@@ -17,7 +17,7 @@ public:
         glClearColor(0.0f,0.0f,0.0f,0.0f);
         glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGBA);
         glutInitWindowSize(Settings::w,Settings::h);
-
+        
         auto Resize = [](int w,int h){
             
         };
@@ -36,10 +36,11 @@ public:
                            100
                            );
             
-            gluLookAt(0.0f,0.0f,1.0f,
+            gluLookAt(0.0f,0.0f,2.0f,
                       0.0f,0.0f,0.0f,
                       0.0f,1.0f,0.0f);
             
+            glTranslatef(-0.4,-0.3,0.8);
             glScalef(0.2,0.2,0.2);
             
             glBegin(GL_TRIANGLE_STRIP);
@@ -52,12 +53,12 @@ public:
             glEnd();
             
             glBegin(GL_TRIANGLE_STRIP);
-            glVertex3f(0.0f,1.0f,0.1);
-            glVertex3f(1.0f,1.0f,0.1);
-            glVertex3f(1.0f,0.0f,0.1);
-            glVertex3f(3.0f,1.0f,0.1);
-            glVertex3f(3.0f,0.0f,0.1);
-            glVertex3f(4.0f,1.0f,0.1);
+            glVertex3f(0.0f,1.0f,0.9);
+            glVertex3f(1.0f,1.0f,0.9);
+            glVertex3f(1.0f,0.0f,0.9);
+            glVertex3f(3.0f,1.0f,0.9);
+            glVertex3f(3.0f,0.0f,0.9);
+            glVertex3f(4.0f,1.0f,0.9);
             glEnd();
             
             glFlush();
