@@ -21,15 +21,35 @@ public:
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
         glutSolidTeapot(30.0);
         glDisable(GL_DEPTH_TEST);
-        
+
         glLoadIdentity();
         
-        glBegin(GL_TRIANGLES);
-        glVertex3f(-2.0f,-2.0f, 0.0f);
-        glVertex3f( 2.0f, 0.0f, 0.0);
-        glVertex3f( 0.0f, 2.0f, 0.0);
-        glEnd();
+        gluLookAt(0.0f,0.0f,1.0f,
+                  0.0f,0.0f,0.0f,
+                  0.0f,1.0f,0.0f);
         
+        
+        
+        glScalef(0.2,0.2,0.2);
+        
+        glBegin(GL_TRIANGLE_STRIP);
+        glVertex3f(0.0f,1.0f,0.0f);
+        glVertex3f(1.0f,1.0f,0.0);
+        glVertex3f(1.0f,0.0f,0.0);
+        glVertex3f(3.0f,1.0f,0.0);
+        glVertex3f(3.0f,0.0f,0.0);
+        glVertex3f(4.0f,1.0f,0.0);
+        glEnd();
+
+        glBegin(GL_TRIANGLE_STRIP);
+        glVertex3f(0.0f,1.0f,0.1);
+        glVertex3f(1.0f,1.0f,0.1);
+        glVertex3f(1.0f,0.0f,0.1);
+        glVertex3f(3.0f,1.0f,0.1);
+        glVertex3f(3.0f,0.0f,0.1);
+        glVertex3f(4.0f,1.0f,0.1);
+        glEnd();
+
         glFlush();
         glutSwapBuffers();
     }
@@ -37,6 +57,8 @@ public:
     static GLvoid Resize(GLint width,GLint height){
         
     }
+private:
+    int i = 0;
 };
 
 int main(int argc, char **argv){
