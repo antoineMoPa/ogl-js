@@ -1,7 +1,7 @@
 #include <iostream>
 #include <GL/glut.h>
-#include <python3.4/Python.h>
 #include <cstdio>
+#include <v8.h>
 #include "math.h"
 
 class Settings{
@@ -30,9 +30,6 @@ public:
         auto Render = [](){
             glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
             
-            
-            Settings::i++;
-            
             glLoadIdentity();
             gluPerspective(
                            80,
@@ -45,41 +42,20 @@ public:
                       0.0f,0.0f,0.0f,
                       0.0f,1.0f,0.0f);
             
-            glTranslatef(-0.4,-1+sin(Settings::i/200.0),cos(Settings::i/100.0));
+            glTranslatef(-0.4,-1,0);
             glScalef(0.1,0.1,0.1);
+
+            glColor3f(0.6,0.3,1);
             
-            for(int i=0;i<20;i++){
-                glRotatef(i*5+Settings::i/20.0,1,1,0);
-                glTranslatef(
-                             3.0*sin(Settings::i/100.0),
-                             1,
-                             3.0*sin(Settings::i/100.0)
-                             );
-                glColor3f(
-                          cos(i/10.0+Settings::i/3.0+1),
-                          0.5+sin(Settings::i/10.0),
-                          cos(i/10.0+Settings::i/3.0)
-                          );
+            glBegin(GL_TRIANGLE_STRIP);
+            glVertex3f(0.0f,1.0f,0.0f);
+            glVertex3f(1.0f,1.0f,0.0);
+            glVertex3f(1.0f,0.0f,0.0);
+            glVertex3f(3.0f,1.0f,0.0);
+            glVertex3f(3.0f,0.0f,0.0);
+            glVertex3f(4.0f,1.0f,0.0);
+            glEnd();
                 
-                glBegin(GL_TRIANGLE_STRIP);
-                glVertex3f(0.0f,1.0f,0.0f);
-                glVertex3f(1.0f,1.0f,0.0);
-                glVertex3f(1.0f,0.0f,0.0);
-                glVertex3f(3.0f,1.0f,0.0);
-                glVertex3f(3.0f,0.0f,0.0);
-                glVertex3f(4.0f,1.0f,0.0);
-                glEnd();
-                
-                glBegin(GL_TRIANGLE_STRIP);
-                glVertex3f(0.0f,1.0f,0.9);
-                glVertex3f(1.0f,1.0f,0.9);
-                glVertex3f(1.0f,0.0f,0.9);
-                glVertex3f(3.0f,1.0f,0.9);
-                glVertex3f(3.0f,0.0f,0.9);
-                glVertex3f(4.0f,1.0f,0.9);
-                glEnd();
-            }
-            
             glFlush();
             glutSwapBuffers();
         };
