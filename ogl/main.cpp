@@ -1,7 +1,6 @@
 #include <iostream>
 #include <GL/glut.h>
 #include <cstdio>
-#include <v8.h>
 #include "math.h"
 
 class Settings{

@@ -1,2 +1,0 @@
-libv8-dev
-freeglut3-dev
