@@ -19,8 +19,6 @@ static JSClass global_class = {
 
 using namespace std;
 
-#define DOIT_MINARGS 2
-
 static JSBool jsfn_plus(JSContext *cx, unsigned argc, jsval *vp)
 {
     JS::CallArgs args = CallArgsFromVp(argc, vp);
@@ -32,6 +30,14 @@ static JSBool jsfn_divide(JSContext *cx, unsigned argc, jsval *vp)
 {
     JS::CallArgs args = CallArgsFromVp(argc, vp);
     args.rval().setInt32(args[0].toInt32() / args[1].toInt32());
+    return true;
+}
+
+static JSBool jsfn_log(JSContext *cx, unsigned argc, jsval *vp)
+{
+    JS::CallArgs args = CallArgsFromVp(argc, vp);
+    const char * str = JS_EncodeString(cx,args[0].toString());
+    cout << str << endl;
     return true;
 }
 
@@ -69,8 +75,9 @@ int main(int argc, const char *argv[])
             JS_InitStandardClasses(cx, global);
 
             static JSFunctionSpec my_functions[] = {
-                JS_FN("plus", jsfn_plus, DOIT_MINARGS, 0),
-                JS_FN("divide", jsfn_divide, DOIT_MINARGS, 0),
+                JS_FN("plus", jsfn_plus, 2, 0),
+                JS_FN("divide", jsfn_divide, 2, 0),
+                JS_FN("log", jsfn_log, 1, 0),
                 JS_FS_END
             };
             
@@ -79,19 +86,21 @@ int main(int argc, const char *argv[])
                 cout << "Function definition error" << endl;
                 return 1;
             }
-            const char *script = "String(plus(20,divide(20,3)))";
+            const char *script =
+                "log('meow')";
             const char *filename = "noname";
             int lineno = 1;
 
             ok = JS_EvaluateScript(cx, global, script, strlen(script), filename, lineno, rval.address());
-            
+
             if(!ok)
                 return 1;
         }
-        
-        JSString *str = rval.toString();
-        char * str2 = JS_EncodeString(cx, str);
-        printf("%s\n", str2);
+        if(rval.isString()){
+            JSString *str = rval.toString();
+            char * str2 = JS_EncodeString(cx, str);
+            printf("%s\n", str2);
+        }
     }
     
     JS_DestroyContext(cx);
