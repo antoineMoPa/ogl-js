@@ -21,19 +21,20 @@ using namespace std;
 
 #define DOIT_MINARGS 2
 
-static JSBool doit(JSContext *cx, unsigned argc, jsval *vp)
+static JSBool jsfn_plus(JSContext *cx, unsigned argc, jsval *vp)
 {
     JS::CallArgs args = CallArgsFromVp(argc, vp);
-    /*
-     * Look in argv for argc actual parameters, set *rval to return a
-     * value to the caller.
-     *
-     * ex. Add two arguments as integer.
-     * 
-     */
     args.rval().setInt32(args[0].toInt32() + args[1].toInt32());
     return true;
 }
+
+static JSBool jsfn_divide(JSContext *cx, unsigned argc, jsval *vp)
+{
+    JS::CallArgs args = CallArgsFromVp(argc, vp);
+    args.rval().setInt32(args[0].toInt32() / args[1].toInt32());
+    return true;
+}
+
 
 int main(int argc, const char *argv[])
 {
@@ -61,18 +62,24 @@ int main(int argc, const char *argv[])
             return 1;
         
         JS::RootedValue rval(cx);
-        
-        { // Scope for JSAutoCompartment
+
+        // Scope for JSAutoCompartment
+        { 
             JSAutoCompartment ac(cx, global);
             JS_InitStandardClasses(cx, global);
 
-            bool ok = JS_DefineFunction(cx, global, "doit", doit, DOIT_MINARGS,0);
+            static JSFunctionSpec my_functions[] = {
+                JS_FN("plus", jsfn_plus, DOIT_MINARGS, 0),
+                JS_FN("divide", jsfn_divide, DOIT_MINARGS, 0),
+                JS_FS_END
+            };
             
+            bool ok = JS_DefineFunctions(cx, global, my_functions);            
             if(!ok){
                 cout << "Function definition error" << endl;
                 return 1;
             }
-            const char *script = "String(doit(20,20))";
+            const char *script = "String(plus(20,divide(20,3)))";
             const char *filename = "noname";
             int lineno = 1;
 
