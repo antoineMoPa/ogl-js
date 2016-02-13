@@ -2,6 +2,7 @@
   From: https://developer.mozilla.org/en-US/docs/Mozilla/Projects/SpiderMonkey/How_to_embed_the_JavaScript_engine
 */
 #include "jsapi.h"
+#include <iostream>
 
 /* The class of the global object. */
 static JSClass global_class = {
@@ -16,12 +17,31 @@ static JSClass global_class = {
     JS_ConvertStub
 };
 
+using namespace std;
+
+#define DOIT_MINARGS 2
+
+static JSBool doit(JSContext *cx, unsigned argc, jsval *vp)
+{
+    JS::CallArgs args = CallArgsFromVp(argc, vp);
+    /*
+     * Look in argv for argc actual parameters, set *rval to return a
+     * value to the caller.
+     *
+     * ex. Add two arguments as integer.
+     * 
+     */
+    args.rval().setInt32(args[0].toInt32() + args[1].toInt32());
+    return true;
+}
+
 int main(int argc, const char *argv[])
 {
     JSRuntime *rt = JS_NewRuntime(8L * 1024 * 1024, JS_USE_HELPER_THREADS);
     if (!rt)
         return 1;
 
+        
     JSContext *cx = JS_NewContext(rt, 8192);
     if (!cx)
         return 1;
@@ -39,26 +59,34 @@ int main(int argc, const char *argv[])
         
         if (!global)
             return 1;
-
+        
         JS::RootedValue rval(cx);
-
+        
         { // Scope for JSAutoCompartment
             JSAutoCompartment ac(cx, global);
             JS_InitStandardClasses(cx, global);
 
-            const char *script = "'hello'+'world, it is '+new Date()";
+            bool ok = JS_DefineFunction(cx, global, "doit", doit, DOIT_MINARGS,0);
+            
+            if(!ok){
+                cout << "Function definition error" << endl;
+                return 1;
+            }
+            const char *script = "String(doit(20,20))";
             const char *filename = "noname";
             int lineno = 1;
 
-            bool ok = JS_EvaluateScript(cx, global, script, strlen(script), filename, lineno, rval.address());
-            if (!ok)
+            ok = JS_EvaluateScript(cx, global, script, strlen(script), filename, lineno, rval.address());
+            
+            if(!ok)
                 return 1;
         }
-
+        
         JSString *str = rval.toString();
-        printf("%s\n", JS_EncodeString(cx, str));
+        char * str2 = JS_EncodeString(cx, str);
+        printf("%s\n", str2);
     }
-
+    
     JS_DestroyContext(cx);
     JS_DestroyRuntime(rt);
     JS_ShutDown();
