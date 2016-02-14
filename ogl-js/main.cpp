@@ -1,8 +1,18 @@
 #include <iostream>
-#include "jsapi.h"
+#include <fstream>
+#include <string>
+#include <sstream>
+#include <math.h>
 #include <GL/glut.h>
+#include <jsapi.h>
 #include <cstdio>
-#include "math.h"
+
+
+
+/*
+  For other JS versions: look at
+  https://developer.mozilla.org/en-US/docs/Mozilla/Projects/SpiderMonkey/How_to_embed_the_JavaScript_engine#Original_Document_Information
+ */
 
 /* The class of the global object. */
 static JSClass global_class = {
@@ -61,7 +71,6 @@ public:
         glutInitWindowSize(Settings::w,Settings::h);
         
         auto Resize = [](int w,int h){
-            
         };
         
         auto Render = [](){
@@ -149,12 +158,32 @@ public:
                     cout << "Function definition error" << endl;
                     return 1;
                 }
-                const char *script =
-                    "log('meow')";
-                const char *filename = "noname";
-                int lineno = 1;
+
+                const char *filename = "world/main.js";
+                int lineno = 0;
+
+                ifstream file;
+                const char *script = "";
+                file.open(filename);
+
+                // How can C++ call itself a high level language
+                // If I can't even `inFile.c_str();`
+                // to get the damn string...
+                // http://stackoverflow.com/questions/2602013/read-whole-ascii-file-into-c-stdstring
+                stringstream strStream;
+                strStream << file.rdbuf();
+                script = strStream.str().c_str();
                 
-                ok = JS_EvaluateScript(cx, global, script, strlen(script), filename, lineno, rval.address());
+                ok = JS_EvaluateScript
+                    (
+                     cx,
+                     global,
+                     script,
+                     strlen(script),
+                     filename,
+                     lineno,
+                     rval.address()
+                     );
                 
                 if(!ok)
                     return 1;
