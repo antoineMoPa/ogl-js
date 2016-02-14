@@ -102,8 +102,74 @@ public:
         
         glutDisplayFunc(Render);
         glutIdleFunc(Render);
-       
+
+        initJS();
+        
         glutMainLoop();
+    }
+    int initJS(){
+        JSRuntime *rt = JS_NewRuntime(8L * 1024 * 1024, JS_USE_HELPER_THREADS);
+        if (!rt)
+            return 1;
+        
+        JSContext *cx = JS_NewContext(rt, 8192);
+        if (!cx)
+            return 1;
+        
+        {
+            // Scope for our various stack objects
+            // (JSAutoRequest, RootedObject), so they all go
+            // out of scope before we JS_DestroyContext.
+            
+            JSAutoRequest ar(cx);
+            // In practice, you would want to exit this any
+            // time you're spinning the event loop
+            
+            JS::RootedObject global(cx, JS_NewGlobalObject(cx, &global_class, nullptr));
+            
+            if (!global)
+                return 1;
+            
+            JS::RootedValue rval(cx);
+            
+            // Scope for JSAutoCompartment
+            { 
+                JSAutoCompartment ac(cx, global);
+                JS_InitStandardClasses(cx, global);
+                
+                static JSFunctionSpec my_functions[] = {
+                    JS_FN("plus", jsfn_plus, 2, 0),
+                    JS_FN("divide", jsfn_divide, 2, 0),
+                    JS_FN("log", jsfn_log, 1, 0),
+                    JS_FS_END
+                };
+                
+                bool ok = JS_DefineFunctions(cx, global, my_functions);            
+                if(!ok){
+                    cout << "Function definition error" << endl;
+                    return 1;
+                }
+                const char *script =
+                    "log('meow')";
+                const char *filename = "noname";
+                int lineno = 1;
+                
+                ok = JS_EvaluateScript(cx, global, script, strlen(script), filename, lineno, rval.address());
+                
+                if(!ok)
+                    return 1;
+            }
+            if(rval.isString()){
+                JSString *str = rval.toString();
+                char * str2 = JS_EncodeString(cx, str);
+                printf("%s\n", str2);
+            }
+        }
+        
+        JS_DestroyContext(cx);
+        JS_DestroyRuntime(rt);
+        JS_ShutDown();
+        
     }
 private:
     int i = 0;
@@ -111,72 +177,10 @@ private:
 
 int main(int argc, char ** argv)
 {
-    JSRuntime *rt = JS_NewRuntime(8L * 1024 * 1024, JS_USE_HELPER_THREADS);
-    if (!rt)
-        return 1;
-
-        
-    JSContext *cx = JS_NewContext(rt, 8192);
-    if (!cx)
-        return 1;
-
-    {
-        // Scope for our various stack objects
-        // (JSAutoRequest, RootedObject), so they all go
-        // out of scope before we JS_DestroyContext.
-
-        JSAutoRequest ar(cx);
-        // In practice, you would want to exit this any
-        // time you're spinning the event loop
-        
-        JS::RootedObject global(cx, JS_NewGlobalObject(cx, &global_class, nullptr));
-        
-        if (!global)
-            return 1;
-        
-        JS::RootedValue rval(cx);
-
-        // Scope for JSAutoCompartment
-        { 
-            JSAutoCompartment ac(cx, global);
-            JS_InitStandardClasses(cx, global);
-
-            static JSFunctionSpec my_functions[] = {
-                JS_FN("plus", jsfn_plus, 2, 0),
-                JS_FN("divide", jsfn_divide, 2, 0),
-                JS_FN("log", jsfn_log, 1, 0),
-                JS_FS_END
-            };
-            
-            bool ok = JS_DefineFunctions(cx, global, my_functions);            
-            if(!ok){
-                cout << "Function definition error" << endl;
-                return 1;
-            }
-            const char *script =
-                "log('meow')";
-            const char *filename = "noname";
-            int lineno = 1;
-
-            ok = JS_EvaluateScript(cx, global, script, strlen(script), filename, lineno, rval.address());
-
-            if(!ok)
-                return 1;
-        }
-        if(rval.isString()){
-            JSString *str = rval.toString();
-            char * str2 = JS_EncodeString(cx, str);
-            printf("%s\n", str2);
-        }
-    }
-    
-    JS_DestroyContext(cx);
-    JS_DestroyRuntime(rt);
-    JS_ShutDown();
-
     Settings::w = 640;
     Settings::h = 480;
     OglApp app(&argc,argv);
     
     return 0;
 }
+
