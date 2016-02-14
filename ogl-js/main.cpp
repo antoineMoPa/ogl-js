@@ -12,6 +12,19 @@
   https://developer.mozilla.org/en-US/docs/Mozilla/Projects/SpiderMonkey/How_to_embed_the_JavaScript_engine#Original_Document_Information
  */
 
+using namespace std;
+
+class Settings{
+public:
+    static int w;
+    static int h;
+    static int i;
+};
+
+int Settings::w = 0;
+int Settings::h = 0;
+int Settings::i = 0;
+
 /* The class of the global object. */
 static JSClass global_class = {
     "global",
@@ -25,54 +38,44 @@ static JSClass global_class = {
     JS_ConvertStub
 };
 
-using namespace std;
-
-static JSBool jsfn_plus(JSContext *cx, unsigned argc, jsval *vp)
-{
-    JS::CallArgs args = CallArgsFromVp(argc, vp);
-    args.rval().setInt32(args[0].toInt32() + args[1].toInt32());
-    return true;
-}
-
-static JSBool jsfn_divide(JSContext *cx, unsigned argc, jsval *vp)
-{
-    JS::CallArgs args = CallArgsFromVp(argc, vp);
-    args.rval().setInt32(args[0].toInt32() / args[1].toInt32());
-    return true;
-}
-
-static JSBool jsfn_log(JSContext *cx, unsigned argc, jsval *vp)
-{
-    JS::CallArgs args = CallArgsFromVp(argc, vp);
-    if(args[0].isString()){
-        const char * str = JS_EncodeString(cx,args[0].toString());
-        cout << str << endl;
-    } else {
-        cout << "[trying to log something that is not a string]"
-             << endl;
-    }
-    return true;
-}
-
-class Settings{
-public:
-    static int w;
-    static int h;
-    static int i;
-};
-
-int Settings::w = 0;
-int Settings::h = 0;
-int Settings::i = 0;
-
 class OglApp{
-public:
+public:   
+    static JSBool
+    jsfn_plus(JSContext *cx, unsigned argc, jsval *vp)
+    {
+        JS::CallArgs args = CallArgsFromVp(argc, vp);
+        args.rval().setInt32(args[0].toInt32() + args[1].toInt32());
+        return true;
+    }
+    
+    static JSBool
+    jsfn_divide(JSContext *cx, unsigned argc, jsval *vp)
+    {
+        JS::CallArgs args = CallArgsFromVp(argc, vp);
+        args.rval().setInt32(args[0].toInt32() / args[1].toInt32());
+        return true;
+    }
+    
+    static JSBool
+    jsfn_log(JSContext *cx, unsigned argc, jsval *vp)
+    {
+        JS::CallArgs args = CallArgsFromVp(argc, vp);
+        if(args[0].isString()){
+            const char * str = JS_EncodeString(cx,args[0].toString());
+            cout << str << endl;
+        } else {
+            cout << "[trying to log something that is not a string]"
+                 << endl;
+        }
+        return true;
+    }
+    
     OglApp(int * argc, char ** argv){
         glutInit(argc,argv);
         glClearColor(0.0f,0.0f,0.0f,0.0f);
         glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGBA);
         glutInitWindowSize(Settings::w,Settings::h);     
-
+        
         auto Resize = [](int w,int h){
         };
         
