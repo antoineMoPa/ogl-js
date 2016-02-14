@@ -11,5 +11,5 @@ if(typeof window == 'undefined'){
 }
 
 log(JSON.stringify(this));
-// causes segfault
+
 log(JSON.stringify(this.parent));

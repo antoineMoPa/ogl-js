@@ -44,8 +44,13 @@ static JSBool jsfn_divide(JSContext *cx, unsigned argc, jsval *vp)
 static JSBool jsfn_log(JSContext *cx, unsigned argc, jsval *vp)
 {
     JS::CallArgs args = CallArgsFromVp(argc, vp);
-    const char * str = JS_EncodeString(cx,args[0].toString());
-    cout << str << endl;
+    if(args[0].isString()){
+        const char * str = JS_EncodeString(cx,args[0].toString());
+        cout << str << endl;
+    } else {
+        cout << "[trying to log something that is not a string]"
+             << endl;
+    }
     return true;
 }
 
@@ -114,7 +119,7 @@ public:
         
         glutMainLoop();
     }
-
+    
     static void dispatchError(
                               JSContext* cx,
                               const char* message,
