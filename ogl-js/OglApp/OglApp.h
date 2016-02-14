@@ -10,12 +10,12 @@
 /*
   For other JS versions: look at
   https://developer.mozilla.org/en-US/docs/Mozilla/Projects/SpiderMonkey/How_to_embed_the_JavaScript_engine#Original_Document_Information
- */
+*/
 
 using namespace std;
 
 class Settings{
-public:
+ public:
     static int w;
     static int h;
     static int i;
@@ -24,6 +24,10 @@ public:
 int Settings::w = 0;
 int Settings::h = 0;
 int Settings::i = 0;
+
+JSContext * cx = NULL;
+// global object
+JS::RootedObject * gl;
 
 /* The class of the global object. */
 static JSClass global_class = {
@@ -71,46 +75,12 @@ class OglApp{
     }
     
     OglApp(int * argc, char ** argv){
+        initJavascript();
+        
         glutInit(argc,argv);
         glClearColor(0.0f,0.0f,0.0f,0.0f);
         glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGBA);
         glutInitWindowSize(Settings::w,Settings::h);     
-        
-        auto Resize = [](int w,int h){
-        };
-        
-        auto Render = [](){
-            glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-            
-            glLoadIdentity();
-            gluPerspective(
-                           80,
-                           float(Settings::w)/float(Settings::h),
-                           1,
-                           100
-                           );
-            
-            gluLookAt(0.0f,0.0f,2.0f,
-                      0.0f,0.0f,0.0f,
-                      0.0f,1.0f,0.0f);
-            
-            glTranslatef(-0.4,-1,0);
-            glScalef(0.1,0.1,0.1);
-            
-            glColor3f(0.6,0.3,1);
-            
-            glBegin(GL_TRIANGLE_STRIP);
-            glVertex3f(0.0f,1.0f,0.0f);
-            glVertex3f(1.0f,1.0f,0.0);
-            glVertex3f(1.0f,0.0f,0.0);
-            glVertex3f(3.0f,1.0f,0.0);
-            glVertex3f(3.0f,0.0f,0.0);
-            glVertex3f(4.0f,1.0f,0.0);
-            glEnd();
-            
-            glFlush();
-            glutSwapBuffers();
-        };
         
         glutReshapeFunc(Resize);
         glutCreateWindow("Hey");
@@ -118,9 +88,43 @@ class OglApp{
         glutDisplayFunc(Render);
         glutIdleFunc(Render);
         
-        initJS();
-        
         glutMainLoop();
+    }
+    
+    static void Resize(int w, int h){
+        
+    }
+    
+    static void Render(){
+        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+        
+        glLoadIdentity();
+        gluPerspective(
+                       80,
+                       float(Settings::w)/float(Settings::h),
+                       1,
+                       100
+                       );
+        
+        gluLookAt(0.0f,0.0f,2.0f,
+                  0.0f,0.0f,0.0f,
+                  0.0f,1.0f,0.0f);
+        
+        glTranslatef(-0.4,-1,0);
+        glScalef(0.1,0.1,0.1);
+        glColor3f(0.6,0.3,1);
+        
+        glBegin(GL_TRIANGLE_STRIP);
+        glVertex3f(0.0f,1.0f,0.0f);
+        glVertex3f(1.0f,1.0f,0.0);
+        glVertex3f(1.0f,0.0f,0.0);
+        glVertex3f(3.0f,1.0f,0.0);
+        glVertex3f(3.0f,0.0f,0.0);
+        glVertex3f(4.0f,1.0f,0.0);
+        glEnd();
+        
+        glFlush();
+        glutSwapBuffers();
     }
     
     static void dispatchError(
@@ -134,33 +138,34 @@ class OglApp{
              << "'" << report->linebuf << "'" << endl;
     }
     
-    int initJS(){
+    static int initJavascript(){
         JSRuntime *rt = JS_NewRuntime(8L * 1024 * 1024, JS_USE_HELPER_THREADS);
         if (!rt)
             return 1;
         
-        JSContext *cx = JS_NewContext(rt, 8192);
+        cx = JS_NewContext(rt, 8192);
         
         JS_SetErrorReporter(cx, &OglApp::dispatchError);
         
         if (!cx)
             return 1;
+
+        JS::RootedValue rval(cx);
         
         {
             // Scope for our various stack objects
             // (JSAutoRequest, RootedObject), so they all go
             // out of scope before we JS_DestroyContext.
-            
             JSAutoRequest ar(cx);
             // In practice, you would want to exit this any
             // time you're spinning the event loop
             
             JS::RootedObject global(cx, JS_NewGlobalObject(cx, &global_class, nullptr));
+
+            gl = &global;
             
             if (!global)
                 return 1;
-            
-            JS::RootedValue rval(cx);
             
             // Scope for JSAutoCompartment
             { 
@@ -206,11 +211,18 @@ class OglApp{
                      lineno,
                      rval.address()
                      );
-                
+
+                JS::AutoValueVector argv(cx);
+                JS_CallFunctionName(
+                                    cx,
+                                    global,
+                                    "render",
+                                    0,
+                                    argv.begin(),
+                                    rval.address()
+                                    );
+
                 if(!ok){
-                    
-                    
-                    
                     return 1;
                 }
             }
@@ -220,6 +232,8 @@ class OglApp{
                 printf("%s\n", str2);
             }
         }
+
+        
         
         JS_DestroyContext(cx);
         JS_DestroyRuntime(rt);

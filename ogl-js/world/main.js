@@ -13,3 +13,8 @@ if(typeof window == 'undefined'){
 log(JSON.stringify(this));
 
 log(JSON.stringify(this.parent));
+
+
+function render(){
+    log("render");
+}
