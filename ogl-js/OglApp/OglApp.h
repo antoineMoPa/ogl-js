@@ -39,9 +39,9 @@ static JSClass global_class = {
 };
 
 class OglApp{
-public:   
+ public:   
     static JSBool
-    jsfn_plus(JSContext *cx, unsigned argc, jsval *vp)
+        jsfn_plus(JSContext *cx, unsigned argc, jsval *vp)
     {
         JS::CallArgs args = CallArgsFromVp(argc, vp);
         args.rval().setInt32(args[0].toInt32() + args[1].toInt32());
@@ -49,7 +49,7 @@ public:
     }
     
     static JSBool
-    jsfn_divide(JSContext *cx, unsigned argc, jsval *vp)
+        jsfn_divide(JSContext *cx, unsigned argc, jsval *vp)
     {
         JS::CallArgs args = CallArgsFromVp(argc, vp);
         args.rval().setInt32(args[0].toInt32() / args[1].toInt32());
@@ -57,7 +57,7 @@ public:
     }
     
     static JSBool
-    jsfn_log(JSContext *cx, unsigned argc, jsval *vp)
+        jsfn_log(JSContext *cx, unsigned argc, jsval *vp)
     {
         JS::CallArgs args = CallArgsFromVp(argc, vp);
         if(args[0].isString()){
@@ -89,14 +89,14 @@ public:
                            1,
                            100
                            );
-
+            
             gluLookAt(0.0f,0.0f,2.0f,
                       0.0f,0.0f,0.0f,
                       0.0f,1.0f,0.0f);
             
             glTranslatef(-0.4,-1,0);
             glScalef(0.1,0.1,0.1);
-
+            
             glColor3f(0.6,0.3,1);
             
             glBegin(GL_TRIANGLE_STRIP);
@@ -107,7 +107,7 @@ public:
             glVertex3f(3.0f,0.0f,0.0);
             glVertex3f(4.0f,1.0f,0.0);
             glEnd();
-                
+            
             glFlush();
             glutSwapBuffers();
         };
@@ -179,14 +179,14 @@ public:
                     cout << "Function definition error" << endl;
                     return 1;
                 }
-
+                
                 const char *filename = "world/main.js";
                 int lineno = 0;
                 
                 ifstream file;
                 
                 file.open(filename);
-
+                
                 // How can C++ call itself a high level language
                 // If I can't even `inFile.c_str();`
                 // to get the damn string...
@@ -208,7 +208,7 @@ public:
                      );
                 
                 if(!ok){
-
+                    
                     
                     
                     return 1;
@@ -226,6 +226,6 @@ public:
         JS_ShutDown();
         
     }
-private:
+ private:
     int i = 0;
 };
