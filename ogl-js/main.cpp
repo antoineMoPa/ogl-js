@@ -7,8 +7,6 @@
 #include <jsapi.h>
 #include <cstdio>
 
-
-
 /*
   For other JS versions: look at
   https://developer.mozilla.org/en-US/docs/Mozilla/Projects/SpiderMonkey/How_to_embed_the_JavaScript_engine#Original_Document_Information
@@ -68,8 +66,8 @@ public:
         glutInit(argc,argv);
         glClearColor(0.0f,0.0f,0.0f,0.0f);
         glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGBA);
-        glutInitWindowSize(Settings::w,Settings::h);
-        
+        glutInitWindowSize(Settings::w,Settings::h);     
+
         auto Resize = [](int w,int h){
         };
         
@@ -111,17 +109,32 @@ public:
         
         glutDisplayFunc(Render);
         glutIdleFunc(Render);
-
+        
         initJS();
         
         glutMainLoop();
     }
+
+    static void dispatchError(
+                              JSContext* cx,
+                              const char* message,
+                              JSErrorReport* report) {
+        cout << "Javascript error at line "
+             << report->lineno << " column "
+             << report->column << endl
+             << message << endl
+             << "'" << report->linebuf << "'" << endl;
+    }
+    
     int initJS(){
         JSRuntime *rt = JS_NewRuntime(8L * 1024 * 1024, JS_USE_HELPER_THREADS);
         if (!rt)
             return 1;
         
         JSContext *cx = JS_NewContext(rt, 8192);
+        
+        JS_SetErrorReporter(cx, &OglApp::dispatchError);
+        
         if (!cx)
             return 1;
         
@@ -161,9 +174,9 @@ public:
 
                 const char *filename = "world/main.js";
                 int lineno = 0;
-
+                
                 ifstream file;
-                const char *script = "";
+                
                 file.open(filename);
 
                 // How can C++ call itself a high level language
@@ -172,7 +185,8 @@ public:
                 // http://stackoverflow.com/questions/2602013/read-whole-ascii-file-into-c-stdstring
                 stringstream strStream;
                 strStream << file.rdbuf();
-                script = strStream.str().c_str();
+                string str = strStream.str();
+                const char * script = str.c_str();
                 
                 ok = JS_EvaluateScript
                     (
@@ -185,8 +199,12 @@ public:
                      rval.address()
                      );
                 
-                if(!ok)
+                if(!ok){
+
+                    
+                    
                     return 1;
+                }
             }
             if(rval.isString()){
                 JSString *str = rval.toString();
