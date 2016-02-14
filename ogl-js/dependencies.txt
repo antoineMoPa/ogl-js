@@ -1,0 +1,3 @@
+# Both available in debian packages
+libmozjs-24-dev
+freeglut3-dev
