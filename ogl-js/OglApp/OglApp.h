@@ -222,7 +222,9 @@ class OglApp{
                      lineno,
                      rval.address()
                      );
-                
+
+                // Now we can call functions from
+                // the script
                 after_run_callback();
                 
                 if(!ok){
