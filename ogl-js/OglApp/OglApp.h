@@ -47,7 +47,7 @@ namespace OglApp{
 
     static void Render(){
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-
+        
         glLoadIdentity();
         gluPerspective(
                        80,
@@ -62,8 +62,7 @@ namespace OglApp{
 
         glTranslatef(-0.4,-1,0);
         glScalef(0.1,0.1,0.1);
-        glColor3f(0.6,0.3,1);
-
+        
         JS::RootedValue rval(cx);
         JS::AutoValueVector argv(cx);
         JS_CallFunctionName(
@@ -85,10 +84,13 @@ namespace OglApp{
         glClearColor(0.0f,0.0f,0.0f,0.0f);
         glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGBA);
         glutInitWindowSize(w,h);
-
+        
         glutReshapeFunc(Resize);
         glutCreateWindow("Hey");
 
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glEnable( GL_BLEND );
+        
         glutDisplayFunc(Render);
         glutIdleFunc(Render);
 
@@ -144,6 +146,7 @@ namespace OglApp{
                     JS_FN("plus", jsfn::plus, 2, 0),
                     JS_FN("translate", jsfn::translate, 3, 0),
                     JS_FN("triangle_strip", jsfn::triangle_strip, 1, 0),
+                    JS_FN("color", jsfn::color, 4, 0),
                     JS_FN("scale", jsfn::scale, 3, 0),
                     JS_FN("divide", jsfn::divide, 2, 0),
                     JS_FN("log", jsfn::log, 1, 0),

@@ -66,7 +66,7 @@ namespace jsfn{
         // We will not use last elements
         // if they are not in a group of 3
         len = len - len % 3;
-
+        
         // Will hold single element from array
         JS::Value el;
 
@@ -89,6 +89,23 @@ namespace jsfn{
         return true;
     }
 
+    /**
+       Set color
+    */
+    static JSBool
+        color(JSContext *cx, unsigned argc, jsval *vp)
+    {
+        JS::CallArgs args = CallArgsFromVp(argc, vp);
+        glColor4f(
+                  args[0].toNumber(),
+                  args[1].toNumber(),
+                  args[2].toNumber(),
+                  args[3].toNumber()
+                  );
+        return true;
+    }
+
+    
     /**
        log strings
      */
