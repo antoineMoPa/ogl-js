@@ -65,6 +65,20 @@ namespace jsfn{
         return true;
     }
 
+    static JSBool
+        pushMatrix(JSContext *cx, unsigned argc, jsval *vp)
+    {
+        glPushMatrix();
+        return true;
+    }
+
+    static JSBool
+        popMatrix(JSContext *cx, unsigned argc, jsval *vp)
+    {
+        glPopMatrix();
+        return true;
+    }
+    
     /**
        OpenGL triangle strip
     */

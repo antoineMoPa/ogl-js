@@ -45,12 +45,42 @@ function test(){
     }
 }
 
+var w = 40;
+var h = 30;
+var grid = new Array(w);
+var colors = new Array(w);
+for(var i = 0; i < w; i++){
+    grid[i] = [];
+    colors[i] = []
+    for(var j = 0; j < h; j++){
+        grid[i][j] = Math.random() * 4 + 1;
+        colors[i][j] = Math.random();
+    }
+}
+
 var step = 0;
 
 render = function(){
     ++step;
-    // Create cube
-    // Points
+    
+    for(var i = 0; i < w; i++){
+        pushMatrix();
+        translate(i*1.1-w/2,0,0);
+        for(var j = 0; j < h; j++){
+            translate(0,0,1.5);
+            color(colors[i][j],0.1,0.4,0.4);
+            grid[i][j] += Math.random() * 0.2 - 0.1;
+            pushMatrix();
+            var scaleY = grid[i][j] + Math.sin((i+step)/4);
+            scale(1,scaleY,1);
+            cube();
+            popMatrix();
+        }
+        popMatrix();
+    }
+};
+
+function cube(){
     var P1 = [0,0,1];
     var P2 = [1,0,1];
     var P3 = [0,0,0];
@@ -86,40 +116,12 @@ render = function(){
         P4.concat(P2,P8,P6)
     );
     
-    rotate(step*2,1,1,0);
-    
-    scale(2,2,2);
-    
-    color(1,0,0,0.6);
     
     // Draw faces
     for(var j in strips){
-        switch(parseInt(j)){
-        case 0:
-            color(1,1,1,1);
-            break;
-        case 1:
-            color(0,1,1,1);
-            break;
-        case 2:
-            color(0,0,1,1);
-            break;
-        case 3:
-            color(1,0,0,1);
-            break;
-        case 4:
-            color(0,1,0,1);
-            break;
-        case 5:
-            color(1,0,1,1);
-            break;
-        default:
-            color(0,0,1,1);
-            break;
-        }
         var strip = strips[j];
         triangle_strip(
             strip
         );
     }
-};
+}

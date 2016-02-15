@@ -97,7 +97,7 @@ namespace OglApp{
         
         glutMainLoop();
     }
-
+    
     static void dispatchError(
                               JSContext* cx,
                               const char* message,
@@ -152,6 +152,8 @@ namespace OglApp{
                     JS_FN("scale", jsfn::scale, 3, 0),
                     JS_FN("divide", jsfn::divide, 2, 0),
                     JS_FN("log", jsfn::log, 1, 0),
+                    JS_FN("pushMatrix", jsfn::pushMatrix, 0, 0),
+                    JS_FN("popMatrix", jsfn::popMatrix, 0, 0),
                     JS_FS_END
                 };
 
