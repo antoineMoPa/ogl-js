@@ -6,6 +6,7 @@
 #include <GL/glut.h>
 #include <jsapi.h>
 #include <cstdio>
+#include "js_functions.h"
 
 /*
   For other JS versions: look at
@@ -43,37 +44,7 @@ static JSClass global_class = {
 };
 
 class OglApp{
- public:   
-    static JSBool
-        jsfn_plus(JSContext *cx, unsigned argc, jsval *vp)
-    {
-        JS::CallArgs args = CallArgsFromVp(argc, vp);
-        args.rval().setInt32(args[0].toInt32() + args[1].toInt32());
-        return true;
-    }
-    
-    static JSBool
-        jsfn_divide(JSContext *cx, unsigned argc, jsval *vp)
-    {
-        JS::CallArgs args = CallArgsFromVp(argc, vp);
-        args.rval().setInt32(args[0].toInt32() / args[1].toInt32());
-        return true;
-    }
-    
-    static JSBool
-        jsfn_log(JSContext *cx, unsigned argc, jsval *vp)
-    {
-        JS::CallArgs args = CallArgsFromVp(argc, vp);
-        if(args[0].isString()){
-            const char * str = JS_EncodeString(cx,args[0].toString());
-            cout << str << endl;
-        } else {
-            cout << "[trying to log something that is not a string]"
-                 << endl;
-        }
-        return true;
-    }
-    
+ public:    
     OglApp(int * argc, char ** argv){
         initJavascript(apploop);
         
@@ -186,9 +157,9 @@ class OglApp{
                 JS_InitStandardClasses(cx, global);
                 
                 static JSFunctionSpec my_functions[] = {
-                    JS_FN("plus", jsfn_plus, 2, 0),
-                    JS_FN("divide", jsfn_divide, 2, 0),
-                    JS_FN("log", jsfn_log, 1, 0),
+                    JS_FN("plus", jsfn::plus, 2, 0),
+                    JS_FN("divide", jsfn::divide, 2, 0),
+                    JS_FN("log", jsfn::log, 1, 0),
                     JS_FS_END
                 };
                 
