@@ -75,16 +75,6 @@ namespace OglApp{
                             rval.address()
                             );
 
-
-        glBegin(GL_TRIANGLE_STRIP);
-        glVertex3f(0.0f,1.0f,0.0f);
-        glVertex3f(1.0f,1.0f,0.0);
-        glVertex3f(1.0f,0.0f,0.0);
-        glVertex3f(3.0f,1.0f,0.0);
-        glVertex3f(3.0f,0.0f,0.0);
-        glVertex3f(4.0f,1.0f,0.0);
-        glEnd();
-
         glFlush();
         glutSwapBuffers();
     }
@@ -153,6 +143,7 @@ namespace OglApp{
                 static JSFunctionSpec my_functions[] = {
                     JS_FN("plus", jsfn::plus, 2, 0),
                     JS_FN("translate", jsfn::translate, 3, 0),
+                    JS_FN("triangle_strip", jsfn::triangle_strip, 1, 0),
                     JS_FN("scale", jsfn::scale, 3, 0),
                     JS_FN("divide", jsfn::divide, 2, 0),
                     JS_FN("log", jsfn::log, 1, 0),
@@ -164,7 +155,7 @@ namespace OglApp{
                     cout << "Function definition error" << endl;
                     return 1;
                 }
-
+                
                 const char *filename = "world/main.js";
                 int lineno = 0;
 

@@ -43,6 +43,39 @@ namespace jsfn{
         return true;
     }
 
+    static JSBool
+        triangle_strip(JSContext *cx, unsigned argc, jsval *vp)
+    {
+        JS::CallArgs args = CallArgsFromVp(argc, vp);
+        
+        uint32_t len;
+        JSObject * arr = args[0].toObjectOrNull();
+        JS_GetArrayLength(cx,arr,&len);
+        
+        // We will not use last elements
+        // if they are not in a group of 3
+        len = len - len % 3;
+        
+        JS::Value el;
+        
+        float a,b,c;
+        
+        glBegin(GL_TRIANGLE_STRIP);
+        for(uint32_t i = 0; i < len; i+=3){
+            // Get numbers
+            JS_GetElement(cx, arr, i, &el);
+            a = el.toNumber();
+            JS_GetElement(cx, arr, i+1, &el);
+            b = el.toNumber();
+            JS_GetElement(cx, arr, i+2, &el);
+            c = el.toNumber();
+            glVertex3f(a,b,c);
+        }
+        
+        glEnd();
+        return true;
+    }
+    
     
     static JSBool
         log(JSContext *cx, unsigned argc, jsval *vp)

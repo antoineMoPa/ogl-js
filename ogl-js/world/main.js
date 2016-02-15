@@ -23,4 +23,13 @@ function render(){
     i++;
     translate(0.2,10 * Math.sin(i/100),0.2);
     scale(Math.sin(i/40),Math.sin(i/40),Math.sin(i%40));
+    triangle_strip(
+        [0.0,1.0,0.0,
+         1.0,1.0,0.0,
+         1.0,0.0,0.0,
+         3.0,1.0,0.0,
+         3.0,0.0,0.0,
+         4.0,1.0,0.0]
+    );
+    
 }
