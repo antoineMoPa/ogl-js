@@ -71,6 +71,7 @@ render = function(){
             color(colors[i][j],0.1,0.4,0.4);
             grid[i][j] += Math.random() * 0.2 - 0.1;
             pushMatrix();
+            rotate(Math.sin(step/10) * 360,0,1,0);
             var scaleY = grid[i][j] + Math.sin((i+step)/4);
             scale(1,scaleY,1);
             cube();
