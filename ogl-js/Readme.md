@@ -12,6 +12,7 @@ This project embeds Spidemonkey 24 into a c++ application.
 * translate(float x,float y,float z) - translates next commands
 * scale(float x,float y,float z) - scales next commands
 * triangle_strip([x1,y1,z1,x2,y2,z2, ... ]) - creates a triangle strip from a 1-D array of coords
+* color(float r,float g, float b, float a) - set color for next vertices
 
 **OpenGL todo**
 
