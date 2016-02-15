@@ -75,7 +75,7 @@ class OglApp{
     }
     
     OglApp(int * argc, char ** argv){
-        initJavascript();
+        initJavascript(apploop);
         
         glutInit(argc,argv);
         glClearColor(0.0f,0.0f,0.0f,0.0f);
@@ -93,6 +93,19 @@ class OglApp{
     
     static void Resize(int w, int h){
         
+    }
+
+    static void apploop(){
+        JS::RootedValue rval(cx);
+        JS::AutoValueVector argv(cx);
+        JS_CallFunctionName(
+                            cx,
+                            *gl,
+                            "render",
+                            0,
+                            argv.begin(),
+                            rval.address()
+                            );
     }
     
     static void Render(){
@@ -138,7 +151,7 @@ class OglApp{
              << "'" << report->linebuf << "'" << endl;
     }
     
-    static int initJavascript(){
+    static int initJavascript(void (*after_run_callback)(void)){
         JSRuntime *rt = JS_NewRuntime(8L * 1024 * 1024, JS_USE_HELPER_THREADS);
         if (!rt)
             return 1;
@@ -211,17 +224,9 @@ class OglApp{
                      lineno,
                      rval.address()
                      );
-
-                JS::AutoValueVector argv(cx);
-                JS_CallFunctionName(
-                                    cx,
-                                    global,
-                                    "render",
-                                    0,
-                                    argv.begin(),
-                                    rval.address()
-                                    );
-
+                
+                after_run_callback();
+                
                 if(!ok){
                     return 1;
                 }
@@ -232,13 +237,10 @@ class OglApp{
                 printf("%s\n", str2);
             }
         }
-
-        
         
         JS_DestroyContext(cx);
         JS_DestroyRuntime(rt);
         JS_ShutDown();
-        
     }
  private:
     int i = 0;
