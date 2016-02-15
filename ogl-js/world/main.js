@@ -22,4 +22,5 @@ var i = 0;
 function render(){
     i++;
     translate(0.2,10 * Math.sin(i/100),0.2);
+    scale(Math.sin(i/40),Math.sin(i/40),Math.sin(i%40));
 }

@@ -153,6 +153,7 @@ namespace OglApp{
                 static JSFunctionSpec my_functions[] = {
                     JS_FN("plus", jsfn::plus, 2, 0),
                     JS_FN("translate", jsfn::translate, 3, 0),
+                    JS_FN("scale", jsfn::scale, 3, 0),
                     JS_FN("divide", jsfn::divide, 2, 0),
                     JS_FN("log", jsfn::log, 1, 0),
                     JS_FS_END
