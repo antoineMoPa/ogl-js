@@ -1,3 +1,10 @@
+/*
+ Boring TODO if this file becomes important:
+ type checks for each function
+ (ensure we don't crash if the parameter is not
+ of the good type)
+ */
+
 using namespace std;
 
 namespace jsfn{
