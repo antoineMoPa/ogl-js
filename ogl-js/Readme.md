@@ -9,10 +9,13 @@ This project embeds Spidemonkey 24 into a c++ application.
 
 **OpenGL**
 
-* translate(float x,float y,float z) - translates next commands
-* scale(float x,float y,float z) - scales next commands
-* triangle_strip([x1,y1,z1,x2,y2,z2, ... ]) - creates a triangle strip from a 1-D array of coords
-* color(float r,float g, float b, float a) - set color for next vertices
+* `translate(float x,float y,float z)` - Translates next commands
+* `scale(float x,float y,float z)` - Scales next commands
+* `rotate(float angle, float x, float y, float z)` - Rotates `angle` around axis `x,y,z`
+* `pushMatrix()` - Used to store translations, scales, rotations
+* `popMatrix()` - Used to retrieve the pushed state
+* `triangle_strip([x1,y1,z1,x2,y2,z2, ... ])` - Creates a triangle strip from a 1-D array of coords
+* `color(float r,float g, float b, float a)` - Set color for next vertices
 
 **OpenGL todo**
 
