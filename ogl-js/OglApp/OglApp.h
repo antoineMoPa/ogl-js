@@ -26,9 +26,13 @@ int Settings::w = 0;
 int Settings::h = 0;
 int Settings::i = 0;
 
+
 JSContext * cx = NULL;
 // global object
 JS::RootedObject * gl;
+
+int * argc;
+char ** argv;
 
 /* The class of the global object. */
 static JSClass global_class = {
@@ -45,9 +49,17 @@ static JSClass global_class = {
 
 class OglApp{
  public:    
-    OglApp(int * argc, char ** argv){
+    OglApp(int * _argc, char ** _argv){
+        argc = _argc;
+        argv = _argv;
         initJavascript(apploop);
+    }
+    
+    static void Resize(int w, int h){
         
+    }
+
+    static void apploop(){
         glutInit(argc,argv);
         glClearColor(0.0f,0.0f,0.0f,0.0f);
         glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGBA);
@@ -59,24 +71,7 @@ class OglApp{
         glutDisplayFunc(Render);
         glutIdleFunc(Render);
         
-        glutMainLoop();
-    }
-    
-    static void Resize(int w, int h){
-        
-    }
-
-    static void apploop(){
-        JS::RootedValue rval(cx);
-        JS::AutoValueVector argv(cx);
-        JS_CallFunctionName(
-                            cx,
-                            *gl,
-                            "render",
-                            0,
-                            argv.begin(),
-                            rval.address()
-                            );
+        glutMainLoop();    
     }
     
     static void Render(){
@@ -97,6 +92,18 @@ class OglApp{
         glTranslatef(-0.4,-1,0);
         glScalef(0.1,0.1,0.1);
         glColor3f(0.6,0.3,1);
+
+        JS::RootedValue rval(cx);
+        JS::AutoValueVector argv(cx);
+        JS_CallFunctionName(
+                            cx,
+                            *gl,
+                            "render",
+                            0,
+                            argv.begin(),
+                            rval.address()
+                            );
+
         
         glBegin(GL_TRIANGLE_STRIP);
         glVertex3f(0.0f,1.0f,0.0f);
