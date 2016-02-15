@@ -42,12 +42,16 @@ namespace jsfn{
                  );
         return true;
     }
-
+    
+    /**
+       OpenGL triangle strip
+    */
     static JSBool
         triangle_strip(JSContext *cx, unsigned argc, jsval *vp)
     {
         JS::CallArgs args = CallArgsFromVp(argc, vp);
-        
+
+        // Will be the length of the array
         uint32_t len;
         JSObject * arr = args[0].toObjectOrNull();
         JS_GetArrayLength(cx,arr,&len);
@@ -55,14 +59,16 @@ namespace jsfn{
         // We will not use last elements
         // if they are not in a group of 3
         len = len - len % 3;
-        
+
+        // Will hold single element from array
         JS::Value el;
-        
+
+        // Will hold parameters
         float a,b,c;
         
         glBegin(GL_TRIANGLE_STRIP);
         for(uint32_t i = 0; i < len; i+=3){
-            // Get numbers
+            // get array elements
             JS_GetElement(cx, arr, i, &el);
             a = el.toNumber();
             JS_GetElement(cx, arr, i+1, &el);
@@ -76,7 +82,9 @@ namespace jsfn{
         return true;
     }
     
-    
+    /**
+       log strings
+     */
     static JSBool
         log(JSContext *cx, unsigned argc, jsval *vp)
     {
