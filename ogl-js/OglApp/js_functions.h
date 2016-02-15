@@ -8,7 +8,7 @@ namespace jsfn{
         args.rval().setInt32(args[0].toInt32() + args[1].toInt32());
         return true;
     }
-    
+
     static JSBool
         divide(JSContext *cx, unsigned argc, jsval *vp)
     {
@@ -16,7 +16,7 @@ namespace jsfn{
         args.rval().setInt32(args[0].toInt32() / args[1].toInt32());
         return true;
     }
-    
+
     static JSBool
         translate(JSContext *cx, unsigned argc, jsval *vp)
     {
@@ -34,7 +34,7 @@ namespace jsfn{
         scale(JSContext *cx, unsigned argc, jsval *vp)
     {
         JS::CallArgs args = CallArgsFromVp(argc, vp);
-        
+
         glScalef(
                  args[0].toNumber(),
                  args[1].toNumber(),
@@ -42,7 +42,7 @@ namespace jsfn{
                  );
         return true;
     }
-    
+
     /**
        OpenGL triangle strip
     */
@@ -55,7 +55,7 @@ namespace jsfn{
         uint32_t len;
         JSObject * arr = args[0].toObjectOrNull();
         JS_GetArrayLength(cx,arr,&len);
-        
+
         // We will not use last elements
         // if they are not in a group of 3
         len = len - len % 3;
@@ -65,7 +65,7 @@ namespace jsfn{
 
         // Will hold parameters
         float a,b,c;
-        
+
         glBegin(GL_TRIANGLE_STRIP);
         for(uint32_t i = 0; i < len; i+=3){
             // get array elements
@@ -77,11 +77,11 @@ namespace jsfn{
             c = el.toNumber();
             glVertex3f(a,b,c);
         }
-        
+
         glEnd();
         return true;
     }
-    
+
     /**
        log strings
      */
@@ -97,5 +97,5 @@ namespace jsfn{
                  << endl;
         }
         return true;
-    }    
+    }
 }
