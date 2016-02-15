@@ -45,7 +45,10 @@ function test(){
     }
 }
 
+var step = 0;
+
 render = function(){
+    ++step;
     // Create cube
     // Points
     var P1 = [0,0,1];
@@ -56,17 +59,67 @@ render = function(){
     var P6 = [1,1,1];
     var P7 = [0,1,0];
     var P8 = [1,1,0];
-
-    var strip = [];
-
-    strip = strip.concat(
-        P3,P7,P8,P3,P4,P1,P4,P2
+    
+    var strips = [];
+    
+    strips.push(
+        P3.concat(P1,P4,P2)
     );
+    
+    strips.push(
+        P1.concat(P5,P2,P6)
+    );
+    
+    strips.push(
+        P8.concat(P6,P7,P5)
+    );
+    
+    strips.push(
+        P1.concat(P3,P5,P7)
+    );
+    
+    strips.push(
+        P4.concat(P8,P3,P7)
+    );
+    
+    strips.push(
+        P4.concat(P2,P8,P6)
+    );
+    
+    rotate(step*2,1,1,0);
+    
+    scale(2,2,2);
+    
+    color(1,0,0,0.6);
     
     // Draw faces
-    color(1,1,0.5,0.2);
-    
-    triangle_strip(
-        strip
-    );
+    for(var j in strips){
+        switch(parseInt(j)){
+        case 0:
+            color(1,1,1,1);
+            break;
+        case 1:
+            color(0,1,1,1);
+            break;
+        case 2:
+            color(0,0,1,1);
+            break;
+        case 3:
+            color(1,0,0,1);
+            break;
+        case 4:
+            color(0,1,0,1);
+            break;
+        case 5:
+            color(1,0,1,1);
+            break;
+        default:
+            color(0,0,1,1);
+            break;
+        }
+        var strip = strips[j];
+        triangle_strip(
+            strip
+        );
+    }
 };

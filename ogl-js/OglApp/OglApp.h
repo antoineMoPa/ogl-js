@@ -88,12 +88,13 @@ namespace OglApp{
         glutReshapeFunc(Resize);
         glutCreateWindow("Hey");
 
+        glEnable(GL_DEPTH_TEST);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glEnable( GL_BLEND );
+        glEnable(GL_BLEND);
         
         glutDisplayFunc(Render);
         glutIdleFunc(Render);
-
+        
         glutMainLoop();
     }
 
@@ -145,6 +146,7 @@ namespace OglApp{
                 static JSFunctionSpec my_functions[] = {
                     JS_FN("plus", jsfn::plus, 2, 0),
                     JS_FN("translate", jsfn::translate, 3, 0),
+                    JS_FN("rotate", jsfn::rotate, 4, 0),
                     JS_FN("triangle_strip", jsfn::triangle_strip, 1, 0),
                     JS_FN("color", jsfn::color, 4, 0),
                     JS_FN("scale", jsfn::scale, 3, 0),

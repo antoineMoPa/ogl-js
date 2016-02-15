@@ -37,6 +37,21 @@ namespace jsfn{
         return true;
     }
 
+    
+    static JSBool
+        rotate(JSContext *cx, unsigned argc, jsval *vp)
+    {
+        JS::CallArgs args = CallArgsFromVp(argc, vp);
+
+        glRotatef(
+                  args[0].toNumber(),
+                  args[1].toNumber(),
+                  args[2].toNumber(),
+                  args[3].toNumber()
+                  );
+        return true;
+    }
+    
     static JSBool
         scale(JSContext *cx, unsigned argc, jsval *vp)
     {
