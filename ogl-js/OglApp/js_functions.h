@@ -16,6 +16,19 @@ namespace jsfn{
         args.rval().setInt32(args[0].toInt32() / args[1].toInt32());
         return true;
     }
+
+    static JSBool
+        translate(JSContext *cx, unsigned argc, jsval *vp)
+    {
+        JS::CallArgs args = CallArgsFromVp(argc, vp);
+
+        glTranslatef(
+                     args[0].toNumber(),
+                     args[1].toNumber(),
+                     args[2].toNumber()
+                     );
+        return true;
+    }
     
     static JSBool
         log(JSContext *cx, unsigned argc, jsval *vp)

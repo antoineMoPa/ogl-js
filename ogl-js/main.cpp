@@ -2,9 +2,9 @@
 
 int main(int argc, char ** argv)
 {
-    Settings::w = 640;
-    Settings::h = 480;
-    OglApp app(&argc,argv);
+    OglApp::w = 640;
+    OglApp::h = 480;
+    OglApp::start(argc,argv);
     
     return 0;
 }
