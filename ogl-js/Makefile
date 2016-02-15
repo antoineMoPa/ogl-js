@@ -1,5 +1,5 @@
 MOZJSCFLAGS=-I/usr/include/mozjs-24/ -lmozjs-24 -lz -lpthread -ldl
-OGLCFLAGS=-lGL -lGLU -lglut -lpython3.4m -lpthread -ldl  -lutil -lm
+OGLCFLAGS=-lGL -lGLU -lglut -lpthread -ldl  -lutil -lm
 
 OPTIONS=$(OGLCFLAGS) $(MOZJSCFLAGS) -std=c++11
 
