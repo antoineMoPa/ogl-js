@@ -205,10 +205,8 @@ class OglApp{
                 
                 file.open(filename);
                 
-                // How can C++ call itself a high level language
-                // If I can't even `inFile.c_str();`
-                // to get the damn string...
-                // http://stackoverflow.com/questions/2602013/read-whole-ascii-file-into-c-stdstring
+                // Take the content of the file
+                // and put it in a string
                 stringstream strStream;
                 strStream << file.rdbuf();
                 string str = strStream.str();
