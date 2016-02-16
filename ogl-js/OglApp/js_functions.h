@@ -89,7 +89,18 @@ namespace jsfn{
 
         // Will be the length of the array
         uint32_t len;
+        if(args.length()<1 || !args[0].isObject())
+        {
+            cerr << "Arg is not an Object" << endl;
+            return false;
+        }
         JSObject * arr = args[0].toObjectOrNull();
+        JSClass * cl = JS_GetClass(arr);
+        if(!cl || 0 != strcmp("Array",cl->name))
+        {
+            cerr << "Arg is not an Array" << endl;
+            return false;
+        }
         JS_GetArrayLength(cx,arr,&len);
 
         // We will not use last elements
