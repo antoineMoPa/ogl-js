@@ -19,10 +19,11 @@ This project embeds Spidemonkey 24 into a c++ application.
 
 **OpenGL todo**
 
-* textures
-* UV maps
 * vertex shaders
 * fragment shaders
+* textures & UV maps
+* Vertex buffer objects
+* Load 3D models (Three.js? Open Asset Import Library?)
 * conquer the world
 
 **General todo**
