@@ -126,3 +126,26 @@ function cube(){
         );
     }
 }
+
+triangles = [];
+
+for(var i = 0; i < 30*3; i++){
+    triangles.push(Math.random());
+}
+
+triangles_speed = [];
+
+for(var i = 0; i < 30*3; i++){
+    triangles_speed.push((Math.random()-0.5) * 0.1);
+}
+
+render = function(){
+    color(1,1,1,0.2);
+    scale(4,4,4)
+    triangle_strip(triangles);
+    for(var i = 0; i < 30*3; i++){
+        triangles_speed[i] += (Math.random()-0.5) * 0.0001;
+        triangles_speed[i] *= 0.999;
+        triangles[i] += triangles_speed[i];
+    }
+}
