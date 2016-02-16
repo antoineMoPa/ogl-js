@@ -128,24 +128,26 @@ function cube(){
 }
 
 triangles = [];
-
-for(var i = 0; i < 30*3; i++){
-    triangles.push(Math.random());
-}
-
 triangles_speed = [];
 
-for(var i = 0; i < 30*3; i++){
-    triangles_speed.push((Math.random()-0.5) * 0.1);
-}
-
+var step = 0;
 render = function(){
+    ++step;
+
+    if(Math.random() < 0.1){
+        triangles.push(0);
+        triangles_speed.push((Math.random()-0.5) * 0.1);
+    }
+    
+    translate(5,8,0);
     color(1,1,1,0.2);
-    scale(4,4,4)
+    //scale(4,4,4)
     triangle_strip(triangles);
-    for(var i = 0; i < 30*3; i++){
-        triangles_speed[i] += (Math.random()-0.5) * 0.0001;
-        triangles_speed[i] *= 0.999;
+    
+    for(var i = 0; i < triangles.length; i++){
+        triangles_speed[i] += (Math.random()-0.5) * 0.00001;
+        triangles[i] *= 1.0001;
         triangles[i] += triangles_speed[i];
     }
+    log("i: "+i);
 }
