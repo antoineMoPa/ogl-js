@@ -16,6 +16,7 @@ This project embeds Spidemonkey 24 into a c++ application.
 * `popMatrix()` - Used to retrieve the pushed state
 * `triangle_strip([x1,y1,z1,x2,y2,z2, ... ])` - Creates a triangle strip from a 1-D array of coords
 * `color(float r,float g, float b, float a)` - Set color for next vertices
+* `console.log(a,b,c,...)` - Log stuff to standard output (objects are converted to JSON)
 
 **OpenGL todo**
 
