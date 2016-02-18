@@ -28,8 +28,6 @@ This project embeds Spidemonkey 24 into a c++ application.
 
 **General todo**
 
-* Better log function
-* Connect with browser for dev UI?
 * Ability to download "cubes" from the internet in .zip format (but renamed .cube)
 * user input
 * links
