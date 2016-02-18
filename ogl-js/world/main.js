@@ -1,16 +1,3 @@
-var render;
-
-var console = {};
-console.log = function(){
-    for(i in arguments){
-        var arg = arguments[i];
-        if(typeof arg == 'object'){
-            log(JSON.stringify(arg));
-        } else {
-            log(""+arg);
-        }
-    }
-}
 
 console.log("meow",1,2,3,{a:3,b:2});
 

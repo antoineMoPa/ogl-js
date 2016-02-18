@@ -97,7 +97,7 @@ namespace OglApp{
         
         glutMainLoop();
     }
-    
+
     static void dispatchError(
                               JSContext* cx,
                               const char* message,
@@ -108,7 +108,35 @@ namespace OglApp{
              << message << endl
              << "'" << report->linebuf << "'" << endl;
     }
-
+    
+    static bool run_file(const char * filename, JS::RootedValue * rval){
+        int lineno = 0;
+        
+        ifstream file;
+        
+        file.open(filename);
+        
+        // Take the content of the file
+        // and put it in a string
+        stringstream strStream;
+        strStream << file.rdbuf();
+        string str = strStream.str();
+        const char * script = str.c_str();
+        
+        bool ok = JS_EvaluateScript
+            (
+             cx,
+             *gl,
+             script,
+             strlen(script),
+             filename,
+             lineno,
+             rval->address()
+             );
+        
+        return ok;
+    } 
+    
     static int initJavascript(void (*after_run_callback)(void)){
         JSRuntime *rt = JS_NewRuntime(8L * 1024 * 1024, JS_USE_HELPER_THREADS);
         if (!rt)
@@ -122,7 +150,7 @@ namespace OglApp{
             return 1;
 
         JS::RootedValue rval(cx);
-
+        
         {
             // Scope for our various stack objects
             // (JSAutoRequest, RootedObject), so they all go
@@ -137,12 +165,12 @@ namespace OglApp{
 
             if (!global)
                 return 1;
-
+            
             // Scope for JSAutoCompartment
             {
                 JSAutoCompartment ac(cx, global);
                 JS_InitStandardClasses(cx, global);
-
+                
                 static JSFunctionSpec my_functions[] = {
                     JS_FN("plus", jsfn::plus, 2, 0),
                     JS_FN("translate", jsfn::translate, 3, 0),
@@ -156,42 +184,20 @@ namespace OglApp{
                     JS_FN("popMatrix", jsfn::popMatrix, 0, 0),
                     JS_FS_END
                 };
-
+                
                 bool ok = JS_DefineFunctions(cx, global, my_functions);
                 if(!ok){
                     cout << "Function definition error" << endl;
                     return 1;
                 }
+
+                run_file("jslib/main.js",&rval);
+                run_file("world/main.js",&rval);
                 
-                const char *filename = "world/main.js";
-                int lineno = 0;
-
-                ifstream file;
-
-                file.open(filename);
-
-                // Take the content of the file
-                // and put it in a string
-                stringstream strStream;
-                strStream << file.rdbuf();
-                string str = strStream.str();
-                const char * script = str.c_str();
-
-                ok = JS_EvaluateScript
-                    (
-                     cx,
-                     global,
-                     script,
-                     strlen(script),
-                     filename,
-                     lineno,
-                     rval.address()
-                     );
-
                 // Now we can call functions from
                 // the script
                 after_run_callback();
-
+                
                 if(!ok){
                     return 1;
                 }
@@ -202,12 +208,12 @@ namespace OglApp{
                 printf("%s\n", str2);
             }
         }
-
+        
         JS_DestroyContext(cx);
         JS_DestroyRuntime(rt);
         JS_ShutDown();
     }
-
+    
     static void start(int _argc, char ** _argv){
         argc = _argc;
         argv = _argv;
