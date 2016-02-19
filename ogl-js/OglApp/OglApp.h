@@ -16,7 +16,7 @@
 using namespace std;
 
 namespace OglApp{
-
+    
     int w = 0;
     int h = 0;
     int i = 0;
@@ -28,6 +28,8 @@ namespace OglApp{
     int argc;
     char ** argv;
 
+    
+    
     /* The class of the global object. */
     static JSClass global_class = {
         "global",
@@ -42,7 +44,7 @@ namespace OglApp{
     };
 
     static void Resize(int w, int h){
-
+        
     }
 
     static void Render(){
@@ -77,8 +79,14 @@ namespace OglApp{
         glFlush();
         glutSwapBuffers();
     }
-
-
+    
+    static void keyboard(unsigned char key, int x, int y){
+        cout << "key " << key
+             << " x: " << x
+             << " y: " << y
+             << endl;
+    }
+    
     static void apploop(){
         glutInit(&argc,argv);
         glClearColor(0.0f,0.0f,0.0f,0.0f);
@@ -88,6 +96,8 @@ namespace OglApp{
         glutReshapeFunc(Resize);
         glutCreateWindow("Hey");
 
+        glutKeyboardFunc((*keyboard));
+        
         glEnable(GL_DEPTH_TEST);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_BLEND);
