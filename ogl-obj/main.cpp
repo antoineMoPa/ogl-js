@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <vector>
 #include <GL/glut.h>
 #include <cstdio>
@@ -37,19 +38,37 @@ public:
             ifstream file;
             char c;
             string s;
+            float x;
+            float y;
+            float z;
+            
             file.open(filename);
-
+            
             while(!file.eof()){
-                getline(file,s);
-                if(s.substr(0,1) == "#"){
-                    // ignore
+                // first part of string
+                file >> s;
+                if(s.substr(0,2) == "vt"){
+                    file >> x >> y;
+                    cout << "vt: " << x << " " << y << endl;
                 }
-                else if(s.substr(0,2) == "vt"){
-                    cout << "vt" << endl;
+                else if(s.substr(0,2) == "vn"){
+                    file >> x >> y >> z;
+                    cout << "vn: " << x
+                         << " " << y << " " << z << endl;
                 }
+                else if(s.substr(0,1) == "v"){
+                    file >> x >> y >> z;
+                    cout << "v: " << x
+                         << " " << y << " " << z << endl;
+                }
+                else{
+                    getline(file,s);
+                }
+
             }
             file.close();
         }
+        
         vector <vec3> vertices;
         vector <vec2> uvs;
         vector <vec3> normals;
