@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <array>
 #include <vector>
 #include <GL/glut.h>
 #include <cstdio>
@@ -19,14 +20,14 @@ int Settings::i = 0;
 
 using namespace std;
 
-class OglApp{
-public:
-
+namespace OglApp{
+    int i = 0;
+    
     /*
       I feel so hipster
     */
-    typedef float vec3[3];
-    typedef float vec2[2];
+    typedef std::array<float,3> vec3;
+    typedef std::array<float,3> vec2;
     
     /** 
         Code + shameless inspiration
@@ -35,12 +36,18 @@ public:
     class Model{
     public:
         void load(const char * filename){
+            vertices.clear();
+            uvs.clear();
+            normals.clear();
+            
             ifstream file;
             char c;
             string s;
             float x;
             float y;
             float z;
+            vec3 v3;
+            vec2 v2;
             
             file.open(filename);
             
@@ -49,37 +56,42 @@ public:
                 file >> s;
                 if(s.substr(0,2) == "vt"){
                     file >> x >> y;
-                    cout << "vt: " << x << " " << y << endl;
                 }
                 else if(s.substr(0,2) == "vn"){
                     file >> x >> y >> z;
-                    cout << "vn: " << x
-                         << " " << y << " " << z << endl;
                 }
                 else if(s.substr(0,1) == "v"){
-                    file >> x >> y >> z;
-                    cout << "v: " << x
-                         << " " << y << " " << z << endl;
+                    file >> v3[0] >> v3[1] >> v3[2];
+                    vertices.push_back(v3);
                 }
                 else{
                     getline(file,s);
                 }
-
             }
             file.close();
         }
-        
+
+        void render(){
+            for(vector<vec3>::iterator it = vertices.begin();
+                it != vertices.end();
+                ++it
+                ){
+                
+            }
+        }
         vector <vec3> vertices;
         vector <vec2> uvs;
         vector <vec3> normals;
     };
-        
-    OglApp(int * argc, char ** argv){
+
+    Model m;
+    
+    void start(int * argc, char ** argv){
         glutInit(argc,argv);
         glClearColor(0.0f,0.0f,0.0f,0.0f);
         glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGBA);
         glutInitWindowSize(Settings::w,Settings::h);
-
+        
         m.load("models/test_3d.obj");
         
         auto Resize = [](int w,int h){
@@ -106,6 +118,8 @@ public:
             
             glColor3f(0.6,0.3,1);
             
+            m.render();
+            
             glBegin(GL_TRIANGLE_STRIP);
             glVertex3f(0.0f,1.0f,0.0f);
             glVertex3f(1.0f,1.0f,0.0);
@@ -127,15 +141,12 @@ public:
        
         glutMainLoop();
     }
-private:
-    int i = 0;
-    Model m;
 };
-    
+
 int main(int argc, char **argv){
     Settings::w = 640;
     Settings::h = 480;
-    OglApp app(&argc,argv);
+    OglApp::start(&argc,argv);
 
     
     return 0;
