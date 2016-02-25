@@ -116,9 +116,9 @@ namespace OglApp{
                       0.0f,0.0f,0.0f,
                       0.0f,1.0f,0.0f);
             
-            glTranslatef(-0.4,-1,0);
-            glScalef(0.1,0.1,0.1);
-            glRotatef(i,0,0,1);
+            glTranslatef(0,0,0);
+            glScalef(0.5,0.5,0.5);
+            glRotatef(i/20,i/10,i/30,i/5);
             glColor3f(0.6,0.3,1);
             
             m.render();
