@@ -5,6 +5,9 @@
 #include <vector>
 #include <GL/glut.h>
 #include <cstdio>
+#include <ctime>
+#include <unistd.h>
+#include <algorithm>
 #include "math.h"
 
 class Settings{
@@ -22,12 +25,14 @@ using namespace std;
 
 namespace OglApp{
     int i = 0;
+    time_t timev;
     
     /*
       I feel so hipster
     */
     typedef std::array<float,3> vec3;
     typedef std::array<float,3> vec2;
+    typedef std::array<float,9> face3;
     
     /** 
         Code + shameless inspiration
@@ -39,15 +44,20 @@ namespace OglApp{
             vertices.clear();
             uvs.clear();
             normals.clear();
+            faces3.clear();
             
             ifstream file;
             char c;
             string s;
+            // temp vars
             float x;
             float y;
             float z;
             vec3 v3;
             vec2 v2;
+            face3 f3;
+            string face;
+            vector<int> tempfaceint;
             
             file.open(filename);
             
@@ -64,6 +74,30 @@ namespace OglApp{
                     file >> v3[0] >> v3[1] >> v3[2];
                     vertices.push_back(v3);
                 }
+                else if(s.substr(0,1) == "f"){
+                    tempfaceint.clear();
+                    // skip character
+                    file.get();
+                    getline(file,face);
+                    // http://stackoverflow.com/questions/2896600/how-to-replace-all-occurrences-of-a-character-in-string
+                    replace(face.begin(),face.end(),'/',' ');
+                    stringstream f(face);
+                    int tempint;
+                    while(f){
+                        f >> tempint;
+                        tempfaceint.push_back(tempint);                       
+                    }
+                    // remove last read number
+                    tempfaceint.pop_back();
+                    
+                    for(vector<int>::iterator it = tempfaceint.begin();
+                        it!= tempfaceint.end();){
+                        for(int i = 0; i < 9; i++,++it){
+                            f3[i] = *it;
+                        }
+                        faces3.push_back(f3);
+                    }
+                }
                 else{
                     getline(file,s);
                 }
@@ -77,13 +111,41 @@ namespace OglApp{
                 it != vertices.end();
                 ++it
                 ){
+                
                 glVertex3f((*it)[0],(*it)[1],(*it)[2]);
             }
             glEnd();
+
+            glBegin(GL_TRIANGLES);
+            for(vector<face3>::iterator it = faces3.begin();
+                it != faces3.end();
+                ++it){
+                
+                glVertex3f(
+                    vertices[(*it)[0]-1][0],
+                    vertices[(*it)[0]-1][1],
+                    vertices[(*it)[0]-1][2]
+                    );
+                glVertex3f(
+                    vertices[(*it)[3]-1][0],
+                    vertices[(*it)[3]-1][1],
+                    vertices[(*it)[3]-1][2]
+                    );
+                
+                glVertex3f(
+                    vertices[(*it)[6]-1][0],
+                    vertices[(*it)[6]-1][1],
+                    vertices[(*it)[6]-1][2]
+                    );
+
+            }
+            glEnd();
+
         }
         vector <vec3> vertices;
         vector <vec2> uvs;
         vector <vec3> normals;
+        vector <face3> faces3;
     };
 
     Model m;
@@ -118,13 +180,14 @@ namespace OglApp{
             
             glTranslatef(0,0,0);
             glScalef(0.5,0.5,0.5);
-            glRotatef(i/20,i/10,i/30,i/5);
             glColor3f(0.6,0.3,1);
+            glRotatef(i/3,1,1,0);
             
             m.render();
-            
+            usleep(2000);
             glFlush();
             glutSwapBuffers();
+            
         };
         
         glutReshapeFunc(Resize);
