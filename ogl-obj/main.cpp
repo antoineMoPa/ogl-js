@@ -72,12 +72,14 @@ namespace OglApp{
         }
 
         void render(){
+            glBegin(GL_POINTS);
             for(vector<vec3>::iterator it = vertices.begin();
                 it != vertices.end();
                 ++it
                 ){
-                
+                glVertex3f((*it)[0],(*it)[1],(*it)[2]);
             }
+            glEnd();
         }
         vector <vec3> vertices;
         vector <vec2> uvs;
