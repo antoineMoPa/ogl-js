@@ -60,6 +60,10 @@ namespace OglApp{
             vector<int> tempfaceint;
             
             file.open(filename);
+
+            if(!file.is_open()){
+                return;
+            }
             
             while(!file.eof()){
                 // first part of string
@@ -79,7 +83,7 @@ namespace OglApp{
                     // skip character
                     file.get();
                     getline(file,face);
-                    // http://stackoverflow.com/questions/2896600/how-to-replace-all-occurrences-of-a-character-in-string
+                    // http://stackoverflow.com/questions/2896600
                     replace(face.begin(),face.end(),'/',' ');
                     stringstream f(face);
                     int tempint;
@@ -90,12 +94,47 @@ namespace OglApp{
                     // remove last read number
                     tempfaceint.pop_back();
                     
-                    for(vector<int>::iterator it = tempfaceint.begin();
-                        it!= tempfaceint.end();){
-                        for(int i = 0; i < 9; i++,++it){
-                            f3[i] = *it;
+                    if(tempfaceint.size() == 9){
+                        for(vector<int>::iterator it = tempfaceint.begin();
+                            it!= tempfaceint.end();
+                            ){
+                            
+                            for(int i = 0; i < 9; i++,++it){
+                                f3[i] = *it;
+                            }
+                            faces3.push_back(f3);
                         }
-                        faces3.push_back(f3);
+                    } else if (tempfaceint.size() == 6){
+                        for(vector<int>::iterator it = tempfaceint.begin();
+                            it!= tempfaceint.end();
+                            ){
+                            for(int i = 0; i < 9; i++){
+                                if(i % 3 == 0){
+                                    f3[i] = *it;
+                                    ++it;
+                                    ++it;
+                                    // TODO: verify vertex actually exists
+                                } else {
+                                    f3[i] = 0;
+                                }
+                            }
+                            faces3.push_back(f3);
+                        }
+                    } else if (tempfaceint.size() == 3){
+                        for(vector<int>::iterator it = tempfaceint.begin();
+                            it!= tempfaceint.end();
+                            ){
+                            for(int i = 0; i < 9; i++){
+                                if(i % 3 == 0){
+                                    f3[i] = *it;
+                                    ++it;
+                                    // TODO: verify vertex actually exists
+                                } else {
+                                    f3[i] = 0;
+                                }
+                            }
+                            faces3.push_back(f3);
+                        }
                     }
                 }
                 else{
@@ -131,7 +170,6 @@ namespace OglApp{
                     vertices[(*it)[3]-1][1],
                     vertices[(*it)[3]-1][2]
                     );
-                
                 glVertex3f(
                     vertices[(*it)[6]-1][0],
                     vertices[(*it)[6]-1][1],
@@ -156,7 +194,10 @@ namespace OglApp{
         glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGBA);
         glutInitWindowSize(Settings::w,Settings::h);
         
-        m.load("models/test_3d.obj");
+        //m.load("models/test_3d.obj");
+        //m.load("models/cube.obj");
+        //m.load("models/world.obj");
+        m.load("models/building.obj");
         
         auto Resize = [](int w,int h){
             
@@ -179,7 +220,7 @@ namespace OglApp{
                       0.0f,1.0f,0.0f);
             
             glTranslatef(0,0,0);
-            glScalef(0.5,0.5,0.5);
+            glScalef(0.3,0.3,0.3);
             glColor3f(0.6,0.3,1);
             glRotatef(i/3,1,1,0);
             
