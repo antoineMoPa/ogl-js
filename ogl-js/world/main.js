@@ -9,7 +9,7 @@ function test(){
     // Should disapear soon
     log(String(plus(2,2)))
     log(String(divide(42,2)))
-    
+
     // Make sure we can't use this ever
     if(typeof XMLHttpRequest == 'undefined'){
         log("XMLHttpRequest is undefined");
@@ -19,7 +19,7 @@ function test(){
     if(typeof console == 'undefined'){
         log("console is undefined");
     }
-    
+
     // Is there a window?... nope
     if(typeof window == 'undefined'){
         log("window is undefined");
@@ -28,7 +28,7 @@ function test(){
     // Testing the log function
     log(JSON.stringify(this));
     log(JSON.stringify(this.parent));
-    
+
     // Test render function
     var i = 0;
     render = function(){
@@ -45,6 +45,7 @@ function test(){
              4.0,1.0,0.0]
         );
     }
+
 }
 
 var w = 40;
@@ -64,7 +65,7 @@ var step = 0;
 
 render = function(){
     ++step;
-    
+
     for(var i = 0; i < w; i++){
         pushMatrix();
         translate(i*1.1-w/2,0,0);
@@ -92,34 +93,34 @@ function cube(){
     var P6 = [1,1,1];
     var P7 = [0,1,0];
     var P8 = [1,1,0];
-    
+
     var strips = [];
-    
+
     strips.push(
         P3.concat(P1,P4,P2)
     );
-    
+
     strips.push(
         P1.concat(P5,P2,P6)
     );
-    
+
     strips.push(
         P8.concat(P6,P7,P5)
     );
-    
+
     strips.push(
         P1.concat(P3,P5,P7)
     );
-    
+
     strips.push(
         P4.concat(P8,P3,P7)
     );
-    
+
     strips.push(
         P4.concat(P2,P8,P6)
     );
-    
-    
+
+
     // Draw faces
     for(var j in strips){
         var strip = strips[j];
@@ -140,12 +141,12 @@ render = function(){
         triangles.push(0);
         triangles_speed.push((Math.random()-0.5) * 0.1);
     }
-    
+
     translate(5,8,0);
     color(1,1,1,0.2);
     //scale(4,4,4)
     triangle_strip(triangles);
-    
+
     for(var i = 0; i < triangles.length; i++){
         triangles_speed[i] += (Math.random()-0.5) * 0.00001;
         triangles[i] *= 1.0001;
@@ -154,3 +155,6 @@ render = function(){
     log("i: "+i);
 }
 */
+render = function(){
+    model_test();
+}

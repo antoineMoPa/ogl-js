@@ -145,6 +145,26 @@ namespace jsfn{
         return true;
     }
 
+    /**
+       Model loading test
+       (should become a model loading function some day)
+    */
+    static JSBool
+        model_test(JSContext *cx, unsigned argc, jsval *vp)
+    {
+        JS::CallArgs args = CallArgsFromVp(argc, vp);
+
+        Model m;
+              
+        //m.load("models/test_3d.obj");
+        //m.load("models/cube.obj");
+        //m.load("models/world.obj");
+        //m.load("models/building.obj");
+        m.load("models/cube-extrude.obj");
+        m.render();
+        
+        return true;
+    }
     
     /**
        log strings
