@@ -8,6 +8,7 @@
 #include <ctime>
 #include <unistd.h>
 #include <algorithm>
+#include <cstdio>
 #include "math.h"
 
 class Settings{
@@ -28,15 +29,61 @@ namespace OglApp{
     time_t timev;
     
     /*
-      I feel so hipster
+      Thanks to
+      http://www.opengl-tutorial.org/beginners-tutorials/tutorial-5-a-textured-cube/
     */
-    typedef std::array<float,3> vec3;
-    typedef std::array<float,3> vec2;
-    typedef std::array<float,9> face3;
+    class Image{
+    public:
+        bool load(const char * filename){
+            FILE * file = fopen(filename,"rb");
+            if(!file){
+                cout << "Unable to read file." << endl;
+                return false;
+            }
+
+            if(fread(header,1,54,file) != 54){
+                cout << "Bad file header." << endl;
+                return false;
+            }
+            
+            if(header[0] != 'B' || header[1] != 'M'){
+                cout << "Bad file header." << endl;
+                return false;
+            }
+
+            dataPos = *(int*)&(header[0x0A]);
+            imageSize = *(int*)&(header[0x22]);
+            width = *(int*)&(header[0x12]);
+            height = *(int*)&(header[0x16]);
+            
+            if(imageSize == 0){
+                imageSize = width*height*3;
+            }
+
+            if(dataPos == 0){
+                dataPos = 54;
+            }
+            
+            data = new unsigned char [imageSize];
+            fread(data,1,imageSize,file);
+            fclose(file);
+        }
+    private:
+        unsigned char header[54];
+        unsigned int dataPos;
+        unsigned int width, height;
+        unsigned int imageSize; // width*height*3
+        unsigned char * data;
+    };
     
-    /** 
-        Code + shameless inspiration
-        http://www.opengl-tutorial.org/beginners-tutorials/tutorial-7-model-loading/
+    
+    typedef array<float,3> vec3;
+    typedef array<float,3> vec2;
+    typedef array<float,9> face3;
+    
+    /**
+       Code + shameless inspiration
+       http://www.opengl-tutorial.org/beginners-tutorials/tutorial-7-model-loading/
     */
     class Model{
     public:
@@ -60,7 +107,7 @@ namespace OglApp{
             vector<int> tempfaceint;
             
             file.open(filename);
-
+            
             if(!file.is_open()){
                 return;
             }
@@ -89,7 +136,7 @@ namespace OglApp{
                     int tempint;
                     while(f){
                         f >> tempint;
-                        tempfaceint.push_back(tempint);                       
+                        tempfaceint.push_back(tempint);
                     }
                     // remove last read number
                     tempfaceint.pop_back();
@@ -143,7 +190,7 @@ namespace OglApp{
             }
             file.close();
         }
-
+        
         void render(){
             glBegin(GL_POINTS);
             for(vector<vec3>::iterator it = vertices.begin();
@@ -154,38 +201,41 @@ namespace OglApp{
                 glVertex3f((*it)[0],(*it)[1],(*it)[2]);
             }
             glEnd();
-
+            
             glBegin(GL_TRIANGLES);
             for(vector<face3>::iterator it = faces3.begin();
                 it != faces3.end();
                 ++it){
                 
                 glVertex3f(
-                    vertices[(*it)[0]-1][0],
-                    vertices[(*it)[0]-1][1],
-                    vertices[(*it)[0]-1][2]
-                    );
+                           vertices[(*it)[0]-1][0],
+                           vertices[(*it)[0]-1][1],
+                           vertices[(*it)[0]-1][2]
+                           );
                 glVertex3f(
-                    vertices[(*it)[3]-1][0],
-                    vertices[(*it)[3]-1][1],
-                    vertices[(*it)[3]-1][2]
-                    );
+                           vertices[(*it)[3]-1][0],
+                           vertices[(*it)[3]-1][1],
+                           vertices[(*it)[3]-1][2]
+                           );
                 glVertex3f(
-                    vertices[(*it)[6]-1][0],
-                    vertices[(*it)[6]-1][1],
-                    vertices[(*it)[6]-1][2]
-                    );
-
+                           vertices[(*it)[6]-1][0],
+                           vertices[(*it)[6]-1][1],
+                           vertices[(*it)[6]-1][2]
+                           );
+                
             }
             glEnd();
-
         }
+        
+    private:
+        
         vector <vec3> vertices;
         vector <vec2> uvs;
         vector <vec3> normals;
         vector <face3> faces3;
     };
-
+    
+    
     Model m;
     
     void start(int * argc, char ** argv){
@@ -198,6 +248,9 @@ namespace OglApp{
         //m.load("models/cube.obj");
         //m.load("models/world.obj");
         m.load("models/building.obj");
+
+        Image img;
+        img.load("images/lava.bmp");
         
         auto Resize = [](int w,int h){
             
@@ -206,7 +259,7 @@ namespace OglApp{
         auto Render = [](){
             i++;
             glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-            
+
             glLoadIdentity();
             gluPerspective(
                            80,
@@ -218,27 +271,27 @@ namespace OglApp{
             gluLookAt(0.0f,0.0f,2.0f,
                       0.0f,0.0f,0.0f,
                       0.0f,1.0f,0.0f);
-            
+
             glTranslatef(0,0,0);
             glScalef(0.3,0.3,0.3);
             glColor3f(0.6,0.3,1);
             glRotatef(i/3,1,1,0);
-            
+
             m.render();
             usleep(2000);
             glFlush();
             glutSwapBuffers();
-            
+
         };
-        
+
         glutReshapeFunc(Resize);
         glutCreateWindow("Hey");
-        
+
         glutDisplayFunc(Render);
         glutIdleFunc(Render);
 
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-        
+
         glutMainLoop();
     }
 };
@@ -246,8 +299,9 @@ namespace OglApp{
 int main(int argc, char **argv){
     Settings::w = 640;
     Settings::h = 480;
+
     OglApp::start(&argc,argv);
 
-    
+
     return 0;
 }
