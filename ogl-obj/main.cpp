@@ -3,6 +3,9 @@
 #include <sstream>
 #include <array>
 #include <vector>
+#include <glm/glm.hpp>
+#define GLM_FORCE_RADIANS
+#include <glm/gtx/transform.hpp>
 #include <GL/glew.h>
 #include <GL/glut.h>
 #include <cstdio>
@@ -12,6 +15,10 @@
 #include <cstdio>
 #include "math.h"
 #include "shader.h"
+
+/*
+ Thanks to http://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/
+ */
 
 class Settings{
 public:
@@ -39,7 +46,6 @@ namespace OglApp{
             glUseProgram(programID);
             return true;
         }
-    private:
         GLuint programID;
     };
     
@@ -55,7 +61,7 @@ namespace OglApp{
                 cout << "Unable to read file." << endl;
                 return false;
             }
-
+            
             if(fread(header,1,54,file) != 54){
                 cout << "Bad file header." << endl;
                 return false;
@@ -289,7 +295,7 @@ namespace OglApp{
         //m.load("models/cube.obj");
         //m.load("models/world.obj");
         m.load("models/building.obj");
-                
+        
         auto Resize = [](int w,int h){
             
         };
@@ -297,32 +303,14 @@ namespace OglApp{
         auto Render = [](){
             i++;
             glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-
-            glLoadIdentity();
-            gluPerspective(
-                           80,
-                           float(Settings::w)/float(Settings::h),
-                           1,
-                           100
-                           );
-
-            gluLookAt(0.0f,0.0f,2.0f,
-                      0.0f,0.0f,0.0f,
-                      0.0f,1.0f,0.0f);
-
-            glTranslatef(0,0,0);
-            glScalef(0.3,0.3,0.3);
-            glColor3f(0.6,0.3,1);
-            glRotatef(i/3,1,1,0);
-
+            
             m.render();
             
             usleep(2000);
             glFlush();
             glutSwapBuffers();
-
         };
-
+        
         glutReshapeFunc(Resize);
         glutCreateWindow("Hey");
 
@@ -340,10 +328,27 @@ namespace OglApp{
         Image img;
         Shader shader;
         
-        shader.load("vertex.glsl","fragment.glsl");
+        glm::mat4 Projection = glm::perspective(
+            glm::radians(45.0f),
+            float(Settings::w)/float(Settings::h),
+            0.1f,
+            100.0f
+            );
 
+        glm::mat4 View = glm::lookAt(
+            glm::vec3(0,0,2), // Camera
+            glm::vec3(0,0,0), // Origin
+            glm::vec3(0,1,0)  // Vertical axis
+            );
+
+        glm::mat4 Model = glm::mat4(1.0f);
+        glm::mat4 mvp = Projection * View * Model;
+
+        shader.load("vertex.glsl","fragment.glsl");
         shader.bind();
-        
+        GLuint MatrixID = glGetUniformLocation(shader.programID, "MVP");
+        glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &mvp[0][0]);
+                
         if(img.load("images/lava.bmp")){
             img.bind();
         }
