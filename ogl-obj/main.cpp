@@ -3,6 +3,7 @@
 #include <sstream>
 #include <array>
 #include <vector>
+#include <GL/glew.h>
 #include <GL/glut.h>
 #include <cstdio>
 #include <ctime>
@@ -10,6 +11,7 @@
 #include <algorithm>
 #include <cstdio>
 #include "math.h"
+#include "shader.h"
 
 class Settings{
 public:
@@ -27,6 +29,19 @@ using namespace std;
 namespace OglApp{
     int i = 0;
     time_t timev;
+
+    class Shader{
+    public:
+        bool load(const char * vertex, const char * fragment){
+            programID = LoadShaders(vertex, fragment);
+        } 
+        bool bind(){
+            glUseProgram(programID);
+            return true;
+        }
+    private:
+        GLuint programID;
+    };
     
     /*
       Thanks to
@@ -67,8 +82,36 @@ namespace OglApp{
             data = new unsigned char [imageSize];
             fread(data,1,imageSize,file);
             fclose(file);
+
+            return true;
         }
-    private:
+        bool bind(){
+            glGenTextures(1, &textureID);
+            glBindTexture(GL_TEXTURE_2D, textureID);
+            glTexImage2D(
+                GL_TEXTURE_2D,
+                0, // level (for mipmap stuff)
+                GL_RGB, // Internal format
+                width,
+                height,
+                0, // Doc says:  "This value must be 0." ...
+                GL_BGR, // Format
+                GL_UNSIGNED_BYTE,
+                data
+                );
+
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+            // Mipmap
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
+            glGenerateMipmap(GL_TEXTURE_2D);
+        }
+        ~Image(){
+            delete data;
+        }
+        GLuint textureID;
         unsigned char header[54];
         unsigned int dataPos;
         unsigned int width, height;
@@ -228,30 +271,25 @@ namespace OglApp{
         }
         
     private:
-        
         vector <vec3> vertices;
         vector <vec2> uvs;
         vector <vec3> normals;
         vector <face3> faces3;
     };
     
-    
     Model m;
     
     void start(int * argc, char ** argv){
         glutInit(argc,argv);
         glClearColor(0.0f,0.0f,0.0f,0.0f);
-        glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGBA);
+        glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGBA);        
         glutInitWindowSize(Settings::w,Settings::h);
         
         //m.load("models/test_3d.obj");
         //m.load("models/cube.obj");
         //m.load("models/world.obj");
         m.load("models/building.obj");
-
-        Image img;
-        img.load("images/lava.bmp");
-        
+                
         auto Resize = [](int w,int h){
             
         };
@@ -278,6 +316,7 @@ namespace OglApp{
             glRotatef(i/3,1,1,0);
 
             m.render();
+            
             usleep(2000);
             glFlush();
             glutSwapBuffers();
@@ -287,11 +326,31 @@ namespace OglApp{
         glutReshapeFunc(Resize);
         glutCreateWindow("Hey");
 
+        // http://gamedev.stackexchange.com/questions/22785/
+        GLenum err = glewInit();
+        if (err != GLEW_OK){
+            cout << "GLEW error: " << err << endl;
+            cout <<  glewGetErrorString(err) << endl;
+            exit(1);
+        }
+        
         glutDisplayFunc(Render);
         glutIdleFunc(Render);
 
-        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+        Image img;
+        Shader shader;
+        
+        shader.load("vertex.glsl","fragment.glsl");
 
+        shader.bind();
+        
+        if(img.load("images/lava.bmp")){
+            img.bind();
+        }
+        
+                
+        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+        
         glutMainLoop();
     }
 };
@@ -299,7 +358,6 @@ namespace OglApp{
 int main(int argc, char **argv){
     Settings::w = 640;
     Settings::h = 480;
-
     OglApp::start(&argc,argv);
 
 
