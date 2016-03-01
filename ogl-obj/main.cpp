@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #define GLM_FORCE_RADIANS
 #include <glm/gtx/transform.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <GL/glew.h>
 #include <GL/glut.h>
 #include <cstdio>
@@ -88,7 +89,7 @@ namespace OglApp{
             data = new unsigned char [imageSize];
             fread(data,1,imageSize,file);
             fclose(file);
-
+            
             return true;
         }
         bool bind(){
@@ -341,18 +342,24 @@ namespace OglApp{
             glm::vec3(0,1,0)  // Vertical axis
             );
 
-        glm::mat4 Model = glm::mat4(1.0f);
+        glm::mat4 scale = glm::mat4(1.0f);
+        scale[0] = glm::vec4(0.2f,0.0f,0.0f,0.0f);
+        scale[1] = glm::vec4(0.0f,0.2f,0.0f,0.0f);
+        scale[2] = glm::vec4(0.0f,0.0f,0.2f,0.0f);
+        glm::mat4 Model = scale * glm::mat4(1.0f);
         glm::mat4 mvp = Projection * View * Model;
-
+        
         shader.load("vertex.glsl","fragment.glsl");
         shader.bind();
-        GLuint MatrixID = glGetUniformLocation(shader.programID, "MVP");
+        
+        GLuint MatrixID =
+            glGetUniformLocation(shader.programID, "MVP");
+        
         glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &mvp[0][0]);
-                
+        
         if(img.load("images/lava.bmp")){
             img.bind();
         }
-        
                 
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
         
