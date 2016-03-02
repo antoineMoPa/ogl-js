@@ -2,10 +2,9 @@
 
 precision highp float;
 
+in vec3 pos;
 out vec3 color;
 
 void main(){
-    color = vec3(sin(gl_PointCoord.x * 30.0),
-                 gl_PointCoord.y,
-                 0.2);
+    color = pos;
 }
