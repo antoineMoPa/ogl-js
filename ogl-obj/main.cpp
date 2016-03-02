@@ -204,7 +204,8 @@ namespace OglApp{
                     uvs.push_back(v2);
                 }
                 else if(s.substr(0,2) == "vn"){
-                    file >> x >> y >> z;
+                    file >> v3[0] >> v3[1] >> v3[2];
+                    normals.push_back(v3);
                 }
                 else if(s.substr(0,1) == "v"){
                     file >> v3[0] >> v3[1] >> v3[2];
@@ -306,6 +307,14 @@ namespace OglApp{
                 uv_buffer_data[uvi+4] = uvs[(*it)[7]-1][0];
                 uv_buffer_data[uvi+5] = uvs[(*it)[7]-1][1];
 
+                cout << " " << uvs[(*it)[1]-1][0];
+                cout << " " << uvs[(*it)[1]-1][1];
+                cout << " " << uvs[(*it)[4]-1][0];
+                cout << " " << uvs[(*it)[4]-1][1];
+                cout << " " << uvs[(*it)[7]-1][0];
+                cout << " " << uvs[(*it)[7]-1][1];
+                cout << endl;
+                
                 i += 9;
                 uvi += 6;
             }
@@ -328,6 +337,7 @@ namespace OglApp{
             
         }
         void render(){
+            // Vertex data
             glEnableVertexAttribArray(0);
             glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
             glVertexAttribPointer(
@@ -341,9 +351,10 @@ namespace OglApp{
             
             glDrawArrays(GL_TRIANGLES, 0, vertex_num);
             glDisableVertexAttribArray(0);
-            
+
+            // UV data
             glEnableVertexAttribArray(1);
-            glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+            glBindBuffer(GL_ARRAY_BUFFER, uv_buffer);
             glVertexAttribPointer(
                 1, // layout
                 2, // uv
@@ -383,10 +394,11 @@ namespace OglApp{
         camera.w = Settings::w;
         camera.h = Settings::h;
         
-        m.load("models/test_3d.obj");
+        //m.load("models/test_3d.obj");
         //m.load("models/cube.obj");
         //m.load("models/world.obj");
         //m.load("models/building.obj");
+        m.load("models/test_3d_2.obj");
         
         auto Resize = [](int w,int h){
             camera.w = w;
@@ -424,6 +436,9 @@ namespace OglApp{
         }
 
         m.create_buffers();
+
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LESS);
         
         glutDisplayFunc(Render);
         glutIdleFunc(Render);
