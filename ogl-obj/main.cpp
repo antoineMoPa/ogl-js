@@ -49,7 +49,39 @@ namespace OglApp{
         }
         GLuint programID;
     };
-    
+
+    class Camera{
+    public:
+        glm::mat4 model_view_matrix(){
+            glm::mat4 Projection = glm::perspective(
+                glm::radians(45.0f),
+                    float(w)/float(h),
+                0.1f,
+                100.0f
+                );
+            
+            glm::mat4 View = glm::lookAt(
+                glm::vec3(0,0,2), // Camera
+                glm::vec3(0,0,0), // Origin
+                glm::vec3(0,1,0)  // Vertical axis
+                );
+            
+            glm::mat4 Scale = glm::mat4(1.0f);
+            Scale[0] = glm::vec4(0.2f,0.0f,0.0f,0.0f);
+            Scale[1] = glm::vec4(0.0f,0.2f,0.0f,0.0f);
+            Scale[2] = glm::vec4(0.0f,0.0f,0.2f,0.0f);
+            glm::mat4 Model = glm::mat4(1.0f);
+            
+            glm::vec3 rotation_axis(1.0f,0.0f,0.0f);
+            glm::mat4 Rotation = glm::rotate(angle, rotation_axis);
+            glm::mat4 mvp = Projection * View * Rotation * Scale * Model;
+            
+            return mvp;
+        }
+        int w,h;
+        float angle = 0;
+    };
+        
     /*
       Thanks to
       http://www.opengl-tutorial.org/beginners-tutorials/tutorial-5-a-textured-cube/
@@ -285,13 +317,21 @@ namespace OglApp{
                 sizeof(GLfloat) * numpoints * 3,
                 vertex_buffer_data,
                 GL_STATIC_DRAW);
+
+            glGenBuffers(1, &uv_buffer);
+            glBindBuffer(GL_ARRAY_BUFFER, uv_buffer);
+            glBufferData(
+                GL_ARRAY_BUFFER,
+                sizeof(GLfloat) * numpoints * 2,
+                uv_buffer_data,
+                GL_STATIC_DRAW);
             
         }
         void render(){
             glEnableVertexAttribArray(0);
             glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
             glVertexAttribPointer(
-                0, // must match layout in shader
+                0, // layout
                 3, // xyz
                 GL_FLOAT, // type
                 GL_FALSE, // normalized?
@@ -301,6 +341,17 @@ namespace OglApp{
             
             glDrawArrays(GL_TRIANGLES, 0, vertex_num);
             glDisableVertexAttribArray(0);
+            
+            glEnableVertexAttribArray(1);
+            glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+            glVertexAttribPointer(
+                1, // layout
+                2, // uv
+                GL_FLOAT, // type
+                GL_FALSE, // normalized?
+                0, // stride
+                (void*)0 // array buffer offset
+                );
         }
         ~Model(){
             delete vertex_buffer_data;
@@ -321,12 +372,16 @@ namespace OglApp{
     
     Model m;
     Shader shader;
+    Camera camera;
     
     void start(int * argc, char ** argv){
         glutInit(argc,argv);
         glClearColor(1.0f,1.0f,0.0f,0.0f);
         glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGBA);        
         glutInitWindowSize(Settings::w,Settings::h);
+
+        camera.w = Settings::w;
+        camera.h = Settings::h;
         
         m.load("models/test_3d.obj");
         //m.load("models/cube.obj");
@@ -334,15 +389,23 @@ namespace OglApp{
         //m.load("models/building.obj");
         
         auto Resize = [](int w,int h){
-            
+            camera.w = w;
+            camera.h = h;
         };
 
         auto Render = [](){
             i++;
             glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-            
+            camera.angle += 0.001;
             m.render();
+
+            glm::mat4 mvp = camera.model_view_matrix();
+            
+            GLuint MatrixID =
+            glGetUniformLocation(shader.programID, "MVP");
+            
+            glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &mvp[0][0]);
             
             glFlush();
             glutSwapBuffers();
@@ -351,7 +414,7 @@ namespace OglApp{
         
         glutReshapeFunc(Resize);
         glutCreateWindow("Hey");
-
+        
         // http://gamedev.stackexchange.com/questions/22785/
         GLenum err = glewInit();
         if (err != GLEW_OK){
@@ -367,33 +430,8 @@ namespace OglApp{
 
         Image img;
         
-        glm::mat4 Projection = glm::perspective(
-            glm::radians(45.0f),
-            float(Settings::w)/float(Settings::h),
-            0.1f,
-            100.0f
-            );
-        
-        glm::mat4 View = glm::lookAt(
-            glm::vec3(0,0,2), // Camera
-            glm::vec3(0,0,0), // Origin
-            glm::vec3(0,1,0)  // Vertical axis
-            );
-
-        glm::mat4 scale = glm::mat4(1.0f);
-        scale[0] = glm::vec4(0.2f,0.0f,0.0f,0.0f);
-        scale[1] = glm::vec4(0.0f,0.2f,0.0f,0.0f);
-        scale[2] = glm::vec4(0.0f,0.0f,0.2f,0.0f);
-        glm::mat4 Model = scale * glm::mat4(1.0f);
-        glm::mat4 mvp = Projection * View * Model;
-        
         shader.load("vertex.glsl","fragment.glsl");
         shader.bind();
-        
-        GLuint MatrixID =
-            glGetUniformLocation(shader.programID, "MVP");
-        
-        glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &mvp[0][0]);
         
         if(img.load("images/lava.bmp")){
             img.bind();
