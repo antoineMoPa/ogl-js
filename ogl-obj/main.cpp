@@ -92,6 +92,7 @@ namespace OglApp{
             
             return true;
         }
+        
         bool bind(){
             glGenTextures(1, &textureID);
             glBindTexture(GL_TEXTURE_2D, textureID);
@@ -115,6 +116,7 @@ namespace OglApp{
             glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
             glGenerateMipmap(GL_TEXTURE_2D);
         }
+        
         ~Image(){
             delete data;
         }
@@ -166,7 +168,8 @@ namespace OglApp{
                 // first part of string
                 file >> s;
                 if(s.substr(0,2) == "vt"){
-                    file >> x >> y;
+                    file >> v2[0] >> v2[1];
+                    uvs.push_back(v2);
                 }
                 else if(s.substr(0,2) == "vn"){
                     file >> x >> y >> z;
@@ -195,7 +198,6 @@ namespace OglApp{
                         for(vector<int>::iterator it = tempfaceint.begin();
                             it!= tempfaceint.end();
                             ){
-                            
                             for(int i = 0; i < 9; i++,++it){
                                 f3[i] = *it;
                             }
@@ -241,75 +243,110 @@ namespace OglApp{
             file.close();
         }
         
-        void render(){
-            glBegin(GL_POINTS);
-            for(vector<vec3>::iterator it = vertices.begin();
-                it != vertices.end();
-                ++it
-                ){
-                
-                glVertex3f((*it)[0],(*it)[1],(*it)[2]);
-            }
-            glEnd();
+        void create_buffers(){
+            size_t numpoints = faces3.size() * 3;
+            vertex_num = numpoints;
+            vertex_buffer_data = new GLfloat[numpoints * 3];
+            uv_buffer_data = new GLfloat[numpoints * 2];
+
+            typedef vector<face3>::iterator faceit;
             
-            glBegin(GL_TRIANGLES);
-            for(vector<face3>::iterator it = faces3.begin();
-                it != faces3.end();
-                ++it){
+            int vi = 0; // vertex index
+            int uvi = 0; // uv index
+            for(faceit it = faces3.begin(); it != faces3.end();++it){
+                // for each face:
+                // add vertex coords to buffer data
+                // add uv coords to buffer data
+                vertex_buffer_data[i+0] = vertices[(*it)[0]-1][0];
+                vertex_buffer_data[i+1] = vertices[(*it)[0]-1][1];
+                vertex_buffer_data[i+2] = vertices[(*it)[0]-1][2];
+                vertex_buffer_data[i+3] = vertices[(*it)[3]-1][0];
+                vertex_buffer_data[i+4] = vertices[(*it)[3]-1][1];
+                vertex_buffer_data[i+5] = vertices[(*it)[3]-1][2];
+                vertex_buffer_data[i+6] = vertices[(*it)[6]-1][0];
+                vertex_buffer_data[i+7] = vertices[(*it)[6]-1][1];
+                vertex_buffer_data[i+8] = vertices[(*it)[6]-1][2];
                 
-                glVertex3f(
-                           vertices[(*it)[0]-1][0],
-                           vertices[(*it)[0]-1][1],
-                           vertices[(*it)[0]-1][2]
-                           );
-                glVertex3f(
-                           vertices[(*it)[3]-1][0],
-                           vertices[(*it)[3]-1][1],
-                           vertices[(*it)[3]-1][2]
-                           );
-                glVertex3f(
-                           vertices[(*it)[6]-1][0],
-                           vertices[(*it)[6]-1][1],
-                           vertices[(*it)[6]-1][2]
-                           );
-                
+                uv_buffer_data[uvi+0] = uvs[(*it)[1]-1][0];
+                uv_buffer_data[uvi+1] = uvs[(*it)[1]-1][1];
+                uv_buffer_data[uvi+2] = uvs[(*it)[4]-1][0];
+                uv_buffer_data[uvi+3] = uvs[(*it)[4]-1][1];
+                uv_buffer_data[uvi+4] = uvs[(*it)[7]-1][0];
+                uv_buffer_data[uvi+5] = uvs[(*it)[7]-1][1];
+
+                i += 9;
+                uvi += 6;
             }
-            glEnd();
+
+            glGenBuffers(1, &vertex_buffer);
+            glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+            glBufferData(
+                GL_ARRAY_BUFFER,
+                sizeof(GLfloat) * numpoints * 3,
+                vertex_buffer_data,
+                GL_STATIC_DRAW);
+            
         }
-        
+        void render(){
+            glEnableVertexAttribArray(0);
+            glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+            glVertexAttribPointer(
+                0, // must match layout in shader
+                3, // xyz
+                GL_FLOAT, // type
+                GL_FALSE, // normalized?
+                0, // stride
+                (void*)0 // array buffer offset
+                );
+            
+            glDrawArrays(GL_TRIANGLES, 0, vertex_num);
+            glDisableVertexAttribArray(0);
+        }
+        ~Model(){
+            delete vertex_buffer_data;
+            delete uv_buffer_data;
+        }
+        GLfloat * vertex_buffer_data;
+        GLfloat * uv_buffer_data;
+
     private:
         vector <vec3> vertices;
         vector <vec2> uvs;
         vector <vec3> normals;
         vector <face3> faces3;
+        size_t vertex_num;
+        GLuint vertex_buffer;
+        GLuint uv_buffer;
     };
     
     Model m;
+    Shader shader;
     
     void start(int * argc, char ** argv){
         glutInit(argc,argv);
-        glClearColor(0.0f,0.0f,0.0f,0.0f);
+        glClearColor(1.0f,1.0f,0.0f,0.0f);
         glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGBA);        
         glutInitWindowSize(Settings::w,Settings::h);
         
-        //m.load("models/test_3d.obj");
+        m.load("models/test_3d.obj");
         //m.load("models/cube.obj");
         //m.load("models/world.obj");
-        m.load("models/building.obj");
+        //m.load("models/building.obj");
         
         auto Resize = [](int w,int h){
             
         };
-        
+
         auto Render = [](){
             i++;
             glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+
             
             m.render();
             
-            usleep(2000);
             glFlush();
             glutSwapBuffers();
+            usleep(2000);
         };
         
         glutReshapeFunc(Resize);
@@ -322,12 +359,13 @@ namespace OglApp{
             cout <<  glewGetErrorString(err) << endl;
             exit(1);
         }
+
+        m.create_buffers();
         
         glutDisplayFunc(Render);
         glutIdleFunc(Render);
 
         Image img;
-        Shader shader;
         
         glm::mat4 Projection = glm::perspective(
             glm::radians(45.0f),
@@ -335,7 +373,7 @@ namespace OglApp{
             0.1f,
             100.0f
             );
-
+        
         glm::mat4 View = glm::lookAt(
             glm::vec3(0,0,2), // Camera
             glm::vec3(0,0,0), // Origin
