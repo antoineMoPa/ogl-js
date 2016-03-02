@@ -65,21 +65,24 @@ namespace OglApp{
                 glm::vec3(0,0,0), // Origin
                 glm::vec3(0,1,0)  // Vertical axis
                 );
-            
-            glm::mat4 Scale = glm::mat4(1.0f);
-            Scale[0] = glm::vec4(0.2f,0.0f,0.0f,0.0f);
-            Scale[1] = glm::vec4(0.0f,0.2f,0.0f,0.0f);
-            Scale[2] = glm::vec4(0.0f,0.0f,0.2f,0.0f);
+
+            glm::mat4 Translate = glm::translate(glm::vec3(x,y,z));
+            glm::mat4 Scale = glm::scale(glm::vec3(scale,scale,scale));
             glm::mat4 Model = glm::mat4(1.0f);
             
             glm::vec3 rotation_axis(1.0f,0.0f,0.0f);
             glm::mat4 Rotation = glm::rotate(angle, rotation_axis);
-            glm::mat4 mvp = Projection * View * Rotation * Scale * Model;
+            glm::mat4 mvp =
+                Projection * View * Translate * Rotation * Scale * Model;
             
             return mvp;
         }
         int w,h;
         float angle = 0;
+        float scale = 0;
+        float x = 0;
+        float y = 0;
+        float z = 0;
     };
         
     /*
@@ -152,6 +155,7 @@ namespace OglApp{
         ~Image(){
             delete data;
         }
+        
         GLuint textureID;
         unsigned char header[54];
         unsigned int dataPos;
@@ -168,6 +172,9 @@ namespace OglApp{
     /**
        Code + shameless inspiration
        http://www.opengl-tutorial.org/beginners-tutorials/tutorial-7-model-loading/
+       
+       The code of this class has to be seriously reviewed if user input is not
+       trusted.
     */
     class Model{
     public:
@@ -226,7 +233,10 @@ namespace OglApp{
                     }
                     // remove last read number
                     tempfaceint.pop_back();
-                    
+
+                    if(tempfaceint.size() == 12){
+                        cout << "Please triangulate your model." << endl;
+                    }
                     if(tempfaceint.size() == 9){
                         for(vector<int>::iterator it = tempfaceint.begin();
                             it!= tempfaceint.end();
@@ -280,6 +290,7 @@ namespace OglApp{
             size_t numpoints = faces3.size() * 3;
             vertex_num = numpoints;
             vertex_buffer_data = new GLfloat[numpoints * 3];
+            normal_buffer_data = new GLfloat[numpoints * 3];
             uv_buffer_data = new GLfloat[numpoints * 2];
 
             typedef vector<face3>::iterator faceit;
@@ -289,6 +300,7 @@ namespace OglApp{
             for(faceit it = faces3.begin(); it != faces3.end();++it){
                 // for each face:
                 // add vertex coords to buffer data
+                // add normal coords to buffer data
                 // add uv coords to buffer data
                 vertex_buffer_data[i+0] = vertices[(*it)[0]-1][0];
                 vertex_buffer_data[i+1] = vertices[(*it)[0]-1][1];
@@ -299,21 +311,29 @@ namespace OglApp{
                 vertex_buffer_data[i+6] = vertices[(*it)[6]-1][0];
                 vertex_buffer_data[i+7] = vertices[(*it)[6]-1][1];
                 vertex_buffer_data[i+8] = vertices[(*it)[6]-1][2];
-                
-                uv_buffer_data[uvi+0] = uvs[(*it)[1]-1][0];
-                uv_buffer_data[uvi+1] = uvs[(*it)[1]-1][1];
-                uv_buffer_data[uvi+2] = uvs[(*it)[4]-1][0];
-                uv_buffer_data[uvi+3] = uvs[(*it)[4]-1][1];
-                uv_buffer_data[uvi+4] = uvs[(*it)[7]-1][0];
-                uv_buffer_data[uvi+5] = uvs[(*it)[7]-1][1];
 
-                cout << " " << uvs[(*it)[1]-1][0];
-                cout << " " << uvs[(*it)[1]-1][1];
-                cout << " " << uvs[(*it)[4]-1][0];
-                cout << " " << uvs[(*it)[4]-1][1];
-                cout << " " << uvs[(*it)[7]-1][0];
-                cout << " " << uvs[(*it)[7]-1][1];
-                cout << endl;
+                // normals
+                if(normals.size() != 0){
+                    normal_buffer_data[i+0] = normals[(*it)[2]-1][0];
+                    normal_buffer_data[i+1] = normals[(*it)[2]-1][1];
+                    normal_buffer_data[i+2] = normals[(*it)[2]-1][2];
+                    normal_buffer_data[i+3] = normals[(*it)[5]-1][0];
+                    normal_buffer_data[i+4] = normals[(*it)[5]-1][1];
+                    normal_buffer_data[i+5] = normals[(*it)[5]-1][2];
+                    normal_buffer_data[i+6] = normals[(*it)[8]-1][0];
+                    normal_buffer_data[i+7] = normals[(*it)[8]-1][1];
+                    normal_buffer_data[i+8] = normals[(*it)[8]-1][2];
+                }
+
+                // uvs
+                if(uvs.size() != 0){
+                    uv_buffer_data[uvi+0] = uvs[(*it)[1]-1][0];
+                    uv_buffer_data[uvi+1] = uvs[(*it)[1]-1][1];
+                    uv_buffer_data[uvi+2] = uvs[(*it)[4]-1][0];
+                    uv_buffer_data[uvi+3] = uvs[(*it)[4]-1][1];
+                    uv_buffer_data[uvi+4] = uvs[(*it)[7]-1][0];
+                    uv_buffer_data[uvi+5] = uvs[(*it)[7]-1][1];
+                }
                 
                 i += 9;
                 uvi += 6;
@@ -335,6 +355,14 @@ namespace OglApp{
                 uv_buffer_data,
                 GL_STATIC_DRAW);
             
+            glGenBuffers(1, &normal_buffer);
+            glBindBuffer(GL_ARRAY_BUFFER, normal_buffer);
+            glBufferData(
+                GL_ARRAY_BUFFER,
+                sizeof(GLfloat) * numpoints * 3,
+                normal_buffer_data,
+                GL_STATIC_DRAW);
+            
         }
         void render(){
             // Vertex data
@@ -351,7 +379,7 @@ namespace OglApp{
             
             glDrawArrays(GL_TRIANGLES, 0, vertex_num);
             glDisableVertexAttribArray(0);
-
+            
             // UV data
             glEnableVertexAttribArray(1);
             glBindBuffer(GL_ARRAY_BUFFER, uv_buffer);
@@ -363,12 +391,26 @@ namespace OglApp{
                 0, // stride
                 (void*)0 // array buffer offset
                 );
+
+            // normal data
+            glEnableVertexAttribArray(2);
+            glBindBuffer(GL_ARRAY_BUFFER, normal_buffer);
+            glVertexAttribPointer(
+                2, // layout
+                3, // normal
+                GL_FLOAT, // type
+                GL_FALSE, // normalized?
+                0, // stride
+                (void*)0 // array buffer offset
+                );
         }
         ~Model(){
             delete vertex_buffer_data;
             delete uv_buffer_data;
         }
+
         GLfloat * vertex_buffer_data;
+        GLfloat * normal_buffer_data;
         GLfloat * uv_buffer_data;
 
     private:
@@ -378,6 +420,7 @@ namespace OglApp{
         vector <face3> faces3;
         size_t vertex_num;
         GLuint vertex_buffer;
+        GLuint normal_buffer;
         GLuint uv_buffer;
     };
     
@@ -398,7 +441,8 @@ namespace OglApp{
         //m.load("models/cube.obj");
         //m.load("models/world.obj");
         //m.load("models/building.obj");
-        m.load("models/test_3d_2.obj");
+        //m.load("models/test_3d_2.obj");
+        m.load("models/itu.obj");
         
         auto Resize = [](int w,int h){
             camera.w = w;
@@ -409,7 +453,11 @@ namespace OglApp{
             i++;
             glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-            camera.angle += 0.001;
+            camera.scale = 0.015;
+            camera.angle = 0.30;
+            camera.x = 0.00;
+            camera.y = -0.2;
+            camera.z = 0;
             m.render();
 
             glm::mat4 mvp = camera.model_view_matrix();
