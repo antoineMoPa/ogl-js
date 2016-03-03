@@ -121,10 +121,10 @@ namespace OglApp{
         Camera(int w, int h){
             mat = Matrix(w,h);
         }
-        void push_state(){
+        void push(){
             matrix_stack.push_back(mat);
         }
-        void pop_state(){
+        void pop(){
             if(!matrix_stack.empty()){
                 mat = matrix_stack.back();
                 matrix_stack.pop_back();
@@ -508,7 +508,13 @@ namespace OglApp{
 
             glm::mat4 mvp = camera.mat.model_view_matrix();
 
-            camera.mat.scale(0.9999,1.0,1.0);
+            camera.push();
+            camera.push();
+            camera.mat.scale(0.5,0.5,0.5);
+            camera.pop();
+            camera.pop();
+
+            // Nothing should happen
             
             GLuint MatrixID =
             glGetUniformLocation(shader.programID, "MVP");
