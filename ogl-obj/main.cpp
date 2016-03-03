@@ -37,7 +37,7 @@ using namespace std;
 namespace OglApp{
     int i = 0;
     time_t timev;
-
+    
     class Shader{
     public:
         bool load(const char * vertex, const char * fragment){
@@ -49,10 +49,21 @@ namespace OglApp{
         }
         GLuint programID;
     };
-
-    class Camera{
+    
+    /*
+      The matrix
+    */
+    class Matrix{
     public:
-        glm::mat4 model_view_matrix(){
+        Matrix operator=(Matrix rhs){
+            angle = rhs.angle;
+            scale = rhs.scale;
+            x = rhs.x;
+            y = rhs.y;
+            z = rhs.z;
+            return *this;
+        }
+        glm::mat4 model_view_matrix(int w, int h){
             glm::mat4 Projection = glm::perspective(
                 glm::radians(45.0f),
                     float(w)/float(h),
@@ -84,7 +95,32 @@ namespace OglApp{
         float y = 0;
         float z = 0;
     };
-        
+
+    class Camera{
+    public:
+        Camera(){
+            
+        }
+        void translate(){
+            
+        }
+        void scale(){
+            
+        }
+        void rotate(){
+            
+        }
+        void push_state(){
+            
+        }
+        void pop_state(){
+            
+        }
+        Matrix mat;
+    private:
+        vector <Matrix> matrix_stack;
+    };
+    
     /*
       Thanks to
       http://www.opengl-tutorial.org/beginners-tutorials/tutorial-5-a-textured-cube/
@@ -434,9 +470,6 @@ namespace OglApp{
         glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGBA);        
         glutInitWindowSize(Settings::w,Settings::h);
 
-        camera.w = Settings::w;
-        camera.h = Settings::h;
-        
         //m.load("models/test_3d.obj");
         //m.load("models/cube.obj");
         //m.load("models/world.obj");
@@ -445,22 +478,22 @@ namespace OglApp{
         m.load("models/itu.obj");
         
         auto Resize = [](int w,int h){
-            camera.w = w;
-            camera.h = h;
+            Settings::w = w;
+            Settings::h = h;
         };
-
+        
         auto Render = [](){
             i++;
             glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-            camera.scale = 0.015;
-            camera.angle = 0.30;
-            camera.x = 0.00;
-            camera.y = -0.2;
-            camera.z = 0;
+            camera.mat.scale = 0.015;
+            camera.mat.angle = 0.30;
+            camera.mat.x = 0.00;
+            camera.mat.y = -0.2;
+            camera.mat.z = 0;
             m.render();
 
-            glm::mat4 mvp = camera.model_view_matrix();
+            glm::mat4 mvp = camera.mat.model_view_matrix(Settings::w,Settings::h);
             
             GLuint MatrixID =
             glGetUniformLocation(shader.programID, "MVP");
