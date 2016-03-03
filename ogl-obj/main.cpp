@@ -35,7 +35,6 @@ int Settings::i = 0;
 using namespace std;
 
 namespace OglApp{
-    int i = 0;
     time_t timev;
     
     class Shader{
@@ -55,66 +54,81 @@ namespace OglApp{
     */
     class Matrix{
     public:
-        Matrix operator=(Matrix rhs){
-            angle = rhs.angle;
-            scale = rhs.scale;
-            x = rhs.x;
-            y = rhs.y;
-            z = rhs.z;
-            return *this;
+        Matrix(){
+            Matrix(100,100);
         }
-        glm::mat4 model_view_matrix(int w, int h){
-            glm::mat4 Projection = glm::perspective(
+        
+        Matrix(int rhs_w, int rhs_h){
+            w = rhs_w;
+            h = rhs_h;
+            resize(w,h);
+            clear_model();
+        }
+        
+        void resize(int w, int h){
+            Projection = glm::perspective(
                 glm::radians(45.0f),
-                    float(w)/float(h),
+                float(w)/float(h),
                 0.1f,
                 100.0f
                 );
             
-            glm::mat4 View = glm::lookAt(
+            View = glm::lookAt(
                 glm::vec3(0,0,2), // Camera
                 glm::vec3(0,0,0), // Origin
                 glm::vec3(0,1,0)  // Vertical axis
                 );
-
-            glm::mat4 Translate = glm::translate(glm::vec3(x,y,z));
-            glm::mat4 Scale = glm::scale(glm::vec3(scale,scale,scale));
-            glm::mat4 Model = glm::mat4(1.0f);
-            
-            glm::vec3 rotation_axis(1.0f,0.0f,0.0f);
-            glm::mat4 Rotation = glm::rotate(angle, rotation_axis);
-            glm::mat4 mvp =
-                Projection * View * Translate * Rotation * Scale * Model;
-            
-            return mvp;
         }
+        
+        Matrix operator=(Matrix rhs){
+            Model = rhs.Model;
+            return *this;
+        }
+
+        void clear_model(){
+            Model = glm::mat4(1.0f);
+        }
+        
+        void translate(float x, float y, float z){
+            glm::mat4 Translate = glm::translate(glm::vec3(x,y,z));
+            Model = Translate * Model;
+        }
+        void scale(float x, float y, float z){
+            glm::mat4 Scale = glm::scale(glm::vec3(x,y,z));
+            Model = Scale * Model;
+        }
+        
+        void rotate(float angle,float x,float y, float z){
+            glm::vec3 rotation_axis(x,y,z);
+            glm::mat4 Rotation = glm::rotate(angle, rotation_axis);
+            Model = Rotation * Model;
+        }
+        
+        glm::mat4 model_view_matrix(){
+            return
+                Projection * View * Model;
+        }
+        
+        glm::mat4 Projection;
+        glm::mat4 View;
+        glm::mat4 Model;
+        
         int w,h;
-        float angle = 0;
-        float scale = 0;
-        float x = 0;
-        float y = 0;
-        float z = 0;
     };
 
     class Camera{
     public:
-        Camera(){
-            
-        }
-        void translate(){
-            
-        }
-        void scale(){
-            
-        }
-        void rotate(){
-            
+        Camera(int w, int h){
+            mat = Matrix(w,h);
         }
         void push_state(){
-            
+            matrix_stack.push_back(mat);
         }
         void pop_state(){
-            
+            if(!matrix_stack.empty()){
+                mat = matrix_stack.back();
+                matrix_stack.pop_back();
+            }
         }
         Matrix mat;
     private:
@@ -330,7 +344,8 @@ namespace OglApp{
             uv_buffer_data = new GLfloat[numpoints * 2];
 
             typedef vector<face3>::iterator faceit;
-            
+
+            int i = 0;
             int vi = 0; // vertex index
             int uvi = 0; // uv index
             for(faceit it = faces3.begin(); it != faces3.end();++it){
@@ -462,7 +477,7 @@ namespace OglApp{
     
     Model m;
     Shader shader;
-    Camera camera;
+    Camera camera(Settings::w,Settings::h);
     
     void start(int * argc, char ** argv){
         glutInit(argc,argv);
@@ -480,25 +495,27 @@ namespace OglApp{
         auto Resize = [](int w,int h){
             Settings::w = w;
             Settings::h = h;
+            camera.mat.resize(w,h);
         };
+
+        Settings::i = 0;
+
+        camera.mat.scale(0.01,0.01,0.01);
         
         auto Render = [](){
-            i++;
+            Settings::i++;
             glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-            camera.mat.scale = 0.015;
-            camera.mat.angle = 0.30;
-            camera.mat.x = 0.00;
-            camera.mat.y = -0.2;
-            camera.mat.z = 0;
-            m.render();
+            glm::mat4 mvp = camera.mat.model_view_matrix();
 
-            glm::mat4 mvp = camera.mat.model_view_matrix(Settings::w,Settings::h);
+            camera.mat.scale(0.9999,1.0,1.0);
             
             GLuint MatrixID =
             glGetUniformLocation(shader.programID, "MVP");
             
             glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &mvp[0][0]);
+
+            m.render();
             
             glFlush();
             glutSwapBuffers();
@@ -543,7 +560,6 @@ int main(int argc, char **argv){
     Settings::w = 640;
     Settings::h = 480;
     OglApp::start(&argc,argv);
-
 
     return 0;
 }
