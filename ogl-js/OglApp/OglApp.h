@@ -24,6 +24,18 @@
 #include "Camera.h"
 #include "Image.h"
 
+namespace OglApp{
+    Shader shader;
+
+    void compute_matrix()
+    {
+        glm::mat4 mvp = camera.mat.model_view_matrix();
+        GLuint MatrixID =
+            glGetUniformLocation(shader.ProgramID, "MVP");
+        glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &mvp[0][0]);
+    }        
+}
+
 #include "js_functions.h"
 
 /*
@@ -44,7 +56,7 @@ namespace OglApp{
 
     int argc;
     char ** argv;
-    
+
     /* The class of the global object. */
     static JSClass global_class = {
         "global",
@@ -58,6 +70,7 @@ namespace OglApp{
         JS_ConvertStub
     };
 
+    
     static void resize(int rhs_w, int rhs_h){
         w = rhs_w;
         h = rhs_h;
@@ -67,20 +80,7 @@ namespace OglApp{
     static void render(){
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-        glLoadIdentity();
-        gluPerspective(
-                       80,
-                       float(w)/float(h),
-                       1,
-                       100
-                       );
-
-        gluLookAt(0.0f,0.0f,2.0f,
-                  0.0f,0.0f,0.0f,
-                  0.0f,1.0f,0.0f);
-
-        glTranslatef(-0.4,-1,0);
-        glScalef(0.1,0.1,0.1);
+        shader.bind();
         
         JS::RootedValue rval(cx);
         JS::AutoValueVector argv(cx);
@@ -110,7 +110,6 @@ namespace OglApp{
         glClearColor(0.0f,0.0f,0.0f,0.0f);
         glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGBA);
         glutInitWindowSize(w,h);
-
         
         glutCreateWindow("Hey");
 
@@ -122,6 +121,9 @@ namespace OglApp{
             exit(1);
         }
 
+        shader.load("world/vertex.glsl","world/fragment.glsl");
+        shader.bind();
+        
         glutKeyboardFunc((*keyboard));
 
         glEnable(GL_DEPTH_TEST);

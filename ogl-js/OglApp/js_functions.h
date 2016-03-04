@@ -3,7 +3,7 @@
  type checks for each function
  (ensure we don't crash if the parameter is not
  of the good type)
- */
+*/
 
 using namespace std;
 using namespace OglApp;
@@ -16,7 +16,7 @@ namespace jsfn{
         args.rval().setInt32(args[0].toInt32() + args[1].toInt32());
         return true;
     }
-
+    
     static JSBool
         divide(JSContext *cx, unsigned argc, jsval *vp)
     {
@@ -34,6 +34,7 @@ namespace jsfn{
                      args[1].toNumber(),
                      args[2].toNumber()
                      );
+        compute_matrix();
         return true;
     }
 
@@ -49,6 +50,7 @@ namespace jsfn{
                   args[2].toNumber(),
                   args[3].toNumber()
                   );
+        compute_matrix();
         return true;
     }
     
@@ -61,6 +63,7 @@ namespace jsfn{
                  args[1].toNumber(),
                  args[2].toNumber()
                  );
+        compute_matrix();
         return true;
     }
 
@@ -68,6 +71,7 @@ namespace jsfn{
         pushMatrix(JSContext *cx, unsigned argc, jsval *vp)
     {
         camera.push();
+        compute_matrix();
         return true;
     }
 
@@ -75,6 +79,7 @@ namespace jsfn{
         popMatrix(JSContext *cx, unsigned argc, jsval *vp)
     {
         camera.pop();
+        compute_matrix();
         return true;
     }
     
@@ -84,6 +89,7 @@ namespace jsfn{
     static JSBool
         triangle_strip(JSContext *cx, unsigned argc, jsval *vp)
     {
+        compute_matrix();
         JS::CallArgs args = CallArgsFromVp(argc, vp);
 
         // Will be the length of the array
@@ -151,6 +157,7 @@ namespace jsfn{
     static JSBool
         model_test(JSContext *cx, unsigned argc, jsval *vp)
     {
+        compute_matrix();
         JS::CallArgs args = CallArgsFromVp(argc, vp);
 
         Model m;

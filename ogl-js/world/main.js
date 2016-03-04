@@ -46,7 +46,6 @@ function test(){
     }
 }
 
-
 var w = 40;
 var h = 30;
 var grid = new Array(w);
@@ -64,7 +63,6 @@ var step = 0;
 
 render = function(){
     ++step;
-
     for(var i = 0; i < w; i++){
         pushMatrix();
         translate(i*1.1-w/2,0,0);
