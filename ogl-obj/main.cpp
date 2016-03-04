@@ -47,13 +47,14 @@ namespace OglApp{
         }
         
         Matrix(int rhs_w, int rhs_h){
-            w = rhs_w;
-            h = rhs_h;
-            resize(w,h);
+            resize(rhs_w,rhs_h);
             clear_model();
         }
         
-        void resize(int w, int h){
+        void resize(int rhs_w, int rhs_h){
+            w = rhs_w;
+            h = rhs_h;
+
             Projection = glm::perspective(
                 glm::radians(45.0f),
                 float(w)/float(h),
@@ -202,7 +203,6 @@ namespace OglApp{
         unsigned char * data;
     };
     
-    
     typedef array<float,3> vec3;
     typedef array<float,3> vec2;
     typedef array<float,9> face3;
@@ -271,7 +271,7 @@ namespace OglApp{
                     }
                     // remove last read number
                     tempfaceint.pop_back();
-
+                    
                     if(tempfaceint.size() == 12){
                         cout << "Please triangulate your model." << endl;
                     }
@@ -479,6 +479,7 @@ namespace OglApp{
         //m.load("models/building.obj");
         //m.load("models/test_3d_2.obj");
         m.load("models/itu.obj");
+        //m.load("models/sphere.obj");
         
         auto Resize = [](int w,int h){
             Settings::w = w;
@@ -488,16 +489,16 @@ namespace OglApp{
 
         Settings::i = 0;
 
-        camera.mat.scale(0.01,0.01,0.01);
+        camera.mat.scale(0.3,0.3,0.3);
         
         auto Render = [](){
             Settings::i++;
             glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
             shader.bind();
-            
-            glm::mat4 mvp = camera.mat.model_view_matrix();
 
+            camera.mat.rotate(0.01,1,0,0);
+            
             camera.push();
             camera.push();
             camera.mat.scale(0.5,0.5,0.5);
@@ -505,6 +506,8 @@ namespace OglApp{
             camera.pop();
 
             // Nothing should happen
+
+            glm::mat4 mvp = camera.mat.model_view_matrix();
             
             GLuint MatrixID =
             glGetUniformLocation(shader.ProgramID, "MVP");
@@ -518,7 +521,6 @@ namespace OglApp{
             usleep(2000);
         };
         
-        glutReshapeFunc(Resize);
         glutCreateWindow("Hey");
         
         // http://gamedev.stackexchange.com/questions/22785/
@@ -533,7 +535,8 @@ namespace OglApp{
 
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LESS);
-        
+
+        glutReshapeFunc(Resize);
         glutDisplayFunc(Render);
         glutIdleFunc(Render);
 

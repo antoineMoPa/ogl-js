@@ -12,6 +12,6 @@ out vec3 normal;
 void main(){
     gl_Position = MVP * vec4(v_pos,1);
     pos = v_pos;
-    normal = v_normal;
+    normal = (MVP * vec4(v_normal,1)).xyz;
     UV = vertexUV;
 }
