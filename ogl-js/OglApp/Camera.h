@@ -17,4 +17,10 @@ namespace OglApp{
     private:
         vector <Matrix> matrix_stack;
     };
+
+    Camera camera(100,100);
+    
+    static Camera& get_camera(){
+        return camera;
+    }
 }

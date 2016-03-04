@@ -34,17 +34,17 @@
 using namespace std;
 
 namespace OglApp{    
-    int w = 0;
-    int h = 0;
+    int w = 100;
+    int h = 100;
     int i = 0;
-
+    
     JSContext * cx = NULL;
     // global object
     JS::RootedObject * gl;
 
     int argc;
     char ** argv;
-
+    
     /* The class of the global object. */
     static JSClass global_class = {
         "global",
@@ -58,11 +58,13 @@ namespace OglApp{
         JS_ConvertStub
     };
 
-    static void Resize(int w, int h){
-
+    static void resize(int rhs_w, int rhs_h){
+        w = rhs_w;
+        h = rhs_h;
+        camera.mat.resize(w,h);
     }
 
-    static void Render(){
+    static void render(){
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
         glLoadIdentity();
@@ -126,9 +128,9 @@ namespace OglApp{
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_BLEND);
 
-        glutReshapeFunc(Resize);
-        glutDisplayFunc(Render);
-        glutIdleFunc(Render);
+        glutReshapeFunc(resize);
+        glutDisplayFunc(render);
+        glutIdleFunc(render);
 
         glutMainLoop();
     }

@@ -1,7 +1,6 @@
 
 console.log("meow",1,2,3,{a:3,b:2});
 
-
 //test();
 
 function test(){
@@ -45,8 +44,8 @@ function test(){
              4.0,1.0,0.0]
         );
     }
-
 }
+
 
 var w = 40;
 var h = 30;
@@ -120,7 +119,6 @@ function cube(){
         P4.concat(P2,P8,P6)
     );
 
-
     // Draw faces
     for(var j in strips){
         var strip = strips[j];
@@ -130,7 +128,9 @@ function cube(){
     }
 }
 
-/*triangles = [];
+
+/*
+triangles = [];
 triangles_speed = [];
 
 var step = 0;
@@ -155,6 +155,6 @@ render = function(){
     log("i: "+i);
 }
 */
-render = function(){
-    model_test();
-}
+//render = function(){
+//    model_test();
+//}

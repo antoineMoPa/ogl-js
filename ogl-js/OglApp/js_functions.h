@@ -29,8 +29,7 @@ namespace jsfn{
         translate(JSContext *cx, unsigned argc, jsval *vp)
     {
         JS::CallArgs args = CallArgsFromVp(argc, vp);
-
-        glTranslatef(
+        get_camera().mat.translate(
                      args[0].toNumber(),
                      args[1].toNumber(),
                      args[2].toNumber()
@@ -44,7 +43,7 @@ namespace jsfn{
     {
         JS::CallArgs args = CallArgsFromVp(argc, vp);
 
-        glRotatef(
+        camera.mat.rotate(
                   args[0].toNumber(),
                   args[1].toNumber(),
                   args[2].toNumber(),
@@ -57,8 +56,7 @@ namespace jsfn{
         scale(JSContext *cx, unsigned argc, jsval *vp)
     {
         JS::CallArgs args = CallArgsFromVp(argc, vp);
-
-        glScalef(
+        camera.mat.scale(
                  args[0].toNumber(),
                  args[1].toNumber(),
                  args[2].toNumber()
@@ -69,14 +67,14 @@ namespace jsfn{
     static JSBool
         pushMatrix(JSContext *cx, unsigned argc, jsval *vp)
     {
-        glPushMatrix();
+        camera.push();
         return true;
     }
 
     static JSBool
         popMatrix(JSContext *cx, unsigned argc, jsval *vp)
     {
-        glPopMatrix();
+        camera.pop();
         return true;
     }
     
