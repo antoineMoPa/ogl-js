@@ -36,19 +36,7 @@ using namespace std;
 
 namespace OglApp{
     time_t timev;
-    
-    class Shader{
-    public:
-        bool load(const char * vertex, const char * fragment){
-            programID = LoadShaders(vertex, fragment);
-        } 
-        bool bind(){
-            glUseProgram(programID);
-            return true;
-        }
-        GLuint programID;
-    };
-    
+        
     /*
       The matrix
     */
@@ -144,7 +132,7 @@ namespace OglApp{
         bool load(const char * filename){
             FILE * file = fopen(filename,"rb");
             if(!file){
-                cout << "Unable to read file." << endl;
+                cout << "Unable to read file '" << filename << "'."<< endl;
                 return false;
             }
             
@@ -506,6 +494,8 @@ namespace OglApp{
             Settings::i++;
             glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
+            shader.bind();
+            
             glm::mat4 mvp = camera.mat.model_view_matrix();
 
             camera.push();
@@ -517,7 +507,7 @@ namespace OglApp{
             // Nothing should happen
             
             GLuint MatrixID =
-            glGetUniformLocation(shader.programID, "MVP");
+            glGetUniformLocation(shader.ProgramID, "MVP");
             
             glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &mvp[0][0]);
 
