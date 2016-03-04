@@ -6,6 +6,7 @@
  */
 
 using namespace std;
+using namespace OglApp;
 
 namespace jsfn{
     static JSBool
@@ -161,6 +162,7 @@ namespace jsfn{
         //m.load("models/world.obj");
         //m.load("models/building.obj");
         m.load("models/cube-extrude.obj");
+        m.create_buffers();
         m.render();
         
         return true;

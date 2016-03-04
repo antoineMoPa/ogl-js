@@ -1,12 +1,29 @@
+#define GLM_FORCE_RADIANS
+
+#include <string>
 #include <iostream>
 #include <fstream>
-#include <string>
 #include <sstream>
-#include <math.h>
+#include <array>
+#include <vector>
+#include <glm/glm.hpp>
+#include <glm/gtx/transform.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <GL/glew.h>
 #include <GL/glut.h>
+#include <cstdio>
+#include <ctime>
+#include <unistd.h>
+#include <algorithm>
 #include <jsapi.h>
 #include <cstdio>
+
 #include "Model.h"
+#include "Shader.h"
+#include "Matrix.h"
+#include "Camera.h"
+#include "Image.h"
+
 #include "js_functions.h"
 
 /*
@@ -16,8 +33,7 @@
 
 using namespace std;
 
-namespace OglApp{
-
+namespace OglApp{    
     int w = 0;
     int h = 0;
     int i = 0;
@@ -28,8 +44,6 @@ namespace OglApp{
 
     int argc;
     char ** argv;
-
-
 
     /* The class of the global object. */
     static JSClass global_class = {
@@ -65,9 +79,10 @@ namespace OglApp{
 
         glTranslatef(-0.4,-1,0);
         glScalef(0.1,0.1,0.1);
-
+        
         JS::RootedValue rval(cx);
         JS::AutoValueVector argv(cx);
+        
         JS_CallFunctionName(
                             cx,
                             *gl,
@@ -94,8 +109,16 @@ namespace OglApp{
         glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGBA);
         glutInitWindowSize(w,h);
 
-        glutReshapeFunc(Resize);
+        
         glutCreateWindow("Hey");
+
+        http://gamedev.stackexchange.com/questions/22785/
+        GLenum err = glewInit();
+        if (err != GLEW_OK){
+            cout << "GLEW error: " << err << endl;
+            cout <<  glewGetErrorString(err) << endl;
+            exit(1);
+        }
 
         glutKeyboardFunc((*keyboard));
 
@@ -103,6 +126,7 @@ namespace OglApp{
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_BLEND);
 
+        glutReshapeFunc(Resize);
         glutDisplayFunc(Render);
         glutIdleFunc(Render);
 

@@ -1,7 +1,7 @@
 MOZJSCFLAGS=-I/usr/include/mozjs-24/ -lmozjs-24 -lz -lpthread -ldl
-OGLCFLAGS=-lGL -lGLU -lglut -lpthread -ldl  -lutil -lm
+OGLCFLAGS=-lGL -lGLU -lglut -lGLEW -lpthread -ldl  -lutil -lm
 
-OPTIONS=$(OGLCFLAGS) $(MOZJSCFLAGS) -std=c++11
+OPTIONS=$(OGLCFLAGS) $(MOZJSCFLAGS) -std=c++11 -g
 
 all: main.cpp
 	g++ main.cpp $(OPTIONS) -o app.o
