@@ -39,18 +39,16 @@ namespace OglApp{
         }
         
         void translate(float x, float y, float z){
-            glm::mat4 Translate = glm::translate(glm::vec3(x,y,z));
-            Model = Translate * Model;
+            Model = glm::translate(Model,glm::vec3(x,y,z));
         }
         void scale(float x, float y, float z){
-            glm::mat4 Scale = glm::scale(glm::vec3(x,y,z));
-            Model = Scale * Model;
+            Model = glm::scale(Model,glm::vec3(x,y,z));
         }
         
         void rotate(float angle,float x,float y, float z){
-            glm::vec3 rotation_axis(x,y,z);
-            glm::mat4 Rotation = glm::rotate(angle, rotation_axis);
-            Model = Rotation * Model;
+            glm::vec3 rotation_axis = glm::vec3(x,y,z);
+            Model =
+                glm::rotate(Model,angle,rotation_axis);
         }
         
         glm::mat4 model_view_matrix(){
