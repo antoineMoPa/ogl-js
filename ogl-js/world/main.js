@@ -64,18 +64,18 @@ var step = 0;
 render = function(){
     ++step;
 
-    translate(0,-1.0,0.2);
+    translate(-4,-1.2,-5.0);
     scale(0.1,0.1,0.1);
     
     for(var i = 0; i < w; i++){
         pushMatrix();
-        translate(i*1.3-w/2,0,0);
+        translate(i*2,0,0);
         for(var j = 0; j < h; j++){
-            translate(0,0,1.5);
+            translate(0,0,2.0);
             color(colors[i][j],0.1,0.4,0.4);
             grid[i][j] += Math.random() * 0.2 - 0.1;
             pushMatrix();
-            rotate(Math.sin(step/10000) * 360,0,1,0);
+            rotate(0.1 * step,0,1,0);
             var scaleY = grid[i][j] + Math.sin((i+step)/4);
             scale(1,scaleY,1);
             cube();
