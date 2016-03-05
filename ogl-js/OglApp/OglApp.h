@@ -80,6 +80,7 @@ namespace OglApp{
     static void render(){
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
+        camera.mat.clear_model();
         shader.bind();
         
         JS::RootedValue rval(cx);

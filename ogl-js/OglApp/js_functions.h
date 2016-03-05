@@ -1,8 +1,8 @@
 /*
- Boring TODO if this file becomes important:
- type checks for each function
- (ensure we don't crash if the parameter is not
- of the good type)
+  Boring TODO if this file becomes important:
+  type checks for each function
+  (ensure we don't crash if the parameter is not
+  of the good type)
 */
 
 using namespace std;
@@ -71,7 +71,6 @@ namespace jsfn{
         pushMatrix(JSContext *cx, unsigned argc, jsval *vp)
     {
         camera.push();
-        compute_matrix();
         return true;
     }
 
@@ -79,7 +78,6 @@ namespace jsfn{
         popMatrix(JSContext *cx, unsigned argc, jsval *vp)
     {
         camera.pop();
-        compute_matrix();
         return true;
     }
     
@@ -89,7 +87,6 @@ namespace jsfn{
     static JSBool
         triangle_strip(JSContext *cx, unsigned argc, jsval *vp)
     {
-        compute_matrix();
         JS::CallArgs args = CallArgsFromVp(argc, vp);
 
         // Will be the length of the array
@@ -141,12 +138,12 @@ namespace jsfn{
         color(JSContext *cx, unsigned argc, jsval *vp)
     {
         JS::CallArgs args = CallArgsFromVp(argc, vp);
-        glColor4f(
+        /*glColor4f(
                   args[0].toNumber(),
                   args[1].toNumber(),
                   args[2].toNumber(),
                   args[3].toNumber()
-                  );
+                  );*/
         return true;
     }
 
@@ -157,7 +154,6 @@ namespace jsfn{
     static JSBool
         model_test(JSContext *cx, unsigned argc, jsval *vp)
     {
-        compute_matrix();
         JS::CallArgs args = CallArgsFromVp(argc, vp);
 
         Model m;

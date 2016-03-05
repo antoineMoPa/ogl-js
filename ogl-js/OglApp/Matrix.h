@@ -10,7 +10,6 @@ namespace OglApp{
         
         Matrix(int rhs_w, int rhs_h){
             resize(rhs_w,rhs_h);
-            clear_model();
         }
         
         void resize(int rhs_w, int rhs_h){
@@ -18,7 +17,7 @@ namespace OglApp{
             h = rhs_h;
             
             Projection = glm::perspective(
-                glm::radians(45.0f),
+                glm::radians(80.0f),
                 float(w)/float(h),
                 0.1f,
                 100.0f
@@ -31,9 +30,8 @@ namespace OglApp{
                 );
         }
         
-        Matrix operator=(Matrix rhs){
+        void operator=(Matrix rhs){
             Model = rhs.Model;
-            return *this;
         }
         
         void clear_model(){
@@ -62,7 +60,7 @@ namespace OglApp{
         
         glm::mat4 Projection;
         glm::mat4 View;
-        glm::mat4 Model;
+        glm::mat4 Model = glm::mat4(1.0f);
         
         int w,h;
     };
