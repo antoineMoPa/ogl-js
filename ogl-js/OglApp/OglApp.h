@@ -76,6 +76,7 @@ namespace OglApp{
         w = rhs_w;
         h = rhs_h;
         camera.mat.resize(w,h);
+        glViewport(0, 0, w, h);
     }
 
     static void render(){
