@@ -46,8 +46,8 @@ function test(){
     }
 }
 
-var w = 40;
-var h = 30;
+var w = 10;
+var h = 10;
 var grid = new Array(w);
 var colors = new Array(w);
 for(var i = 0; i < w; i++){
@@ -69,16 +69,16 @@ render = function(){
 
     for(var i = 0; i < w; i++){
         pushMatrix();
-        translate(i*2,0,0);
+        translate(i*10,0,0);
         for(var j = 0; j < h; j++){
-            translate(0,0,2.0);
+            translate(0,0,5.0);
             color(colors[i][j],0.1,0.4,0.4);
             grid[i][j] += Math.random() * 0.2 - 0.1;
             pushMatrix();
             rotate(0.1 * step,0,1,0);
             var scaleY = grid[i][j] + Math.sin((i+step)/4);
             scale(1,scaleY,1);
-            render_model("../models/cube.obj");
+            render_model("../models/world.obj");
             popMatrix();
         }
         popMatrix();

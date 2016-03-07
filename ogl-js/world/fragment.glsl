@@ -26,9 +26,9 @@ void main(){
         dot(normal,light_pos) / (dist * dist);
 
     float window =
-        sin(pos_m.x * 20.0) *
-        sin(pos_m.y * 20.0 + 0.2) *
-        sin(pos_m.z * 20.0 + 0.5) * sin((pos_m.x + pos_m.y + pos_m.x)*10.0);
-
+        sin(pos_m.x * 1.0) *
+        sin(pos_m.y * 1.0);
+    
     color = vec4(window+0.1,window+0.1,0.0,1.0);
+    color = vec4(pos,1.0);
 }

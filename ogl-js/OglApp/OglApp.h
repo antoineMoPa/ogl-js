@@ -87,7 +87,7 @@ namespace OglApp{
 
     static void render(){
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-
+        
         camera.mat.clear_model();
         shader.bind();
         
@@ -141,13 +141,15 @@ namespace OglApp{
         glutKeyboardFunc((*keyboard));
 
         glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LESS);
+
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_BLEND);
 
         glutReshapeFunc(resize);
         glutDisplayFunc(render);
         glutIdleFunc(render);
-
+        
         glutMainLoop();
     }
 
