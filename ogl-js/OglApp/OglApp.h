@@ -58,6 +58,9 @@ namespace OglApp{
     int argc;
     char ** argv;
 
+    // Default app path
+    string app_path = "world";
+    
     /* The class of the global object. */
     static JSClass global_class = {
         "global",
@@ -115,7 +118,7 @@ namespace OglApp{
         glutInitWindowSize(w,h);
         
         glutCreateWindow("Hey");
-
+        
         http://gamedev.stackexchange.com/questions/22785/
         GLenum err = glewInit();
         if (err != GLEW_OK){
@@ -124,7 +127,12 @@ namespace OglApp{
             exit(1);
         }
 
-        shader.load("world/vertex.glsl","world/fragment.glsl");
+        char * vertex_path = strcat(strdup(app_path.c_str()),
+                                    "/vertex.glsl");
+        char * frag_path = strcat(strdup(app_path.c_str()),
+                                  "/fragment.glsl");
+        
+        shader.load(vertex_path,frag_path);
         shader.bind();
         
         glutKeyboardFunc((*keyboard));
@@ -260,6 +268,12 @@ namespace OglApp{
     static void start(int _argc, char ** _argv){
         argc = _argc;
         argv = _argv;
+        if(argc >= 2){
+            app_path = argv[1];
+            if(app_path[app_path.size()-1] == '/'){
+                app_path.resize(app_path.size()-1);
+            }
+        }
         initJavascript(apploop);
     }
 }
