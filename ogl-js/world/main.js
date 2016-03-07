@@ -85,6 +85,14 @@ render = function(){
     }
 };
 
+render = function(){
+    step++;
+    translate(0,-0.3,0);
+    scale(0.1,0.1,0.1);
+    rotate(0.01 * step,0,1,0);
+    render_model("../models/world.obj");
+}
+
 function cube(){
     var P1 = [0,0,1];
     var P2 = [1,0,1];

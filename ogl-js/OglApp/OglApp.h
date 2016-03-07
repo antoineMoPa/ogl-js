@@ -117,7 +117,7 @@ namespace OglApp{
     static void apploop(){
         glutInit(&argc,argv);
         glClearColor(0.0f,0.0f,0.0f,0.0f);
-        glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGBA);
+        glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGBA|GLUT_DEPTH);
         glutInitWindowSize(w,h);
         
         glutCreateWindow("Hey");

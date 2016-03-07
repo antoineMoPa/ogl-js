@@ -19,14 +19,14 @@ namespace OglApp{
             Projection = glm::perspective(
                 glm::radians(80.0f),
                 float(w)/float(h),
-                0.1f,
+                1.0f,
                 100.0f
                 );
             
             View = glm::lookAt(
-                glm::vec3(0,0,2), // Camera
-                glm::vec3(0,0,0), // Origin
-                glm::vec3(0,1,0)  // Vertical axis
+                glm::vec3(0.0f,0.0f,2.0f), // Camera
+                glm::vec3(0.0f,0.0f,0.0f), // Origin
+                glm::vec3(0.0f,1.0f,0.0f)  // Vertical axis
                 );
         }
         
