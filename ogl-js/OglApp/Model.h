@@ -88,6 +88,9 @@ namespace OglApp{
                             faces3.push_back(f3);
                         }
                     } else if (tempfaceint.size() == 6){
+                        // Todo: this is so wrong
+                        // We should verify if we
+                        // have normals or uvs
                         for(vector<int>::iterator it = tempfaceint.begin();
                             it!= tempfaceint.end();
                             ){
