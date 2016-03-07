@@ -6,6 +6,7 @@
 #include <fstream>
 #include <sstream>
 #include <array>
+#include <map>
 #include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
@@ -25,10 +26,15 @@
 #include "Camera.h"
 #include "Image.h"
 
+using namespace std;
+
 namespace OglApp{
     // Default app path
     string app_path = "world/";
 
+    using ModelMap = std::map<std::string,Model>;
+    ModelMap models;
+    
     Shader shader;
 
     void compute_matrix()
@@ -46,9 +52,6 @@ namespace OglApp{
   For other JS versions: look at
   https://developer.mozilla.org/en-US/docs/Mozilla/Projects/SpiderMonkey/How_to_embed_the_JavaScript_engine#Original_Document_Information
 */
-
-using namespace std;
-
 namespace OglApp{    
     int w = 100;
     int h = 100;

@@ -254,14 +254,20 @@ namespace OglApp{
                 );
         }
         ~Model(){
-            delete vertex_buffer_data;
-            delete normal_buffer_data;
-            delete uv_buffer_data;
+            if(vertex_buffer_data == NULL){
+                delete vertex_buffer_data;
+            }
+            if(normal_buffer_data == NULL){
+                delete normal_buffer_data;
+            }
+            if(uv_buffer_data == NULL){
+                delete uv_buffer_data;
+            }
         }
 
-        GLfloat * vertex_buffer_data;
-        GLfloat * normal_buffer_data;
-        GLfloat * uv_buffer_data;
+        GLfloat * vertex_buffer_data = NULL;
+        GLfloat * normal_buffer_data = NULL;
+        GLfloat * uv_buffer_data = NULL;
 
     private:
         bool buffers_created = false;

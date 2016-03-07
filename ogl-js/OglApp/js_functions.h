@@ -161,12 +161,23 @@ namespace jsfn{
         }
         
         const char * str =
-            JS_EncodeString(cx,args[0].toString());
+                JS_EncodeString(cx,args[0].toString());
+
+        string index(str);
         
-        Model m;
-        m.load(strcat(strcat(strdup(OglApp::app_path.c_str()),"/"),str));
-        m.create_buffers();
-        m.render();
+        if(models.find(index) == models.end()){
+            // Load model
+            Model m;
+            m.load((app_path + index).c_str());
+            
+            using new_el = ModelMap::value_type;
+
+            m.create_buffers();
+            OglApp::models.insert(new_el(index,m));
+        }
+        
+        Model * m = &models[index];
+        m->render();
         
         return true;
     }
