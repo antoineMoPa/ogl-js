@@ -63,10 +63,10 @@ var step = 0;
 
 render = function(){
     ++step;
-
+    
     translate(-4,-1.2,-5.0);
     scale(0.1,0.1,0.1);
-    
+
     for(var i = 0; i < w; i++){
         pushMatrix();
         translate(i*2,0,0);
@@ -78,7 +78,7 @@ render = function(){
             rotate(0.1 * step,0,1,0);
             var scaleY = grid[i][j] + Math.sin((i+step)/4);
             scale(1,scaleY,1);
-            cube();
+            render_model("../models/cube.obj");
             popMatrix();
         }
         popMatrix();

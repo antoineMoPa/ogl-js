@@ -230,7 +230,7 @@ namespace OglApp{
                     JS_FN("rotate", jsfn::rotate, 4, 0),
                     JS_FN("triangle_strip", jsfn::triangle_strip, 1, 0),
                     JS_FN("color", jsfn::color, 4, 0),
-                    JS_FN("load_model", jsfn::load_model, 1, 0),
+                    JS_FN("render_model", jsfn::render_model, 1, 0),
                     JS_FN("scale", jsfn::scale, 3, 0),
                     JS_FN("divide", jsfn::divide, 2, 0),
                     JS_FN("log", jsfn::log, 1, 0),

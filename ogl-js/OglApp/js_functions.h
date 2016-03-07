@@ -148,11 +148,11 @@ namespace jsfn{
     }
 
     /**
-       Model loading test
-       (should become a model loading function some day)
+       Load .obj file and render it
+       (Or render it if previously called)
     */
     static JSBool
-        load_model(JSContext *cx, unsigned argc, jsval *vp)
+        render_model(JSContext *cx, unsigned argc, jsval *vp)
     {
         JS::CallArgs args = CallArgsFromVp(argc, vp);
         
