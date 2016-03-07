@@ -26,6 +26,9 @@
 #include "Image.h"
 
 namespace OglApp{
+    // Default app path
+    string app_path = "world/";
+
     Shader shader;
 
     void compute_matrix()
@@ -57,9 +60,6 @@ namespace OglApp{
 
     int argc;
     char ** argv;
-
-    // Default app path
-    string app_path = "world";
     
     /* The class of the global object. */
     static JSClass global_class = {
@@ -127,10 +127,10 @@ namespace OglApp{
             exit(1);
         }
 
-        char * vertex_path = strcat(strdup(app_path.c_str()),
-                                    "/vertex.glsl");
-        char * frag_path = strcat(strdup(app_path.c_str()),
-                                  "/fragment.glsl");
+        char * vertex_path =
+            strdup((app_path + "vertex.glsl").c_str());
+        char * frag_path =
+            strdup((app_path + "fragment.glsl").c_str());
         
         shader.load(vertex_path,frag_path);
         shader.bind();
@@ -163,7 +163,7 @@ namespace OglApp{
         int lineno = 0;
 
         ifstream file;
-
+        
         file.open(filename);
 
         // Take the content of the file
@@ -227,7 +227,7 @@ namespace OglApp{
                     JS_FN("rotate", jsfn::rotate, 4, 0),
                     JS_FN("triangle_strip", jsfn::triangle_strip, 1, 0),
                     JS_FN("color", jsfn::color, 4, 0),
-                    JS_FN("model_test", jsfn::model_test, 0, 0),
+                    JS_FN("load_model", jsfn::load_model, 1, 0),
                     JS_FN("scale", jsfn::scale, 3, 0),
                     JS_FN("divide", jsfn::divide, 2, 0),
                     JS_FN("log", jsfn::log, 1, 0),
@@ -243,7 +243,7 @@ namespace OglApp{
                 }
 
                 run_file("jslib/main.js",&rval);
-                run_file("world/main.js",&rval);
+                run_file((app_path+"main.js").c_str(),&rval);
 
                 // Now we can call functions from
                 // the script
@@ -270,8 +270,8 @@ namespace OglApp{
         argv = _argv;
         if(argc >= 2){
             app_path = argv[1];
-            if(app_path[app_path.size()-1] == '/'){
-                app_path.resize(app_path.size()-1);
+            if(app_path[app_path.size()-1] != '/'){
+                app_path += '/';
             }
         }
         initJavascript(apploop);

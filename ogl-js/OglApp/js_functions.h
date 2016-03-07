@@ -152,17 +152,19 @@ namespace jsfn{
        (should become a model loading function some day)
     */
     static JSBool
-        model_test(JSContext *cx, unsigned argc, jsval *vp)
+        load_model(JSContext *cx, unsigned argc, jsval *vp)
     {
         JS::CallArgs args = CallArgsFromVp(argc, vp);
-
+        
+        if(!args[0].isString()){
+            return false;
+        }
+        
+        const char * str =
+            JS_EncodeString(cx,args[0].toString());
+        
         Model m;
-              
-        //m.load("models/test_3d.obj");
-        //m.load("models/cube.obj");
-        //m.load("models/world.obj");
-        //m.load("models/building.obj");
-        m.load("models/cube-extrude.obj");
+        m.load(strcat(strcat(strdup(OglApp::app_path.c_str()),"/"),str));
         m.create_buffers();
         m.render();
         
