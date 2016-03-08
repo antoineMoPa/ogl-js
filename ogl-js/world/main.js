@@ -47,14 +47,14 @@ function test(){
 }
 
 var w = 10;
-var h = 10;
+var h = 30;
 var grid = new Array(w);
 var colors = new Array(w);
 for(var i = 0; i < w; i++){
     grid[i] = [];
     colors[i] = []
     for(var j = 0; j < h; j++){
-        grid[i][j] = Math.random() * 4 + 1;
+        grid[i][j] = Math.floor(Math.random() * 10) + 1;
         colors[i][j] = Math.random();
     }
 }
@@ -64,35 +64,36 @@ var step = 0;
 render = function(){
     ++step;
     
-    translate(-4,-1.2,-5.0);
-    scale(0.1,0.1,0.1);
+    translate(-4,-3.2,-8.0);
+    scale(0.3,0.3,0.3);
 
     for(var i = 0; i < w; i++){
         pushMatrix();
-        translate(i*10,0,0);
+        var spacing = 4;
+        translate(i*spacing,0,0);
         for(var j = 0; j < h; j++){
-            translate(0,0,5.0);
+            translate(0,0,spacing);
             color(colors[i][j],0.1,0.4,0.4);
-            grid[i][j] += Math.random() * 0.2 - 0.1;
             pushMatrix();
-            rotate(0.1 * step,0,1,0);
-            var scaleY = grid[i][j] + Math.sin((i+step)/4);
+            rotate(0.01 * step,0,1,0);
+            var scaleY = grid[i][j];
             scale(1,scaleY,1);
-            render_model("../models/world.obj");
+            render_model("../models/test_3d.obj");
+            //cube();
             popMatrix();
         }
         popMatrix();
     }
 };
-
+/*
 render = function(){
     step++;
-    translate(0,-0.3,0);
-    scale(0.1,0.1,0.1);
+    translate(0,0,0);
+    scale(0.6,0.6,0.6);
     rotate(0.01 * step,0,1,0);
-    render_model("../models/world.obj");
+    render_model("../models/test_3d.obj");
 }
-
+*/
 function cube(){
     var P1 = [0,0,1];
     var P2 = [1,0,1];

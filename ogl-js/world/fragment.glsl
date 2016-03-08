@@ -5,34 +5,46 @@ precision highp float;
 out vec4 color;
 
 in vec2 UV;
-in vec3 pos;
+in vec3 pos_model;
 in vec3 normal;
+in vec3 light_pos;
+in float light_power;
+
 uniform sampler2D texSampler;
 
-vec3 light_pos = vec3(10.0f,-3.0f,0.0f);
+
 vec3 light_color = vec3(1.0f,1.0f,1.0f);
-float light_power = 100.0;
+
 
 void main(){
     //color = texture(texSampler,UV).rgb;
-    vec3 pos_m = pos;
     //color = sin(pos_m);
     //color = vec3(UV.x,UV.y,0);
 
-    float dist = distance(pos,light_pos);
+    float dist = distance(pos_model,light_pos);
 
+    float fac = clamp(dot(normal,light_pos),0.0,1.0);
+    
     // diffuse part
     vec3 diff_color = light_color * light_power *
-        dot(normal,light_pos) / (dist * dist);
+         fac / (dist * dist);
 
-    float window =
-        sin(pos_m.x * 1.0) *
-        sin(pos_m.y * 1.0);
-
-    //gl_FragCoord = vec4(pos,1.0);
-    //gl_FragDepth = pos.z;
+    vec3 spec_color = light_color * light_power *
+        pow(3,fac) / (dist * dist);
     
-    color = vec4(window+0.1,window+0.1,0.0,1.0);
-    //color = vec4(pos.z,0,0,1.0);
-    //color = vec4(0,gl_FragCoord.z/4.0,0,1.0);
+    float z_window = 0.0;
+
+    if(int(pos_model.z / 10.0) % 2 == 0){
+        z_window = 1.0;
+    }
+
+    float x_window = floor(clamp(3.0*sin(pos_model.x * 30.0),0,1));
+    float y_window = floor(clamp(3.0*sin(pos_model.y * 30.0),0,1));
+    float window = x_window * y_window * z_window;
+
+    vec4 window_color = vec4(window,window,0.0,1.0);
+    
+    color = vec4(diff_color,1.0) + vec4(spec_color,1.0) - window_color;
+    
+    
 }
