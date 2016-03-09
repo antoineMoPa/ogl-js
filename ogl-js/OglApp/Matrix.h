@@ -19,7 +19,7 @@ namespace OglApp{
             Projection = glm::perspective(
                 glm::radians(80.0f),
                 float(w)/float(h),
-                1.0f,
+                0.1f,
                 100.0f
                 );
             

@@ -130,7 +130,7 @@ namespace jsfn{
         glEnd();
         return true;
     }
-
+    
     /**
        Set color
     */
@@ -171,7 +171,7 @@ namespace jsfn{
             m.load((app_path + index).c_str());
             
             using new_el = ModelMap::value_type;
-
+            
             m.create_buffers();
             OglApp::models.insert(new_el(index,m));
         }
@@ -181,6 +181,85 @@ namespace jsfn{
         
         return true;
     }
+
+    /**
+     */
+    static JSBool
+        load_shaders(JSContext *cx, unsigned argc, jsval *vp)
+    {
+        JS::CallArgs args = CallArgsFromVp(argc, vp);
+        
+        if(!args[0].isString()){
+            return false;
+        }
+        if(!args[1].isString()){
+            return false;
+        }
+        if(!args[2].isString()){
+            return false;
+        }
+
+        const char * index_cstr =
+            JS_EncodeString(cx,args[0].toString());
+        
+        const char * vert_cstr =
+            JS_EncodeString(cx,args[1].toString());
+
+        const char * frag_cstr =
+            JS_EncodeString(cx,args[2].toString());
+
+        string index(index_cstr);
+        string vert_file(vert_cstr);
+        string frag_file(frag_cstr);
+        
+        if(shaders.find(index) == shaders.end()){
+            // Load shader
+            Shader s;
+            s.load(
+                   (app_path + vert_cstr).c_str(),
+                   (app_path + frag_cstr).c_str()
+                   );
+            
+            using new_el = ShaderMap::value_type;
+            OglApp::shaders.insert(new_el(index,s));
+        } else {
+            cerr << "Shader already loaded" << endl;
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     */
+    static JSBool
+        bind_shaders(JSContext *cx, unsigned argc, jsval *vp)
+    {
+        JS::CallArgs args = CallArgsFromVp(argc, vp);
+
+        if(!args[0].isString()){
+            return false;
+        }
+        
+        const char * index_cstr =
+            JS_EncodeString(cx,args[0].toString());
+        
+        string index(index_cstr);
+        
+        ShaderMap::iterator desired = shaders.find(index);
+        
+        if(desired == shaders.end()){
+            cerr << "No shader with index '"
+                 << index << "'" << endl;
+            return false;
+        }
+        
+        desired->second.bind();
+
+        compute_matrix();
+        
+        return true;
+    }
+
     
     /**
        log strings

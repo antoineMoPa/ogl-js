@@ -9,7 +9,7 @@ namespace OglApp{
            GL_VERTEX_SHADER
            GL_FRAGMENT_SHADER
         */
-        GLuint load_shader(char * file_path,GLenum shaderType){
+        GLuint load_shader(const char * file_path,GLenum shaderType){
             // Create the shaders
             GLuint ShaderID = glCreateShader(shaderType);
             
@@ -53,7 +53,7 @@ namespace OglApp{
             return ShaderID;
         }
         
-        bool load(char * vertex_path, char * fragment_path){
+        bool load(const char * vertex_path, const char * fragment_path){
             if(used){
                 std::cout << "This shader has already been used." << std::endl;
                 std::cout << "Create a new one." << std::endl;

@@ -34,15 +34,25 @@ namespace OglApp{
 
     using ModelMap = std::map<std::string,Model>;
     ModelMap models;
-    
-    Shader shader;
 
+    using ShaderMap = std::map<std::string,Shader>;
+    ShaderMap shaders;
+    
     void compute_matrix()
     {
         glm::mat4 mvp = camera.mat.model_view_matrix();
-        GLuint MatrixID =
-            glGetUniformLocation(shader.ProgramID, "MVP");
-        glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &mvp[0][0]);
+
+        // Update MVP in all shaders
+        
+        typedef ShaderMap::iterator map_it;
+        for( map_it it = shaders.begin();
+             it != shaders.end();
+             it++ ){
+            Shader * shader = &it->second; 
+            GLuint MatrixID =
+                glGetUniformLocation(shader->ProgramID, "MVP");
+            glUniformMatrix4fv(MatrixID,1,GL_FALSE,&mvp[0][0]);
+        }
     }        
 }
 
@@ -89,7 +99,8 @@ namespace OglApp{
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
         
         camera.mat.clear_model();
-        shader.bind();
+
+        shaders[string("default")].bind();
         
         JS::RootedValue rval(cx);
         JS::AutoValueVector argv(cx);
@@ -113,60 +124,27 @@ namespace OglApp{
              << " y: " << y
              << endl;
     }
-
-    static void apploop(){
-        glutInit(&argc,argv);
-        glClearColor(0.0f,0.0f,0.0f,0.0f);
-        glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGBA|GLUT_DEPTH);
-        glutInitWindowSize(w,h);
-        
-        glutCreateWindow("Hey");
-        
-        http://gamedev.stackexchange.com/questions/22785/
-        GLenum err = glewInit();
-        if (err != GLEW_OK){
-            cout << "GLEW error: " << err << endl;
-            cout <<  glewGetErrorString(err) << endl;
-            exit(1);
-        }
-
+    
+    static void load_default_shaders(){
+        // default shaders
         char * vertex_path =
-            strdup((app_path + "vertex.glsl").c_str());
+            strdup("vertex.glsl");
         char * frag_path =
-            strdup((app_path + "fragment.glsl").c_str());
+            strdup("fragment.glsl");
+
+        Shader s;
         
-        shader.load(vertex_path,frag_path);
-        shader.bind();
+        s.load(vertex_path,frag_path);
+        s.bind();
+
+        using new_el = ShaderMap::value_type;
         
-        glutKeyboardFunc((*keyboard));
-
-        glEnable(GL_DEPTH_TEST);
-        glDepthFunc(GL_LESS);
-
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glEnable(GL_BLEND);
-
-        glutReshapeFunc(resize);
-        glutDisplayFunc(render);
-        glutIdleFunc(render);
-        
-        glutMainLoop();
-    }
-
-    static void dispatchError(
-                              JSContext* cx,
-                              const char* message,
-                              JSErrorReport* report) {
-        cout << "Javascript error at line "
-             << report->lineno << " column "
-             << report->column << endl
-             << message << endl
-             << "'" << report->linebuf << "'" << endl;
+        shaders.insert(new_el("default",s));
     }
 
     static bool run_file(const char * filename, JS::RootedValue * rval){
         int lineno = 0;
-
+        
         ifstream file;
         
         file.open(filename);
@@ -190,6 +168,53 @@ namespace OglApp{
              );
 
         return ok;
+    }
+    
+    static void apploop(){
+        glutInit(&argc,argv);
+        glClearColor(0.0f,0.0f,0.0f,0.0f);
+        glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGBA|GLUT_DEPTH);
+        glutInitWindowSize(w,h);
+        
+        glutCreateWindow("Hey");
+        
+        http://gamedev.stackexchange.com/questions/22785/
+        GLenum err = glewInit();
+        if (err != GLEW_OK){
+            cout << "GLEW error: " << err << endl;
+            cout <<  glewGetErrorString(err) << endl;
+            exit(1);
+        }
+
+        load_default_shaders();
+        
+        glutKeyboardFunc((*keyboard));
+
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LESS);
+
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glEnable(GL_BLEND);
+
+        JS::RootedValue rval(cx);
+        run_file((app_path+"main.js").c_str(),&rval);
+        
+        glutReshapeFunc(resize);
+        glutDisplayFunc(render);
+        glutIdleFunc(render);
+        
+        glutMainLoop();
+    }
+
+    static void dispatchError(
+                              JSContext* cx,
+                              const char* message,
+                              JSErrorReport* report) {
+        cout << "Javascript error at line "
+             << report->lineno << " column "
+             << report->column << endl
+             << message << endl
+             << "'" << report->linebuf << "'" << endl;
     }
 
     static int initJavascript(void (*after_run_callback)(void)){
@@ -233,6 +258,8 @@ namespace OglApp{
                     JS_FN("triangle_strip", jsfn::triangle_strip, 1, 0),
                     JS_FN("color", jsfn::color, 4, 0),
                     JS_FN("render_model", jsfn::render_model, 1, 0),
+                    JS_FN("load_shaders", jsfn::load_shaders, 3, 0),
+                    JS_FN("bind_shaders", jsfn::bind_shaders, 1, 0),
                     JS_FN("scale", jsfn::scale, 3, 0),
                     JS_FN("divide", jsfn::divide, 2, 0),
                     JS_FN("log", jsfn::log, 1, 0),
@@ -248,8 +275,7 @@ namespace OglApp{
                 }
 
                 run_file("jslib/main.js",&rval);
-                run_file((app_path+"main.js").c_str(),&rval);
-
+                                
                 // Now we can call functions from
                 // the script
                 after_run_callback();

@@ -1,5 +1,8 @@
 var step = 0;
 
+load_shaders("grass","grass/vertex.glsl","grass/fragment.glsl");
+load_shaders("grey","grey/vertex.glsl","grey/fragment.glsl");
+
 render = function(){
     ++step;
     
@@ -13,6 +16,9 @@ render = function(){
             0,
             Math.sin(i) * 0.00008
         );
+
+        bind_shaders("grass");
+
         plane();
     }
 };
