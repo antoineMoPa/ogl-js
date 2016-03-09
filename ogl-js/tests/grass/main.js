@@ -1,7 +1,7 @@
 var step = 0;
 
 load_shaders("grass","grass/vertex.glsl","grass/fragment.glsl");
-load_shaders("grey","grey/vertex.glsl","grey/fragment.glsl");
+load_shaders("ground","ground/vertex.glsl","ground/fragment.glsl");
 
 render = function(){
     ++step;
@@ -9,6 +9,10 @@ render = function(){
     translate(-50,-3,-50.0);
     scale(100,100,100);
 
+    bind_shaders("ground");
+    plane();
+    
+    bind_shaders("grass");
     for(var i = 0; i < 30; i++){
         translate(0,0.0001,0);
         translate(
@@ -16,11 +20,9 @@ render = function(){
             0,
             Math.sin(i) * 0.00008
         );
-
-        bind_shaders("grass");
-
         plane();
     }
+
 };
 
 function plane(){
