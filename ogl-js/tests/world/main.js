@@ -70,20 +70,20 @@ render = function(){
     scale(0.1,0.1,0.1);
     
     for(var i = 0; i < w; i++){
-        pushMatrix();
+        push_matrix();
         translate(i*2,0,0);
         for(var j = 0; j < h; j++){
             translate(0,0,2.0);
             color(colors[i][j],0.1,0.4,0.4);
             grid[i][j] += Math.random() * 0.2 - 0.1;
-            pushMatrix();
+            push_matrix();
             rotate(0.1 * step,0,1,0);
             var scaleY = grid[i][j] + Math.sin((i+step)/4);
             scale(1,scaleY,1);
             cube();
-            popMatrix();
+            pop_matrix();
         }
-        popMatrix();
+        pop_matrix();
     }
 };
 

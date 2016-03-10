@@ -68,14 +68,14 @@ namespace jsfn{
     }
 
     static JSBool
-        pushMatrix(JSContext *cx, unsigned argc, jsval *vp)
+        push_matrix(JSContext *cx, unsigned argc, jsval *vp)
     {
         camera.push();
         return true;
     }
 
     static JSBool
-        popMatrix(JSContext *cx, unsigned argc, jsval *vp)
+        pop_matrix(JSContext *cx, unsigned argc, jsval *vp)
     {
         camera.pop();
         return true;

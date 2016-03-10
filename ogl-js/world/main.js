@@ -70,21 +70,21 @@ render = function(){
     scale(0.3,0.3,0.3);
 
     for(var i = 0; i < w; i++){
-        pushMatrix();
+        push_matrix();
         var spacing = 4;
         translate(i*spacing,0,0);
         for(var j = 0; j < h; j++){
             translate(0,0,spacing);
             color(colors[i][j],0.1,0.4,0.4);
-            pushMatrix();
+            push_matrix();
             rotate(0.01 * step,0,1,0);
             var scaleY = grid[i][j];
             scale(1,scaleY,1);
             render_model("../models/test_3d.obj");
             //cube();
-            popMatrix();
+            pop_matrix();
         }
-        popMatrix();
+        pop_matrix();
     }
 };
 /*
