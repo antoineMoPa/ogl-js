@@ -61,9 +61,11 @@ for(var i = 0; i < w; i++){
 
 var step = 0;
 
+load_shaders("main","vertex.glsl","fragment.glsl");
+
 render = function(){
     ++step;
-
+    bind_shaders("main");
     translate(-4,-1.2,-5.0);
     scale(0.1,0.1,0.1);
     
