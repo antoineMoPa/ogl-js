@@ -8,8 +8,6 @@ load_shaders("building",
 
 render = function(){
     ++step;
-
-    
     
     translate(-50,-3,-50.0);
     scale(100,100,100);
@@ -30,7 +28,7 @@ render = function(){
     
     bind_shaders("grass");
     for(var i = 0; i < 20; i++){
-        translate(0,0.0001,0);
+        translate(0,0.00004,0);
         translate(
             Math.sin(i) * 0.00008,
             0,

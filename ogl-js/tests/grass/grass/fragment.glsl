@@ -50,7 +50,7 @@ void main(){
     
     x -= 0.11;
     y -= 3.7;
-    float grass = grass_fac(x,y,1000.0);
+    float grass = grass_fac(x,y,3000.0);
     grass_color = vec4(0.1,0.6,0.1,grass);
     
     color = vec4(diff_color,1.0);
