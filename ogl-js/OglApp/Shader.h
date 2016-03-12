@@ -22,7 +22,6 @@ namespace OglApp{
                 ShaderStream.close();
             }else{
                 printf("Impossible to open %s.\n", file_path);
-                getchar();
                 return 0;
             }
             
@@ -61,8 +60,13 @@ namespace OglApp{
             }
             
             GLuint VertexShaderID = load_shader(vertex_path,GL_VERTEX_SHADER);
-            GLuint FragmentShaderID = load_shader(fragment_path,GL_FRAGMENT_SHADER);
+            if(VertexShaderID == 0)
+                return false;
             
+            GLuint FragmentShaderID = load_shader(fragment_path,GL_FRAGMENT_SHADER);
+            if(FragmentShaderID == 0)
+                return false;
+                
             // Link the program
             printf("Linking program\n");
             ProgramID = glCreateProgram();
@@ -81,6 +85,7 @@ namespace OglApp{
                 std::vector<char> prog_err_msg(InfoLogLength+1);
                 glGetProgramInfoLog(ProgramID, InfoLogLength, NULL, &prog_err_msg[0]);
                 printf("%s\n", &prog_err_msg[0]);
+                return false;
             }
             
             glDetachShader(ProgramID, VertexShaderID);

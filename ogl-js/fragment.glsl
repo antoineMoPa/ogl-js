@@ -30,7 +30,7 @@ void main(){
          fac / (dist * dist);
 
     vec3 spec_color = light_color * light_power *
-        pow(3,fac) / (dist * dist);
+        pow(3.0,fac) / (dist * dist);
     
     color = vec4(diff_color,1.0) + vec4(spec_color,1.0);
 }

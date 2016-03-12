@@ -18,7 +18,6 @@
 #include <unistd.h>
 #include <algorithm>
 #include <jsapi.h>
-#include <cstdio>
 
 #include "Model.h"
 #include "Shader.h"
@@ -66,11 +65,13 @@ namespace OglApp{
     int w = 100;
     int h = 100;
     int i = 0;
+    bool has_default_shader = false;
     
     JSContext * cx = NULL;
     // global object
     JS::RootedObject * gl;
-
+    JSRuntime *rt;
+    
     int argc;
     char ** argv;
     
@@ -95,17 +96,24 @@ namespace OglApp{
         glViewport(0, 0, w, h);
     }
 
+    static void stop(){
+        JS_DestroyContext(cx);
+        JS_DestroyRuntime(rt);
+        JS_ShutDown();
+    }
+    
     static void render(){
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
         
         camera.mat.clear_model();
 
-        shaders[string("default")].bind();
-        
+        if(has_default_shader)
+            shaders[string("default")].bind();
+            
         JS::RootedValue rval(cx);
         JS::AutoValueVector argv(cx);
         
-        JS_CallFunctionName(
+        JSBool ok = JS_CallFunctionName(
                             cx,
                             *gl,
                             "render",
@@ -134,12 +142,16 @@ namespace OglApp{
 
         Shader s;
         
-        s.load(vertex_path,frag_path);
+        if(!s.load(vertex_path,frag_path)){
+            cout << "No default vertex & fragment shader found." << endl;
+            return;
+        }
         s.bind();
 
         using new_el = ShaderMap::value_type;
         
         shaders.insert(new_el("default",s));
+        has_default_shader = true;
     }
 
     static bool run_file(const char * filename, JS::RootedValue * rval){
@@ -178,12 +190,11 @@ namespace OglApp{
         
         glutCreateWindow("Hey");
         
-        http://gamedev.stackexchange.com/questions/22785/
+        // http://gamedev.stackexchange.com/questions/22785/
         GLenum err = glewInit();
         if (err != GLEW_OK){
             cout << "GLEW error: " << err << endl;
             cout <<  glewGetErrorString(err) << endl;
-            exit(1);
         }
 
         load_default_shaders();
@@ -216,9 +227,9 @@ namespace OglApp{
              << message << endl
              << "'" << report->linebuf << "'" << endl;
     }
-
+    
     static int initJavascript(void (*after_run_callback)(void)){
-        JSRuntime *rt = JS_NewRuntime(8L * 1024 * 1024, JS_USE_HELPER_THREADS);
+        rt = JS_NewRuntime(8L * 1024 * 1024, JS_USE_HELPER_THREADS);
         if (!rt)
             return 1;
 
@@ -291,11 +302,9 @@ namespace OglApp{
             }
         }
 
-        JS_DestroyContext(cx);
-        JS_DestroyRuntime(rt);
-        JS_ShutDown();
+        stop();
     }
-
+    
     static void start(int _argc, char ** _argv){
         argc = _argc;
         argv = _argv;
