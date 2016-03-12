@@ -5,11 +5,92 @@
 
 namespace OglApp{    
     using namespace std;
-    
+
     typedef array<float,3> vec3;
-    typedef array<float,3> vec2;
+    typedef array<float,2> vec2;
     typedef array<float,9> face3;
+
+    /*
+      Override >> operators for vectors so we can scan
+      a file easily:
+      
+      file >> v3;
+     */
+    istream & operator>>(istream & is, vec3 & v3){
+        is >> v3[0] >> v3[1] >> v3[2];
+        return is;
+    }
+
+    istream & operator>>(istream & is, vec2 & v2){
+        is >> v2[0] >> v2[1];
+        return is;
+    }
     
+    class Material{
+        friend class MaterialLib;
+    private:
+        vec3 ka;
+        vec3 kd;
+        vec3 ks;
+        string map_ka_path;
+        string map_kd_path;
+        string map_ks_path;
+        Image map_kd;
+        Image map_ks;
+    };
+
+    using MaterialMap = map<string,Material>;
+    
+    class MaterialLib{
+    private:
+        MaterialMap materials;
+    public:
+        void load(string path){
+            ifstream file;
+            string s;
+            file.open(path);
+
+            if(!file){
+                return;
+            }
+            
+            Material * current_material;
+            
+            file >> s;
+
+            while(!file.eof()){
+                if(s.substr(0,6) == "newmtl"){
+                    string index;
+                    file >> index;
+                    current_material = &materials[index];
+                }
+                else if(s.substr(0,2) == "Ka"){
+                    file >> current_material->ka;
+                }
+                else if(s.substr(0,2) == "Kd"){
+                    file >> current_material->kd;
+                }
+                else if(s.substr(0,2) == "Ks"){
+                    file >> current_material->ks;
+                }
+                else if(s.substr(0,6) == "map_Ka"){
+                    file >> current_material->map_ka_path;
+                }
+                else if(s.substr(0,6) == "map_Kd"){
+                    file >> current_material->map_kd_path;
+                }
+                else if(s.substr(0,6) == "map_Ks"){
+                    file >> current_material->map_ks_path;
+                }
+                else {
+                    getline(file,s);
+                }
+            }
+        
+            file.close();
+        }
+    };
+        
     /**
        Code + shameless inspiration
        http://www.opengl-tutorial.org/beginners-tutorials/tutorial-7-model-loading/
@@ -48,15 +129,15 @@ namespace OglApp{
                 // first part of string
                 file >> s;
                 if(s.substr(0,2) == "vt"){
-                    file >> v2[0] >> v2[1];
+                    file >> v2;
                     uvs.push_back(v2);
                 }
                 else if(s.substr(0,2) == "vn"){
-                    file >> v3[0] >> v3[1] >> v3[2];
+                    file >> v3;
                     normals.push_back(v3);
                 }
                 else if(s.substr(0,1) == "v"){
-                    file >> v3[0] >> v3[1] >> v3[2];
+                    file >> v3;
                     vertices.push_back(v3);
                 }
                 else if(s.substr(0,1) == "f"){
@@ -122,6 +203,10 @@ namespace OglApp{
                             faces3.push_back(f3);
                         }
                     }
+                } else if (s.substr(0,6) == "mtllib"){
+                    string path;
+                    file >> path;
+                    materials.load(path);
                 }
                 else{
                     getline(file,s);
@@ -282,5 +367,6 @@ namespace OglApp{
         GLuint vertex_buffer;
         GLuint normal_buffer;
         GLuint uv_buffer;
+        MaterialLib materials;
     };
 }

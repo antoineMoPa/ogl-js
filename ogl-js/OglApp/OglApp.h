@@ -19,11 +19,11 @@
 #include <algorithm>
 #include <jsapi.h>
 
+#include "Image.h"
 #include "Model.h"
 #include "Shader.h"
 #include "Matrix.h"
 #include "Camera.h"
-#include "Image.h"
 
 using namespace std;
 
