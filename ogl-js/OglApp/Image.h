@@ -10,16 +10,19 @@ public:
         FILE * file = fopen(filename,"rb");
         if(!file){
             cout << "Unable to read file '" << filename << "'."<< endl;
+            fclose(file);
             return false;
         }
         
         if(fread(header,1,54,file) != 54){
             cout << "Bad file header." << endl;
+            fclose(file);
             return false;
         }
         
         if(header[0] != 'B' || header[1] != 'M'){
             cout << "Bad file header." << endl;
+            fclose(file);
             return false;
         }
         
@@ -68,7 +71,9 @@ public:
     }
     
     ~Image(){
-        delete data;
+        if(data != nullptr){
+            delete data;
+        }
     }
     
     GLuint textureID;
@@ -76,5 +81,5 @@ public:
     unsigned int dataPos;
     unsigned int width, height;
     unsigned int imageSize; // width*height*3
-    unsigned char * data;
+    unsigned char * data = nullptr;
 };

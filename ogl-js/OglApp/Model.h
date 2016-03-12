@@ -28,15 +28,47 @@ namespace OglApp{
     
     class Material{
         friend class MaterialLib;
+    public:
+        ~Material(){
+            if(ka_img != nullptr)
+                delete ka_img;
+            if(kd_img != nullptr)
+                delete kd_img;
+            if(ks_img != nullptr)
+                delete ks_img;
+        }
+
+        void load_images(){
+            if(!ka_path.empty()){
+                ka_img = new Image();
+                if(!ka_img->load(ka_path.c_str())){
+                    ka_img = nullptr;
+                }
+            }
+            if(!kd_path.empty()){
+                kd_img = new Image();
+                if(!kd_img->load(kd_path.c_str())){
+                    kd_img = nullptr;
+                }
+            }
+            if(!ks_path.empty()){
+                ks_img = new Image();
+                if(!ks_img->load(ks_path.c_str())){
+                    ks_img = nullptr;
+                }
+            }
+        }
+        
     private:
         vec3 ka;
         vec3 kd;
         vec3 ks;
-        string map_ka_path;
-        string map_kd_path;
-        string map_ks_path;
-        Image map_kd;
-        Image map_ks;
+        string ka_path;        
+        string kd_path;
+        string ks_path;
+        Image * ka_img = nullptr;
+        Image * kd_img = nullptr;
+        Image * ks_img = nullptr;
     };
 
     using MaterialMap = map<string,Material>;
@@ -54,12 +86,15 @@ namespace OglApp{
                 return;
             }
             
-            Material * current_material;
+            Material * current_material = nullptr;
             
-            file >> s;
-
             while(!file.eof()){
+                file >> s;
                 if(s.substr(0,6) == "newmtl"){
+                    if(current_material != nullptr){
+                        current_material->load_images();
+                    }
+                    
                     string index;
                     file >> index;
                     current_material = &materials[index];
@@ -74,19 +109,21 @@ namespace OglApp{
                     file >> current_material->ks;
                 }
                 else if(s.substr(0,6) == "map_Ka"){
-                    file >> current_material->map_ka_path;
+                    file >> current_material->ka_path;
                 }
                 else if(s.substr(0,6) == "map_Kd"){
-                    file >> current_material->map_kd_path;
+                    cout << "meow" << endl;
+                    file >> current_material->kd_path;
+                    cout << "path: " << current_material->kd_path << endl;
                 }
                 else if(s.substr(0,6) == "map_Ks"){
-                    file >> current_material->map_ks_path;
+                    file >> current_material->ks_path;
                 }
                 else {
                     getline(file,s);
                 }
             }
-        
+            
             file.close();
         }
     };

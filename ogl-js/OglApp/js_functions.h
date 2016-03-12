@@ -167,13 +167,12 @@ namespace jsfn{
         
         if(models.find(index) == models.end()){
             // Load model
-            Model m;
-            m.load((app_path + index).c_str());
+            Model * m = &models[index];
+            m->load((app_path + index).c_str());
             
             using new_el = ModelMap::value_type;
             
-            m.create_buffers();
-            OglApp::models.insert(new_el(index,m));
+            m->create_buffers();
         }
         
         Model * m = &models[index];
