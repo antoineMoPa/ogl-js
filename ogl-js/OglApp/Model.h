@@ -3,6 +3,16 @@
 #include <algorithm>
 #include "math.h"
 
+#define VERTEX_SLOT 0
+#define UV_SLOT 1
+#define NORMAL_SLOT 2
+#define KA_SLOT 3
+#define KD_SLOT 4
+#define KS_SLOT 5
+#define KA_MAP_SLOT GL_TEXTURE0
+#define KD_MAP_SLOT GL_TEXTURE1
+#define KS_MAP_SLOT GL_TEXTURE2
+
 namespace OglApp{
     using namespace std;
 
@@ -30,7 +40,15 @@ namespace OglApp{
         friend class MaterialLib;
     public:
         void bind(){
-
+            if(ka_img != nullptr){
+                ka_img->bind(KA_MAP_SLOT);
+            }
+            if(kd_img != nullptr){
+                kd_img->bind(KD_MAP_SLOT);
+            }
+            if(ks_img != nullptr){
+                ks_img->bind(KS_MAP_SLOT);
+            }
         }
         ~Material(){
             if(ka_img != nullptr)
@@ -97,7 +115,7 @@ namespace OglApp{
                     if(current_material != nullptr){
                         current_material->load_images();
                     }
-
+                    
                     string index;
                     file >> index;
                     current_material = &materials[index];
@@ -127,6 +145,12 @@ namespace OglApp{
 
             file.close();
         }
+        void bind(string index){
+            if(materials.find(index) != materials.end()){
+                Material * material = &materials[index];
+                material->bind();
+            }
+        }
     };
 
     class ModelPart{
@@ -135,7 +159,7 @@ namespace OglApp{
         ModelPart(){
             // nothing yet
         }
-        void create_buffers(){
+        void create_buffers(const vector <vec3> & vertices){
             size_t numpoints = faces3.size() * 3;
             vertex_num = numpoints;
             vertex_buffer_data = new GLfloat[numpoints * 3];
@@ -213,46 +237,47 @@ namespace OglApp{
                 normal_buffer_data,
                 GL_STATIC_DRAW);
         }
-
+        
         void render(){
-            // Vertex data
-            glEnableVertexAttribArray(0);
-            glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-            glVertexAttribPointer(
-                0, // layout
-                3, // xyz
-                GL_FLOAT, // type
-                GL_FALSE, // normalized?
-                0, // stride
-                (void*)0 // array buffer offset
-                );
-
-            glDrawArrays(GL_TRIANGLES, 0, vertex_num);
-            glDisableVertexAttribArray(0);
-
             // UV data
-            glEnableVertexAttribArray(1);
+            glEnableVertexAttribArray(UV_SLOT);
             glBindBuffer(GL_ARRAY_BUFFER, uv_buffer);
             glVertexAttribPointer(
-                1, // layout
+                UV_SLOT, // layout
                 2, // uv
                 GL_FLOAT, // type
                 GL_FALSE, // normalized?
                 0, // stride
                 (void*)0 // array buffer offset
                 );
-
+            glDisableVertexAttribArray(UV_SLOT);
+            
             // normal data
-            glEnableVertexAttribArray(2);
+            glEnableVertexAttribArray(NORMAL_SLOT);
             glBindBuffer(GL_ARRAY_BUFFER, normal_buffer);
             glVertexAttribPointer(
-                2, // layout
+                NORMAL_SLOT, // layout
                 3, // normal
                 GL_FLOAT, // type
                 GL_FALSE, // normalized?
                 0, // stride
                 (void*)0 // array buffer offset
                 );
+            glDisableVertexAttribArray(NORMAL_SLOT);
+
+            // Vertex data
+            glEnableVertexAttribArray(VERTEX_SLOT);
+            glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+            glVertexAttribPointer(
+                VERTEX_SLOT, // layout
+                3, // xyz
+                GL_FLOAT, // type
+                GL_FALSE, // normalized?
+                0, // stride
+                (void*)0 // array buffer offset
+                );
+            glDrawArrays(GL_TRIANGLES, 0, vertex_num);
+            glDisableVertexAttribArray(VERTEX_SLOT);
         }
 
         ~ModelPart(){
@@ -273,7 +298,6 @@ namespace OglApp{
 
     private:
         string material;
-        vector <vec3> vertices;
         vector <vec2> uvs;
         vector <vec3> normals;
         vector <face3> faces3;
@@ -294,13 +318,8 @@ namespace OglApp{
     class Model{
     public:
         void load(const char * filename){
-            ModelPart * curr = new ModelPart();
-            parts.push_back(curr);
-            curr->vertices.clear();
-            curr->uvs.clear();
-            curr->normals.clear();
-            curr->faces3.clear();
-
+            ModelPart * current_part = new ModelPart();
+            parts.push_back(current_part);
             ifstream file;
             char c;
             string s;
@@ -313,7 +332,7 @@ namespace OglApp{
             face3 f3;
             string face;
             vector<int> tempfaceint;
-
+            
             file.open(filename);
 
             if(!file.is_open()){
@@ -325,15 +344,15 @@ namespace OglApp{
                 file >> s;
                 if(s.substr(0,2) == "vt"){
                     file >> v2;
-                    curr->uvs.push_back(v2);
+                    current_part->uvs.push_back(v2);
                 }
                 else if(s.substr(0,2) == "vn"){
                     file >> v3;
-                    curr->normals.push_back(v3);
+                    current_part->normals.push_back(v3);
                 }
                 else if(s.substr(0,1) == "v"){
                     file >> v3;
-                    curr->vertices.push_back(v3);
+                    vertices.push_back(v3);
                 }
                 else if(s.substr(0,1) == "f"){
                     tempfaceint.clear();
@@ -361,7 +380,7 @@ namespace OglApp{
                             for(int i = 0; i < 9; i++,++it){
                                 f3[i] = *it;
                             }
-                            curr->faces3.push_back(f3);
+                            current_part->faces3.push_back(f3);
                         }
                     } else if (tempfaceint.size() == 6){
                         // Todo: this is so wrong
@@ -380,7 +399,7 @@ namespace OglApp{
                                     f3[i] = 0;
                                 }
                             }
-                            curr->faces3.push_back(f3);
+                            current_part->faces3.push_back(f3);
                         }
                     } else if (tempfaceint.size() == 3){
                         for(vector<int>::iterator it = tempfaceint.begin();
@@ -395,13 +414,19 @@ namespace OglApp{
                                     f3[i] = 0;
                                 }
                             }
-                            curr->faces3.push_back(f3);
+                            current_part->faces3.push_back(f3);
                         }
                     }
                 } else if (s.substr(0,6) == "mtllib"){
                     string path;
                     file >> path;
                     materials.load(path);
+                } else if (s.substr(0,6) == "usemtl"){
+                    string mtl_name;
+                    file >> mtl_name;
+                    current_part = new ModelPart();
+                    current_part->material = mtl_name;
+                    parts.push_back(current_part);
                 }
                 else{
                     getline(file,s);
@@ -418,7 +443,7 @@ namespace OglApp{
             using it_type = vector<ModelPart*>::iterator;
 
             for(it_type it = parts.begin(); it != parts.end();++it){
-                (*it)->create_buffers();
+                (*it)->create_buffers(vertices);
             }
 
             buffers_created = true;
@@ -430,8 +455,8 @@ namespace OglApp{
             }
 
             using it_type = vector<ModelPart*>::iterator;
-
             for(it_type it = parts.begin(); it != parts.end();++it){
+                materials.bind((*it)->material);
                 (*it)->render();
             }
         }
@@ -444,6 +469,7 @@ namespace OglApp{
     private:
         bool buffers_created = false;
         MaterialLib materials;
+        vector <vec3> vertices;
         vector<ModelPart*> parts;
     };
 }
