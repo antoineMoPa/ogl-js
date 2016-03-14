@@ -9,9 +9,6 @@
 #define KA_SLOT 3
 #define KD_SLOT 4
 #define KS_SLOT 5
-#define KA_MAP_SLOT GL_TEXTURE0
-#define KD_MAP_SLOT GL_TEXTURE1
-#define KS_MAP_SLOT GL_TEXTURE2
 
 namespace OglApp{
     using namespace std;
@@ -35,19 +32,19 @@ namespace OglApp{
         is >> v2[0] >> v2[1];
         return is;
     }
-
+    
     class Material{
         friend class MaterialLib;
     public:
         void bind(){
             if(ka_img != nullptr){
-                ka_img->bind(KA_MAP_SLOT);
+                ka_img->bind(0,"ambiant_tex");
             }
             if(kd_img != nullptr){
-                kd_img->bind(KD_MAP_SLOT);
+                kd_img->bind(1,"diffuse_tex");
             }
             if(ks_img != nullptr){
-                ks_img->bind(KS_MAP_SLOT);
+                ks_img->bind(2,"specular_tex");
             }
         }
         ~Material(){
@@ -159,7 +156,9 @@ namespace OglApp{
         ModelPart(){
             // nothing yet
         }
-        void create_buffers(const vector <vec3> & vertices){
+        void create_buffers( const vector <vec3> & vertices,
+                             const vector <vec3> & normals,
+                             const vector <vec2> & uvs ){
             size_t numpoints = faces3.size() * 3;
             vertex_num = numpoints;
             vertex_buffer_data = new GLfloat[numpoints * 3];
@@ -200,7 +199,7 @@ namespace OglApp{
                 }
 
                 // uvs
-                if(uvs.size() != 0){
+                if(uvs.size() != 0 && (*it)[1] != 0){
                     uv_buffer_data[uvi+0] = uvs[(*it)[1]-1][0];
                     uv_buffer_data[uvi+1] = uvs[(*it)[1]-1][1];
                     uv_buffer_data[uvi+2] = uvs[(*it)[4]-1][0];
@@ -250,7 +249,6 @@ namespace OglApp{
                 0, // stride
                 (void*)0 // array buffer offset
                 );
-            glDisableVertexAttribArray(UV_SLOT);
             
             // normal data
             glEnableVertexAttribArray(NORMAL_SLOT);
@@ -263,7 +261,6 @@ namespace OglApp{
                 0, // stride
                 (void*)0 // array buffer offset
                 );
-            glDisableVertexAttribArray(NORMAL_SLOT);
 
             // Vertex data
             glEnableVertexAttribArray(VERTEX_SLOT);
@@ -298,8 +295,6 @@ namespace OglApp{
 
     private:
         string material;
-        vector <vec2> uvs;
-        vector <vec3> normals;
         vector <face3> faces3;
         size_t vertex_num;
         GLuint vertex_buffer;
@@ -344,11 +339,11 @@ namespace OglApp{
                 file >> s;
                 if(s.substr(0,2) == "vt"){
                     file >> v2;
-                    current_part->uvs.push_back(v2);
+                    uvs.push_back(v2);
                 }
                 else if(s.substr(0,2) == "vn"){
                     file >> v3;
-                    current_part->normals.push_back(v3);
+                    normals.push_back(v3);
                 }
                 else if(s.substr(0,1) == "v"){
                     file >> v3;
@@ -369,7 +364,7 @@ namespace OglApp{
                     }
                     // remove last read number
                     tempfaceint.pop_back();
-
+                    
                     if(tempfaceint.size() == 12){
                         cout << "Please triangulate your model." << endl;
                     }
@@ -443,7 +438,7 @@ namespace OglApp{
             using it_type = vector<ModelPart*>::iterator;
 
             for(it_type it = parts.begin(); it != parts.end();++it){
-                (*it)->create_buffers(vertices);
+                (*it)->create_buffers(vertices,normals,uvs);
             }
 
             buffers_created = true;
@@ -453,7 +448,7 @@ namespace OglApp{
             if(!buffers_created){
                 return;
             }
-
+            
             using it_type = vector<ModelPart*>::iterator;
             for(it_type it = parts.begin(); it != parts.end();++it){
                 materials.bind((*it)->material);
@@ -470,6 +465,9 @@ namespace OglApp{
         bool buffers_created = false;
         MaterialLib materials;
         vector <vec3> vertices;
+        vector <vec2> uvs;
+        vector <vec3> normals;
+
         vector<ModelPart*> parts;
     };
 }

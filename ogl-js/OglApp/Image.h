@@ -60,8 +60,7 @@ public:
             0, // Doc says:  "This value must be 0." ...
             GL_BGR, // Format
             GL_UNSIGNED_BYTE,
-            data
-            );
+            data);
         
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -72,9 +71,14 @@ public:
         glGenerateMipmap(GL_TEXTURE_2D);
     }
     
-    void bind(int i){
-        glActiveTexture(i);
+    void bind(GLuint index,const char * name){
+        // This variable not being a parameter
+        // is a ugly hack. But I'm lazy.
+        GLuint shader_id = OglApp::current_shader_id;
+        GLuint loc = glGetUniformLocation(shader_id, name);
+        glActiveTexture(GL_TEXTURE0 + index);
         glBindTexture(GL_TEXTURE_2D, textureID);
+        glUniform1i(loc,index);
     }
     
     ~Image(){

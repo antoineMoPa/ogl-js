@@ -19,6 +19,10 @@
 #include <algorithm>
 #include <jsapi.h>
 
+namespace OglApp{
+    GLuint current_shader_id = 0;
+}
+
 #include "Image.h"
 #include "Model.h"
 #include "Shader.h"
@@ -30,13 +34,13 @@ using namespace std;
 namespace OglApp{
     // Default app path
     string app_path = "world/";
-
+    
     using ModelMap = std::map<std::string,Model>;
     ModelMap models;
-
+    
     using ShaderMap = std::map<std::string,Shader>;
     ShaderMap shaders;
-    
+        
     void compute_matrix()
     {
         glm::mat4 mvp = camera.mat.model_view_matrix();
