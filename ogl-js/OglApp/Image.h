@@ -74,7 +74,7 @@ public:
     void bind(GLuint index,const char * name){
         // This variable not being a parameter
         // is a ugly hack. But I'm lazy.
-        GLuint shader_id = OglApp::current_shader_id;
+        GLuint shader_id = OglApp::current_shader->get_id();
         GLuint loc = glGetUniformLocation(shader_id, name);
         glActiveTexture(GL_TEXTURE0 + index);
         glBindTexture(GL_TEXTURE_2D, textureID);

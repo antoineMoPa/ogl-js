@@ -253,7 +253,8 @@ namespace jsfn{
         }
         
         desired->second.bind();
-
+        OglApp::current_shader = &desired->second;
+        
         compute_matrix();
         
         return true;

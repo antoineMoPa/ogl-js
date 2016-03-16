@@ -19,13 +19,14 @@
 #include <algorithm>
 #include <jsapi.h>
 
+#include "Shader.h"
+
 namespace OglApp{
-    GLuint current_shader_id = 0;
+    Shader * current_shader = nullptr;
 }
 
 #include "Image.h"
 #include "Model.h"
-#include "Shader.h"
 #include "Matrix.h"
 #include "Camera.h"
 
@@ -111,9 +112,11 @@ namespace OglApp{
         
         camera.mat.clear_model();
 
-        if(has_default_shader)
-            shaders[string("default")].bind();
-            
+        if(has_default_shader){
+            current_shader = &shaders[string("default")];
+            current_shader->bind();
+        }
+        
         JS::RootedValue rval(cx);
         JS::AutoValueVector argv(cx);
         

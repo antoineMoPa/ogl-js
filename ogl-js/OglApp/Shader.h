@@ -97,9 +97,12 @@ namespace OglApp{
             
             return ProgramID;
         } 
+
+        GLuint get_id(){
+            return ProgramID;
+        }
         
         bool bind(){
-            OglApp::current_shader_id = ProgramID;
             glUseProgram(ProgramID);
             return true;
         }
