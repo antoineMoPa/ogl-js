@@ -113,56 +113,59 @@ namespace OglApp{
       http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-14-render-to-texture/
      */
     static void render(){
-        // Create framebuffer
-        GLuint fb_id = 0;
-        glGenFramebuffers(1, &fb_id);
-        glBindFramebuffer(GL_FRAMEBUFFER, fb_id);
-        
-        GLuint rendered_tex;
-        glGenTextures(1, &rendered_tex);
-        glBindTexture(GL_TEXTURE_2D, rendered_tex);
-
-        // Give an empty image to OpenGL ( the last "0" )
-        glTexImage2D(
-            GL_TEXTURE_2D,
-            0,
-            GL_RGB,
-            w,h,
-            0,
-            GL_RGB,
-            GL_UNSIGNED_BYTE,
-            0);
-        
-        // Poor filtering. Needed !
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-
-        // The depth buffer
-
-        GLuint depth_buf;
-
-        glGenRenderbuffers(1, &depth_buf);
-        glBindRenderbuffer(GL_RENDERBUFFER, depth_buf);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, w, h);
-        glFramebufferRenderbuffer(
-            GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth_buf
-            );
-
-        // Use rendered_tex
-        glFramebufferTexture(
-            GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0, rendered_tex, 0
-            );
-                
-        // Set the list of draw buffers.
-        GLenum draw_buffers[1] = {GL_COLOR_ATTACHMENT0};
-        glDrawBuffers(1, draw_buffers);
-
-        if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
-            cerr << "Framebuffer setup error" << endl;
+        // Skip post processing for now
+        if(false){
+            // Create framebuffer
+            GLuint fb_id = 0;
+            glGenFramebuffers(1, &fb_id);
+            glBindFramebuffer(GL_FRAMEBUFFER, fb_id);
+            
+            GLuint rendered_tex;
+            glGenTextures(1, &rendered_tex);
+            glBindTexture(GL_TEXTURE_2D, rendered_tex);
+            
+            // Give an empty image to OpenGL ( the last "0" )
+            glTexImage2D(
+                GL_TEXTURE_2D,
+                0,
+                GL_RGBA,
+                w,h,
+                0,
+                GL_RGBA,
+                GL_UNSIGNED_BYTE,
+                0);
+            
+            // Poor filtering. Needed !
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            
+            // The depth buffer
+            
+            GLuint depth_buf;
+            
+            glGenRenderbuffers(1, &depth_buf);
+            glBindRenderbuffer(GL_RENDERBUFFER, depth_buf);
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, w, h);
+            glFramebufferRenderbuffer(
+                GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth_buf
+                );
+            
+            // Use rendered_tex
+            glFramebufferTexture(
+                GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0, rendered_tex, 0
+                );
+            
+            // Set the list of draw buffers.
+            GLenum draw_buffers[1] = {GL_COLOR_ATTACHMENT0};
+            glDrawBuffers(1, draw_buffers);
+            
+            if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
+                cerr << "Framebuffer setup error" << endl;
+            }
+            
+            glBindFramebuffer(GL_FRAMEBUFFER, fb_id);
+            glViewport(0,0,w,h);
         }
-        
-        glBindFramebuffer(GL_FRAMEBUFFER, fb_id);
-        glViewport(0,0,w,h);
         
         // Actual rendering
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
@@ -187,45 +190,43 @@ namespace OglApp{
                             );
 
         // End of the actual rendering
+        // Skip post processing for now
+        if(false){
+            GLuint quad_vertex_array_id;
+            glGenVertexArrays(1, &quad_vertex_array_id);
+            glBindVertexArray(quad_vertex_array_id);
+            
+            static const GLfloat quad_vertex_buffer_data[] = {
+                -1.0f, -1.0f, 0.0f,
+                1.0f, -1.0f, 0.0f,
+                -1.0f,  1.0f, 0.0f,
+                -1.0f,  1.0f, 0.0f,
+                1.0f, -1.0f, 0.0f,
+                1.0f,  1.0f, 0.0f,
+            };
+            
+            GLuint quad_vertexbuffer;
+            glGenBuffers(1, &quad_vertexbuffer);
+            glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
+            glBufferData(GL_ARRAY_BUFFER,
+                         sizeof(quad_vertex_buffer_data),
+                         quad_vertex_buffer_data,
+                         GL_STATIC_DRAW);
+            
+            glDrawArrays(GL_QUADS, 0, 4);
+            
+            // Create and compile our GLSL program from the shaders
+            
+            post_process_shader.bind();
+            
+            GLuint pid = post_process_shader.get_id();
+            //GLuint tex_id = glGetUniformLocation(pid, "rendered");
+            //GLuint time_id = glGetUniformLocation(pid, "time");
+            
+            glBindFramebuffer(GL_FRAMEBUFFER, 1);
+            glViewport(0,0,w,h);
+        }
         
-        glFlush();
-        glutSwapBuffers();
-        // The fullscreen quad's FBO
-
-        GLuint quad_vertex_array_id;
-        glGenVertexArrays(1, &quad_vertex_array_id);
-        glBindVertexArray(quad_vertex_array_id);
-
-        static const GLfloat quad_vertex_buffer_data[] = {
-            -1.0f, -1.0f, 0.0f,
-            1.0f, -1.0f, 0.0f,
-            -1.0f,  1.0f, 0.0f,
-            -1.0f,  1.0f, 0.0f,
-            1.0f, -1.0f, 0.0f,
-            1.0f,  1.0f, 0.0f,
-        };
-        
-        GLuint quad_vertexbuffer;
-        glGenBuffers(1, &quad_vertexbuffer);
-        glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
-        glBufferData(GL_ARRAY_BUFFER,
-                     sizeof(quad_vertex_buffer_data),
-                     quad_vertex_buffer_data,
-                     GL_STATIC_DRAW);
-
-        glDrawArrays(GL_QUADS, 0, 4);
-        
-        // Create and compile our GLSL program from the shaders
-
-        post_process_shader.bind();
-        
-        GLuint pid = post_process_shader.get_id();
-        //GLuint tex_id = glGetUniformLocation(pid, "rendered");
-        //GLuint time_id = glGetUniformLocation(pid, "time");
-        
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glViewport(0,0,w,h);
-
         glFlush();
         glutSwapBuffers();
     }
@@ -311,7 +312,9 @@ namespace OglApp{
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_BLEND);
 
-        post_process_shader.load("post-vertex.glsl","post-fragment.glsl");
+        post_process_shader.load(
+            (app_path+"post-vertex.glsl").c_str(),
+            (app_path+"post-fragment.glsl").c_str());
         
         JS::RootedValue rval(cx);
         run_file((app_path+"main.js").c_str(),&rval);
