@@ -4,8 +4,9 @@ This project embeds Spidemonkey 24 into a c++ application.
 
 ## Currently available functions
 
-**Log**
-* log(str) - logs a string [Protip: log(JSON.stringify(obj)) log(JSON.stringify({a: 1, b: 2}))]
+**Log stuff for debugging**
+
+* `console.log(stuff)` - will log stuff (And help you find the solution to all your problems?)
 
 **OpenGL**
 
@@ -18,19 +19,31 @@ This project embeds Spidemonkey 24 into a c++ application.
 * `color(float r,float g, float b, float a)` - Set color for next vertices
 * `console.log(a,b,c,...)` - Log stuff to standard output (objects are converted to JSON)
 
+**GLSL**
+
+GLSL is an awesome language that allows you to do all sorts of magic things with the vertex and pixels of the screen.
+
+"handle" is an identifier created by you.
+
+* `load_shaders("handle","vertex.glsl","fragment.glsl")` - Load Shaders in current folder. Use "handle" as the name.
+* `bind_shaders("handle")` - Bind the shader with name "handle" for the next calls
+* `bind_shaders("default")` - Back to the default shader
+ 
+**BONUS**
+
+* `render_model("test.obj");` - Render a 3d model made with blender's obj export. (In export settings: Triangulate faces!)
+
 **OpenGL todo**
 
-* vertex shaders
-* fragment shaders
-* textures & UV maps
-* Vertex buffer objects
-* Load 3D models (Three.js? Open Asset Import Library?)
+* make render to texture work
+* default shader that loads textures, uvs, uses Kd, Ks, Ka from MaterialLib
 * conquer the world
+* Load PNGs in Model, not just bmp - http://lodev.org/lodepng/? other lib with more filetypes?
 
 **General todo**
 
 * Ability to download "cubes" from the internet in .zip format (but renamed .cube)
-* user input
+* user input (started, but not put in javascript)
 * links
 * move through the world / follow links
 
@@ -52,7 +65,11 @@ I encourage you to follow the hacker mindset and share your cubes under an open 
 
 ## Contributing
 
-Talk to me!
+fork on github
+commit your changes
+create a pull request
+
+Talk to me for info!
 
 Rules:
 
@@ -70,6 +87,18 @@ In Debian (and maybe Ubuntu):
 
     make
 
-## Run
+## Use
+
+### Run
 
     ./app.o
+
+### Create your own world!
+
+    cp -r world some_folder
+
+Just have fun with main.js and the GLSL files!
+
+### Run something else than world/
+
+    ./app.o some_folder/
