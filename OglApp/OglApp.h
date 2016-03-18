@@ -82,12 +82,12 @@ namespace OglApp{
     // The texture that we can post process
     // (and render on the quad)
     Image * rendered_tex;
-    
+
     // The data of the render-to-texture quad
     GLuint quad_vertexbuffer;
-    
+
     bool has_default_shader = false;
-    
+
     JSContext * cx = NULL;
     // global object
     JS::RootedObject * gl;
@@ -126,7 +126,7 @@ namespace OglApp{
         JS_DestroyRuntime(rt);
         JS_ShutDown();
     }
-    
+
     static void render(){
         // Prepare to render to a texture
         glBindFramebuffer(GL_FRAMEBUFFER, fb_id);
@@ -137,7 +137,7 @@ namespace OglApp{
 
         // Reset camera transforms
         camera.mat.clear_model();
-        
+
         if(has_default_shader){
             current_shader = &shaders[string("default")];
             current_shader->bind();
@@ -159,29 +159,32 @@ namespace OglApp{
             );
 
         glFlush();
-
+        
         // Render texture on a plane
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glViewport(0,0,w,h);
         post_process_shader.bind();
 
+        // bind texture
+        rendered_tex->bind(post_process_shader.get_id(),0,"renderedTexture");
+        
         // Add timestamp
         GLuint loc = post_process_shader
             .get_uniform_location("time");
-        
+
         // Bind timestamp to variable
         glUniform1i(loc,get_timestamp());
-        
+
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-        // Render the plane        
+        // Render the plane
         glEnableVertexAttribArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
         glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,0,(void*)0);
 
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
         glDisableVertexAttribArray(0);
-        
+
         glFlush();
         glutSwapBuffers();
     }
@@ -243,14 +246,13 @@ namespace OglApp{
     }
 
     static void init_render_buffers(){
-        // Create framebuffer 
+        // Create framebuffer
         glGenFramebuffers(1, &fb_id);
         glGenRenderbuffers(1, &depth_buf);
         glBindFramebuffer(GL_FRAMEBUFFER,fb_id);
 
         rendered_tex = new Image(w,h);
-        rendered_tex->bind();
-        
+
         // Poor filtering. Needed !
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -260,13 +262,13 @@ namespace OglApp{
                                GL_COLOR_ATTACHMENT0,
                                GL_TEXTURE_2D,
                                rendered_tex->get_id(),0);
-        
+
         GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
         glDrawBuffers(1, DrawBuffers);
-        
+
         glBindRenderbuffer(GL_RENDERBUFFER, depth_buf);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, w, h);
-        
+
         glFramebufferRenderbuffer(
                                   GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth_buf
             );
@@ -274,11 +276,6 @@ namespace OglApp{
         if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
             cerr << "Framebuffer setup error" << endl;
         }
-
-        GLuint loc;
-        
-        loc = post_process_shader.get_uniform_location("renderedTexture");
-        glUniform1i(loc,0);
     }
 
     /**
@@ -289,7 +286,7 @@ namespace OglApp{
         // Create a quad
         glGenVertexArrays(1, &quad_vertex_array_id);
         glBindVertexArray(quad_vertex_array_id);
-        
+
         static const GLfloat quad_vertex_buffer_data[] = {
             -1.0f, 1.0f, 0.0f,
             1.0f, 1.0f, 0.0f,
@@ -305,13 +302,13 @@ namespace OglApp{
                      quad_vertex_buffer_data,
                      GL_STATIC_DRAW);
     }
-    
+
     static void apploop(){
         glutInit(&argc,argv);
         glClearColor(0.0f,0.0f,0.0f,0.0f);
         glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGBA|GLUT_DEPTH);
         glutInitWindowSize(w,h);
-        
+
         glutCreateWindow("ogl-js");
 
         // http://gamedev.stackexchange.com/questions/22785/
@@ -343,7 +340,7 @@ namespace OglApp{
         JS::RootedValue rval(cx);
         run_file((app_path+"main.js").c_str(),&rval);
 
-        // Assign callbacks 
+        // Assign callbacks
         glutReshapeFunc(resize);
         glutDisplayFunc(render);
         glutIdleFunc(render);

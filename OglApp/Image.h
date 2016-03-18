@@ -95,10 +95,13 @@ public:
     void bind(){
         glBindTexture(GL_TEXTURE_2D, textureID);
     }
+
     void bind(GLuint index,const char * name){
-        // This variable not being a parameter
-        // is a ugly hack. But I'm lazy.
         GLuint shader_id = OglApp::current_shader->get_id();
+        bind(shader_id, index, name);
+    }
+    
+    void bind(GLuint shader_id, GLuint index,const char * name){
         GLuint loc = glGetUniformLocation(shader_id, name);
         glActiveTexture(GL_TEXTURE0 + index);
         glBindTexture(GL_TEXTURE_2D, textureID);
