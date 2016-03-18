@@ -1,9 +1,9 @@
-#version 330 core
+#version 300 es
 
-in vec2 UV;
-out vec4 color;
+in highp vec2 UV;
+out highp vec4 color;
 uniform sampler2D renderedTexture;
-uniform float time;
+uniform highp float time;
 
 void main(){
     //color = vec4(UV,1.0,1.0);;

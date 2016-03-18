@@ -77,10 +77,11 @@ namespace OglApp{
     GLuint depth_buf;
     // The render buffer
     GLuint fb_id;
+
     // The texture that we can post process
     // (and render on the quad)
-    GLuint rendered_tex;
-
+    Image * rendered_tex;
+    
     // The data of the render-to-texture quad
     GLuint quad_vertexbuffer;
     
@@ -236,41 +237,31 @@ namespace OglApp{
         // Create framebuffer 
         glGenFramebuffers(1, &fb_id);
         glGenRenderbuffers(1, &depth_buf);
+        glBindFramebuffer(GL_FRAMEBUFFER,fb_id);
         
-        // Create framebuffer texture
-        glGenTextures(1, &rendered_tex);
-        glBindTexture(GL_TEXTURE_2D, rendered_tex);
-        
-        // Give an empty image to OpenGL ( the last "0" )
-        glTexImage2D(
-            GL_TEXTURE_2D,
-            0,
-            GL_RGBA,
-            w,h,
-            0,
-            GL_RGBA,
-            GL_UNSIGNED_BYTE,
-            0);
-
-        // Use rendered_tex
-        glFramebufferTexture(
-            GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0, rendered_tex, 0
-            );
-
-        // Set the list of draw buffers.
-        GLenum draw_buffers[1] = {GL_COLOR_ATTACHMENT0};
-        glDrawBuffers(1, draw_buffers);
+        rendered_tex = new Image(w,h);
+        rendered_tex->bind();
         
         // Poor filtering. Needed !
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+        glFramebufferTexture2D(
+                               GL_FRAMEBUFFER,
+                               GL_COLOR_ATTACHMENT0,
+                               GL_TEXTURE_2D,
+                               rendered_tex->get_id(),0);
+        
+        GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
+        glDrawBuffers(1, DrawBuffers);
         
         glBindRenderbuffer(GL_RENDERBUFFER, depth_buf);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, w, h);
+        
         glFramebufferRenderbuffer(
-            GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth_buf
+                                  GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth_buf
             );
-                
+
         if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
             cerr << "Framebuffer setup error" << endl;
         }

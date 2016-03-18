@@ -6,6 +6,28 @@ using namespace std;
 */
 class Image{
 public:
+    Image(){
+
+    }
+    /* generate empty image */
+    Image(int w, int h){
+        // Create framebuffer texture
+        glGenTextures(1, &textureID);
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        
+        glTexImage2D(
+            GL_TEXTURE_2D,
+            0,
+            GL_RGBA,
+            w,h,
+            0,
+            GL_RGBA,
+            GL_UNSIGNED_BYTE,
+            0);
+    }
+    GLuint get_id(){
+        return textureID;
+    }
     bool load(const char * filename){
         FILE * file = fopen(filename,"rb");
         if(!file){
@@ -70,7 +92,9 @@ public:
         glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_LINEAR);
         glGenerateMipmap(GL_TEXTURE_2D);
     }
-    
+    void bind(){
+        glBindTexture(GL_TEXTURE_2D, textureID);
+    }
     void bind(GLuint index,const char * name){
         // This variable not being a parameter
         // is a ugly hack. But I'm lazy.
