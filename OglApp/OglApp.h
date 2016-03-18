@@ -155,16 +155,17 @@ namespace OglApp{
             argv.begin(),
             rval.address()
             );
-        
-        // Render texture
-        
+
+        glFlush();
+
+        // Render texture on a plane
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glViewport(0,0,w,h);
         post_process_shader.bind();
         
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-        // Render the plane
+        // Render the plane        
         glEnableVertexAttribArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
         glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,0,(void*)0);
@@ -250,6 +251,15 @@ namespace OglApp{
             GL_RGBA,
             GL_UNSIGNED_BYTE,
             0);
+
+        // Use rendered_tex
+        glFramebufferTexture(
+            GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0, rendered_tex, 0
+            );
+
+        // Set the list of draw buffers.
+        GLenum draw_buffers[1] = {GL_COLOR_ATTACHMENT0};
+        glDrawBuffers(1, draw_buffers);
         
         // Poor filtering. Needed !
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -260,19 +270,13 @@ namespace OglApp{
         glFramebufferRenderbuffer(
             GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth_buf
             );
-        
-        // Use rendered_tex
-        glFramebufferTexture(
-            GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0, rendered_tex, 0
-            );
-
-        // Set the list of draw buffers.
-        GLenum draw_buffers[1] = {GL_COLOR_ATTACHMENT0};
-        glDrawBuffers(1, draw_buffers);
-        
+                
         if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
             cerr << "Framebuffer setup error" << endl;
         }
+
+        GLuint loc = post_process_shader.get_uniform_location("renderedTexture");
+        glUniform1i(loc,0);
     }
 
     /**

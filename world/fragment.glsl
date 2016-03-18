@@ -2,16 +2,13 @@
 
 precision highp float;
 
-out vec4 color;
+layout(location=0) out vec4 color;
 
 in vec2 UV;
 in vec3 pos_model;
 in vec3 normal;
 in vec3 light_pos;
 in float light_power;
-
-uniform sampler2D texSampler;
-
 
 vec3 light_color = vec3(1.0f,1.0f,1.0f);
 
