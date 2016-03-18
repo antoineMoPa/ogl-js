@@ -232,11 +232,11 @@ namespace OglApp{
     }
 
     static void init_render_buffers(){
-        // Create framebuffer texture
+        // Create framebuffer 
         glGenFramebuffers(1, &fb_id);
         glGenRenderbuffers(1, &depth_buf);
         
-        // Create framebuffer
+        // Create framebuffer texture
         glGenTextures(1, &rendered_tex);
         glBindTexture(GL_TEXTURE_2D, rendered_tex);
         
