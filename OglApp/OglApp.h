@@ -238,7 +238,7 @@ namespace OglApp{
         glGenFramebuffers(1, &fb_id);
         glGenRenderbuffers(1, &depth_buf);
         glBindFramebuffer(GL_FRAMEBUFFER,fb_id);
-        
+
         rendered_tex = new Image(w,h);
         rendered_tex->bind();
         
