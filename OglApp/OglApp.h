@@ -169,7 +169,8 @@ namespace OglApp{
         GLuint loc = post_process_shader
             .get_uniform_location("time");
         
-        glUniform1f(loc,float(get_timestamp()));
+        // Bind timestamp to variable
+        glUniform1i(loc,get_timestamp());
         
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
@@ -182,6 +183,7 @@ namespace OglApp{
         glDisableVertexAttribArray(0);
         
         glFlush();
+        glutSwapBuffers();
     }
 
     static void keyboard(unsigned char key, int x, int y){
@@ -307,7 +309,7 @@ namespace OglApp{
     static void apploop(){
         glutInit(&argc,argv);
         glClearColor(0.0f,0.0f,0.0f,0.0f);
-        glutInitDisplayMode(GLUT_RGBA|GLUT_DEPTH);
+        glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGBA|GLUT_DEPTH);
         glutInitWindowSize(w,h);
         
         glutCreateWindow("ogl-js");
