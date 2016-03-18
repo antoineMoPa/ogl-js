@@ -68,15 +68,23 @@ namespace OglApp{
   https://developer.mozilla.org/en-US/docs/Mozilla/Projects/SpiderMonkey/How_to_embed_the_JavaScript_engine#Original_Document_Information
 */
 namespace OglApp{
+    // Window width
     int w = 100;
+    // Window height
     int h = 100;
-    int i = 0;
+
     // The depth buffer
     GLuint depth_buf;
     // The render buffer
     GLuint fb_id;
-    bool has_default_shader = false;
+    // The texture that we can post process
+    // (and render on the quad)
+    GLuint rendered_tex;
+
+    // The data of the render-to-texture quad
     GLuint quad_vertexbuffer;
+    
+    bool has_default_shader = false;
     
     JSContext * cx = NULL;
     // global object
@@ -99,24 +107,24 @@ namespace OglApp{
         JS_ConvertStub
     };
 
-
+    /**
+       Window resize callback
+     */
     static void resize(int rhs_w, int rhs_h){
         w = rhs_w;
         h = rhs_h;
         camera.mat.resize(w,h);
     }
 
+    /**
+       Things to do when we kill JS
+     */
     static void stop(){
         JS_DestroyContext(cx);
         JS_DestroyRuntime(rt);
         JS_ShutDown();
     }
-
-    /*
-      Render to a texture then render a scene with the texture
-      Reference:
-      http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-14-render-to-texture/
-     */
+    
     static void render(){
         // Prepare to render to a texture
         glBindFramebuffer(GL_FRAMEBUFFER, fb_id);
@@ -124,17 +132,21 @@ namespace OglApp{
 
         // Actual rendering
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-        
-        camera.mat.clear_model();
 
+        // Reset camera transforms
+        camera.mat.clear_model();
+        
         if(has_default_shader){
             current_shader = &shaders[string("default")];
             current_shader->bind();
         }
 
+        // return value and empty arg
         JS::RootedValue rval(cx);
         JS::AutoValueVector argv(cx);
 
+        // Call javascript "render" function
+        // defined in the app's main.js
         JSBool ok = JS_CallFunctionName(
             cx,
             *gl,
@@ -145,22 +157,17 @@ namespace OglApp{
             );
         
         // Render texture
+        
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glViewport(0,0,w,h);
         post_process_shader.bind();
+        
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
+        // Render the plane
         glEnableVertexAttribArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
-
-        glVertexAttribPointer(
-            0,
-            3,
-            GL_FLOAT,
-            GL_FALSE,
-            0,
-            (void*)0
-            );
+        glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,0,(void*)0);
 
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
         glDisableVertexAttribArray(0);
@@ -230,7 +237,6 @@ namespace OglApp{
         glGenRenderbuffers(1, &depth_buf);
         
         // Create framebuffer
-        GLuint rendered_tex;
         glGenTextures(1, &rendered_tex);
         glBindTexture(GL_TEXTURE_2D, rendered_tex);
         
@@ -259,7 +265,7 @@ namespace OglApp{
         glFramebufferTexture(
             GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0, rendered_tex, 0
             );
-        
+
         // Set the list of draw buffers.
         GLenum draw_buffers[1] = {GL_COLOR_ATTACHMENT0};
         glDrawBuffers(1, draw_buffers);
@@ -284,7 +290,8 @@ namespace OglApp{
             -1.0f,  -1.0f, 0.0f,
             1.0f,  -1.0f, 0.0f
         };
-        
+
+        // Put the data in buffers
         glGenBuffers(1, &quad_vertexbuffer);
         glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
         glBufferData(GL_ARRAY_BUFFER,

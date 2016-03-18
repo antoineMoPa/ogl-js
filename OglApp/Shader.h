@@ -1,6 +1,8 @@
 #include <GL/gl.h>
 #include <GL/glut.h>
 
+// TODO: move vars to snake_case
+
 namespace OglApp{
     class Shader{
     public:
@@ -51,7 +53,9 @@ namespace OglApp{
             }
             return ShaderID;
         }
-        
+        GLuint get_uniform_location(const char * name){
+            glGetUniformLocation(ProgramID,name);
+        }
         bool load(const char * vertex_path, const char * fragment_path){
             if(used){
                 std::cout << "This shader has already been used." << std::endl;
