@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <jsapi.h>
 
+#include "platform.h"
 #include "Shader.h"
 
 namespace OglApp{
@@ -163,6 +164,12 @@ namespace OglApp{
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glViewport(0,0,w,h);
         post_process_shader.bind();
+
+        // Add timestamp
+        GLuint loc = post_process_shader
+            .get_uniform_location("time");
+        
+        glUniform1f(loc,float(get_timestamp()));
         
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
@@ -266,7 +273,9 @@ namespace OglApp{
             cerr << "Framebuffer setup error" << endl;
         }
 
-        GLuint loc = post_process_shader.get_uniform_location("renderedTexture");
+        GLuint loc;
+        
+        loc = post_process_shader.get_uniform_location("renderedTexture");
         glUniform1i(loc,0);
     }
 

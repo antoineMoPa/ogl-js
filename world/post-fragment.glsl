@@ -6,7 +6,8 @@ uniform sampler2D renderedTexture;
 uniform highp float time;
 
 void main(){
-    //color = vec4(UV,1.0,1.0);;
-    color = vec4(texture(renderedTexture, sin(UV)).rgb,1.0);
-    //color = vec4(1.0,0.0,0.0,1.0);
+    highp vec2 uv = UV;
+    highp float small_time = sin(time/1000.0);
+    uv.x += sin(uv.y * 10.0 + small_time) * 0.01;
+    color = vec4(texture(renderedTexture, uv).rgb,1.0);
 }
