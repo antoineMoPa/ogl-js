@@ -110,8 +110,8 @@ namespace OglApp{
             glUseProgram(ProgramID);
             return true;
         }
-        
+
         bool used = false;
-        GLuint ProgramID = 0;
+        GLuint ProgramID = -1;
     };
 }

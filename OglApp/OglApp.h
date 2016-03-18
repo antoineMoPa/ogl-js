@@ -28,6 +28,13 @@ namespace OglApp{
 }
 
 #include "Image.h"
+
+namespace OglApp{
+    // The texture that we can post process
+    // (and render on the quad)
+    Image * rendered_tex;
+}
+
 #include "Model.h"
 #include "Matrix.h"
 #include "Camera.h"
@@ -78,10 +85,6 @@ namespace OglApp{
     GLuint depth_buf;
     // The render buffer
     GLuint fb_id;
-
-    // The texture that we can post process
-    // (and render on the quad)
-    Image * rendered_tex;
 
     // The data of the render-to-texture quad
     GLuint quad_vertexbuffer;
@@ -141,8 +144,9 @@ namespace OglApp{
         if(has_default_shader){
             current_shader = &shaders[string("default")];
             current_shader->bind();
+            OglApp::rendered_tex->bind(3,"rendered_tex");
         }
-
+        
         // return value and empty arg
         JS::RootedValue rval(cx);
         JS::AutoValueVector argv(cx);
