@@ -36,29 +36,29 @@ using namespace std;
 namespace OglApp{
     // Default app path
     string app_path = "world/";
-    
+
     using ModelMap = std::map<std::string,Model>;
     ModelMap models;
-    
+
     using ShaderMap = std::map<std::string,Shader>;
     ShaderMap shaders;
-        
+
     void compute_matrix()
     {
         glm::mat4 mvp = camera.mat.model_view_matrix();
 
         // Update MVP in all shaders
-        
+
         typedef ShaderMap::iterator map_it;
         for( map_it it = shaders.begin();
              it != shaders.end();
              it++ ){
-            Shader * shader = &it->second; 
+            Shader * shader = &it->second;
             GLuint MatrixID =
                 glGetUniformLocation(shader->ProgramID, "MVP");
             glUniformMatrix4fv(MatrixID,1,GL_FALSE,&mvp[0][0]);
         }
-    }        
+    }
 }
 
 #include "js_functions.h"
@@ -67,20 +67,25 @@ namespace OglApp{
   For other JS versions: look at
   https://developer.mozilla.org/en-US/docs/Mozilla/Projects/SpiderMonkey/How_to_embed_the_JavaScript_engine#Original_Document_Information
 */
-namespace OglApp{    
+namespace OglApp{
     int w = 100;
     int h = 100;
     int i = 0;
+    // The depth buffer
+    GLuint depth_buf;
+    // The render buffer
+    GLuint fb_id;
     bool has_default_shader = false;
+    GLuint quad_vertexbuffer;
     
     JSContext * cx = NULL;
     // global object
     JS::RootedObject * gl;
     JSRuntime *rt;
-    
+
     int argc;
     char ** argv;
-    
+
     /* The class of the global object. */
     static JSClass global_class = {
         "global",
@@ -94,7 +99,7 @@ namespace OglApp{
         JS_ConvertStub
     };
 
-    
+
     static void resize(int rhs_w, int rhs_h){
         w = rhs_w;
         h = rhs_h;
@@ -109,135 +114,67 @@ namespace OglApp{
 
     /*
       Render to a texture then render a scene with the texture
-      Reference: 
+      Reference:
       http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-14-render-to-texture/
      */
     static void render(){
-        // Skip post processing for now
-        if(false){
-            // Create framebuffer
-            GLuint fb_id = 0;
-            glGenFramebuffers(1, &fb_id);
-            glBindFramebuffer(GL_FRAMEBUFFER, fb_id);
-            
-            GLuint rendered_tex;
-            glGenTextures(1, &rendered_tex);
-            glBindTexture(GL_TEXTURE_2D, rendered_tex);
-            
-            // Give an empty image to OpenGL ( the last "0" )
-            glTexImage2D(
-                GL_TEXTURE_2D,
-                0,
-                GL_RGBA,
-                w,h,
-                0,
-                GL_RGBA,
-                GL_UNSIGNED_BYTE,
-                0);
-            
-            // Poor filtering. Needed !
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            
-            // The depth buffer
-            
-            GLuint depth_buf;
-            
-            glGenRenderbuffers(1, &depth_buf);
-            glBindRenderbuffer(GL_RENDERBUFFER, depth_buf);
-            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, w, h);
-            glFramebufferRenderbuffer(
-                GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth_buf
-                );
-            
-            // Use rendered_tex
-            glFramebufferTexture(
-                GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0, rendered_tex, 0
-                );
-            
-            // Set the list of draw buffers.
-            GLenum draw_buffers[1] = {GL_COLOR_ATTACHMENT0};
-            glDrawBuffers(1, draw_buffers);
-            
-            if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
-                cerr << "Framebuffer setup error" << endl;
-            }
-            
-            glBindFramebuffer(GL_FRAMEBUFFER, fb_id);
-            glViewport(0,0,w,h);
-        }
-        
+        // Prepare to render to a texture
+        glBindFramebuffer(GL_FRAMEBUFFER, fb_id);
+        glViewport(0,0,w,h);
+
         // Actual rendering
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
         
-        camera.mat.clear_model();        
-        
+        camera.mat.clear_model();
+
         if(has_default_shader){
             current_shader = &shaders[string("default")];
             current_shader->bind();
         }
-        
+
         JS::RootedValue rval(cx);
         JS::AutoValueVector argv(cx);
-        
-        JSBool ok = JS_CallFunctionName(
-                            cx,
-                            *gl,
-                            "render",
-                            0,
-                            argv.begin(),
-                            rval.address()
-                            );
 
-        // End of the actual rendering
-        // Skip post processing for now
-        if(false){
-            GLuint quad_vertex_array_id;
-            glGenVertexArrays(1, &quad_vertex_array_id);
-            glBindVertexArray(quad_vertex_array_id);
-            
-            static const GLfloat quad_vertex_buffer_data[] = {
-                -1.0f, -1.0f, 0.0f,
-                1.0f, -1.0f, 0.0f,
-                -1.0f,  1.0f, 0.0f,
-                -1.0f,  1.0f, 0.0f,
-                1.0f, -1.0f, 0.0f,
-                1.0f,  1.0f, 0.0f,
-            };
-            
-            GLuint quad_vertexbuffer;
-            glGenBuffers(1, &quad_vertexbuffer);
-            glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
-            glBufferData(GL_ARRAY_BUFFER,
-                         sizeof(quad_vertex_buffer_data),
-                         quad_vertex_buffer_data,
-                         GL_STATIC_DRAW);
-            
-            glDrawArrays(GL_QUADS, 0, 4);
-            
-            // Create and compile our GLSL program from the shaders
-            
-            post_process_shader.bind();
-            
-            GLuint pid = post_process_shader.get_id();
-            //GLuint tex_id = glGetUniformLocation(pid, "rendered");
-            //GLuint time_id = glGetUniformLocation(pid, "time");
-            
-            glBindFramebuffer(GL_FRAMEBUFFER, 1);
-            glViewport(0,0,w,h);
-        }
+        JSBool ok = JS_CallFunctionName(
+            cx,
+            *gl,
+            "render",
+            0,
+            argv.begin(),
+            rval.address()
+            );
+        
+        // Render texture
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(0,0,w,h);
+        post_process_shader.bind();
+        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+
+        glEnableVertexAttribArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
+
+        glVertexAttribPointer(
+            0,
+            3,
+            GL_FLOAT,
+            GL_FALSE,
+            0,
+            (void*)0
+            );
+
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        glDisableVertexAttribArray(0);
         
         glFlush();
-        glutSwapBuffers();
     }
-    
+
     static void keyboard(unsigned char key, int x, int y){
         cout << "key " << key
              << " x: " << x
              << " y: " << y
              << endl;
     }
-    
+
     static void load_default_shaders(){
         // default shaders
         char * vertex_path =
@@ -246,7 +183,7 @@ namespace OglApp{
             strdup("fragment.glsl");
 
         Shader s;
-        
+
         if(!s.load(vertex_path,frag_path)){
             cout << "No default vertex & fragment shader found." << endl;
             return;
@@ -254,16 +191,16 @@ namespace OglApp{
         s.bind();
 
         using new_el = ShaderMap::value_type;
-        
+
         shaders.insert(new_el("default",s));
         has_default_shader = true;
     }
 
     static bool run_file(const char * filename, JS::RootedValue * rval){
         int lineno = 0;
-        
+
         ifstream file;
-        
+
         file.open(filename);
 
         // Take the content of the file
@@ -286,15 +223,84 @@ namespace OglApp{
 
         return ok;
     }
+
+    static void init_render_buffers(){
+        // Create framebuffer texture
+        glGenFramebuffers(1, &fb_id);
+        glGenRenderbuffers(1, &depth_buf);
+        
+        // Create framebuffer
+        GLuint rendered_tex;
+        glGenTextures(1, &rendered_tex);
+        glBindTexture(GL_TEXTURE_2D, rendered_tex);
+        
+        // Give an empty image to OpenGL ( the last "0" )
+        glTexImage2D(
+            GL_TEXTURE_2D,
+            0,
+            GL_RGBA,
+            w,h,
+            0,
+            GL_RGBA,
+            GL_UNSIGNED_BYTE,
+            0);
+        
+        // Poor filtering. Needed !
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        
+        glBindRenderbuffer(GL_RENDERBUFFER, depth_buf);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, w, h);
+        glFramebufferRenderbuffer(
+            GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth_buf
+            );
+        
+        // Use rendered_tex
+        glFramebufferTexture(
+            GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0, rendered_tex, 0
+            );
+        
+        // Set the list of draw buffers.
+        GLenum draw_buffers[1] = {GL_COLOR_ATTACHMENT0};
+        glDrawBuffers(1, draw_buffers);
+        
+        if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
+            cerr << "Framebuffer setup error" << endl;
+        }
+    }
+
+    /**
+       Creates the plane that will be used to render everything on
+     */
+    static void create_render_quad(){
+        GLuint quad_vertex_array_id;
+        // Create a quad
+        glGenVertexArrays(1, &quad_vertex_array_id);
+        glBindVertexArray(quad_vertex_array_id);
+        
+        static const GLfloat quad_vertex_buffer_data[] = {
+            -1.0f, 1.0f, 0.0f,
+            1.0f, 1.0f, 0.0f,
+            -1.0f,  -1.0f, 0.0f,
+            1.0f,  -1.0f, 0.0f
+        };
+        
+        glGenBuffers(1, &quad_vertexbuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
+        glBufferData(GL_ARRAY_BUFFER,
+                     sizeof(quad_vertex_buffer_data),
+                     quad_vertex_buffer_data,
+                     GL_STATIC_DRAW);
+    }
     
     static void apploop(){
         glutInit(&argc,argv);
         glClearColor(0.0f,0.0f,0.0f,0.0f);
-        glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGBA|GLUT_DEPTH);
+        glutInitDisplayMode(GLUT_RGBA|GLUT_DEPTH);
         glutInitWindowSize(w,h);
         
-        glutCreateWindow("Hey");
-        
+        glutCreateWindow("ogl-js");
+
         // http://gamedev.stackexchange.com/questions/22785/
         GLenum err = glewInit();
         if (err != GLEW_OK){
@@ -303,26 +309,38 @@ namespace OglApp{
         }
 
         load_default_shaders();
-        
+
+        // Listen to the keyboard
         glutKeyboardFunc((*keyboard));
 
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LESS);
 
+        // Alpha mixing setup
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_BLEND);
 
+        // Load post processing shaders
         post_process_shader.load(
             (app_path+"post-vertex.glsl").c_str(),
             (app_path+"post-fragment.glsl").c_str());
-        
+
+        // Setup javascript global context
+        // Load main.js containing console.log()
         JS::RootedValue rval(cx);
         run_file((app_path+"main.js").c_str(),&rval);
-        
+
+        // Assign callbacks 
         glutReshapeFunc(resize);
         glutDisplayFunc(render);
         glutIdleFunc(render);
-        
+
+        // Create the plane for render-to-texture
+        create_render_quad();
+        // Init buffers for render-to-texture
+        init_render_buffers();
+
+        // The app becomes alive here
         glutMainLoop();
     }
 
@@ -336,7 +354,7 @@ namespace OglApp{
              << message << endl
              << "'" << report->linebuf << "'" << endl;
     }
-    
+
     static int initJavascript(void (*after_run_callback)(void)){
         rt = JS_NewRuntime(8L * 1024 * 1024, JS_USE_HELPER_THREADS);
         if (!rt)
@@ -395,7 +413,7 @@ namespace OglApp{
                 }
 
                 run_file("jslib/main.js",&rval);
-                                
+
                 // Now we can call functions from
                 // the script
                 after_run_callback();
@@ -413,7 +431,7 @@ namespace OglApp{
 
         stop();
     }
-    
+
     static void start(int _argc, char ** _argv){
         argc = _argc;
         argv = _argv;
