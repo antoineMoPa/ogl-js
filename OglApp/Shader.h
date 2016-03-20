@@ -1,5 +1,8 @@
 #include <GL/gl.h>
 #include <GL/glut.h>
+#include <iostream>
+
+using namespace std;
 
 // TODO: move vars to snake_case
 
@@ -58,19 +61,24 @@ namespace OglApp{
         }
         bool load(const char * vertex_path, const char * fragment_path){
             if(used){
-                std::cout << "This shader has already been used." << std::endl;
-                std::cout << "Create a new one." << std::endl;
+                cerr << "This shader has already been used." << endl;
+                cerr << "Create a new one." << endl;
                 return false;
             }
             
             GLuint VertexShaderID = load_shader(vertex_path,GL_VERTEX_SHADER);
-            if(VertexShaderID == 0)
+            if(VertexShaderID == 0){
+                cerr << "Problem loading vertex shader" << endl;
                 return false;
+            }
             
             GLuint FragmentShaderID = load_shader(fragment_path,GL_FRAGMENT_SHADER);
-            if(FragmentShaderID == 0)
+            
+            if(FragmentShaderID == 0){
+                cerr << "Problem loading fragment shader" << endl;
                 return false;
-                
+            }
+            
             // Link the program
             printf("Linking program\n");
             ProgramID = glCreateProgram();
@@ -86,10 +94,17 @@ namespace OglApp{
             glGetProgramiv(ProgramID, GL_INFO_LOG_LENGTH, &InfoLogLength);
             
             if ( InfoLogLength > 0 ){
-                std::vector<char> prog_err_msg(InfoLogLength+1);
-                glGetProgramInfoLog(ProgramID, InfoLogLength, NULL, &prog_err_msg[0]);
-                printf("%s\n", &prog_err_msg[0]);
-                return false;
+                cout << "LOG: " << InfoLogLength<< endl;
+                vector<char> prog_err_msg(InfoLogLength+1);
+                glGetProgramInfoLog(ProgramID,
+                                    InfoLogLength,
+                                    NULL,
+                                    &prog_err_msg[0]);
+
+                if(prog_err_msg[0] != 0){
+                    printf("%s\n",&prog_err_msg[0]);
+                    return false;
+                }
             }
             
             glDetachShader(ProgramID, VertexShaderID);
@@ -99,7 +114,7 @@ namespace OglApp{
             
             used = true;
             
-            return ProgramID;
+            return true;
         } 
 
         GLuint get_id(){
