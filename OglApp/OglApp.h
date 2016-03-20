@@ -89,8 +89,6 @@ namespace OglApp{
     // The data of the render-to-texture quad
     GLuint quad_vertexbuffer;
 
-    bool has_default_shader = false;
-
     JSContext * cx = NULL;
     // global object
     JS::RootedObject * gl;
@@ -141,11 +139,9 @@ namespace OglApp{
         // Reset camera transforms
         camera.mat.clear_model();
 
-        if(has_default_shader){
-            current_shader = &shaders[string("default")];
-            current_shader->bind();
-            OglApp::rendered_tex->bind(3,"rendered_tex");
-        }
+        current_shader = &shaders[string("default")];
+        current_shader->bind();
+        OglApp::rendered_tex->bind(3,"rendered_tex");
         
         // return value and empty arg
         JS::RootedValue rval(cx);
@@ -211,6 +207,7 @@ namespace OglApp{
 
         if(!s.load(vertex_path,frag_path)){
             cout << "No default vertex & fragment shader found." << endl;
+            exit(0);
             return;
         }
         s.bind();
@@ -218,7 +215,6 @@ namespace OglApp{
         using new_el = ShaderMap::value_type;
 
         shaders.insert(new_el("default",s));
-        has_default_shader = true;
     }
 
     static bool run_file(const char * filename, JS::RootedValue * rval){
