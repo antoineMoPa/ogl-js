@@ -8,6 +8,9 @@ in vec2 UV;
 in vec3 pos_model;
 in vec3 normal;
 in vec3 light_pos;
+in vec3 kd;
+in vec3 ka;
+in vec3 ks;
 in float light_power;
 
 uniform sampler2D texSampler;
@@ -26,11 +29,8 @@ void main(){
     float fac = clamp(dot(normal,light_pos),0.0,1.0);
     
     // diffuse part
-    vec3 diff_color = light_color * light_power *
+    vec3 diff_color = kd * light_color * light_power *
          fac / (dist * dist);
 
-    vec3 spec_color = light_color * light_power *
-        pow(3.0,fac) / (dist * dist);
-    
-    color = vec4(diff_color,1.0) + vec4(spec_color,1.0);
+    color = vec4(diff_color,1.0);
 }

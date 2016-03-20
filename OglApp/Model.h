@@ -37,6 +37,15 @@ namespace OglApp{
         friend class MaterialLib;
     public:
         void bind(){
+            GLuint loc;
+            GLuint shader_id = OglApp::current_shader->get_id();
+            loc = glGetUniformLocation(shader_id,"ka");
+            glUniform3fv(loc,1,&ka[0]);
+            loc = glGetUniformLocation(shader_id,"kd");
+            glUniform3fv(loc,1,&kd[0]);
+            loc = glGetUniformLocation(shader_id,"ks");
+            glUniform3fv(loc,1,&ks[0]);
+
             if(ka_img != nullptr){
                 ka_img->bind(0,"ambiant_tex");
             }

@@ -17,7 +17,7 @@ render = function(){
     translate(0.5,-0.02,0.4);
     scale(0.04,0.04,0.04);
 
-    bind_shaders("building");
+    bind_shaders("default");
     rotate(step/100,0,1,0);
     render_model("../../models/test_3d.obj");
     

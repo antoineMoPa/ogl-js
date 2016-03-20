@@ -199,12 +199,13 @@ namespace OglApp{
     static void load_default_shaders(){
         // default shaders
         char * vertex_path =
-            strdup("vertex.glsl");
+            strdup("./vertex.glsl");
         char * frag_path =
-            strdup("fragment.glsl");
+            strdup("./fragment.glsl");
 
         Shader s;
-
+        cout << frag_path;
+        cout << vertex_path;
         if(!s.load(vertex_path,frag_path)){
             cout << "No default vertex & fragment shader found." << endl;
             exit(0);
