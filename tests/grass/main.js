@@ -2,9 +2,6 @@ var step = 0;
 
 load_shaders("grass","grass/vertex.glsl","grass/fragment.glsl");
 load_shaders("ground","ground/vertex.glsl","ground/fragment.glsl");
-load_shaders("building",
-             "../../world/vertex.glsl",
-             "../../world/fragment.glsl");
 
 render = function(){
     ++step;

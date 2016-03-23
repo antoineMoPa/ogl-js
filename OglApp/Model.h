@@ -36,6 +36,9 @@ namespace OglApp{
     class Material{
         friend class MaterialLib;
     public:
+        Material(){
+            // Nothing for now
+        }
         void bind(){
             GLuint loc;
             GLuint shader_id = OglApp::current_shader->get_id();
@@ -121,7 +124,6 @@ namespace OglApp{
                     if(current_material != nullptr){
                         current_material->load_images();
                     }
-                    
                     string index;
                     file >> index;
                     current_material = &materials[index];
@@ -322,6 +324,7 @@ namespace OglApp{
     class Model{
     public:
         void load(const char * filename){
+            int part_count = 0;
             ModelPart * current_part = new ModelPart();
             parts.push_back(current_part);
             ifstream file;
@@ -338,7 +341,7 @@ namespace OglApp{
             vector<int> tempfaceint;
             
             file.open(filename);
-
+            
             if(!file.is_open()){
                 return;
             }
@@ -422,15 +425,28 @@ namespace OglApp{
                         }
                     }
                 } else if (s.substr(0,6) == "mtllib"){
-                    string path;
-                    file >> path;
+                    string relative_path;
+                    file >> relative_path;
+                    
+                    string path =
+                        get_folder_from_filename(filename);
+                    
+                    path += "/" + relative_path;
                     materials.load(path);
                 } else if (s.substr(0,6) == "usemtl"){
                     string mtl_name;
                     file >> mtl_name;
-                    current_part = new ModelPart();
+
+                    // At first part, we don't add a new mtl
+                    // just set the material name for
+                    // the already created part
+                    if(part_count != 0){
+                        current_part = new ModelPart();
+                        parts.push_back(current_part);
+                    }
+                    
                     current_part->material = mtl_name;
-                    parts.push_back(current_part);
+                    part_count++;
                 }
                 else{
                     getline(file,s);
@@ -476,7 +492,6 @@ namespace OglApp{
         vector <vec3> vertices;
         vector <vec2> uvs;
         vector <vec3> normals;
-
         vector<ModelPart*> parts;
     };
 }

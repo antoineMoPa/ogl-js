@@ -94,7 +94,6 @@ namespace OglApp{
             glGetProgramiv(ProgramID, GL_INFO_LOG_LENGTH, &InfoLogLength);
             
             if ( InfoLogLength > 0 ){
-                cout << "LOG: " << InfoLogLength<< endl;
                 vector<char> prog_err_msg(InfoLogLength+1);
                 glGetProgramInfoLog(ProgramID,
                                     InfoLogLength,
