@@ -1,5 +1,7 @@
 #version 300 es
 
+// Default vertex shader
+
 layout(location = 0) in vec3 v_pos;
 layout(location = 1) in vec2 vertexUV;
 layout(location = 2) in vec3 v_normal;
