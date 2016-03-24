@@ -12,8 +12,12 @@ namespace jsfn{
     
     class FloatArrayTracker{
     public:
-        GLuint buffer_id;
-        int size;
+        GLuint vertex_id;
+        GLuint normal_id;
+        GLuint uv_id;
+        int vertex_size;
+        int normal_size;
+        int uv_size;
     };
     
     using GLuintMap = std::map<std::string, FloatArrayTracker*>;
@@ -271,9 +275,11 @@ namespace jsfn{
     }
 
     /**
-       2 js args: name, data
-       name is used to keep track of the data in
-       float_arrays
+       4 js args: name, data
+       name is used to keep track of the data in float_arrays
+       vertex position float
+       normal floats
+       uv floats
        
        TODO:
        
@@ -292,41 +298,69 @@ namespace jsfn{
         if(!args[0].isString()){
             return false;
         }
-        // data
-        if(!args[1].isObject()){
+        // vertex data
+        if(!args[1].isObject() ||
+           !args[2].isObject() ||
+           !args[3].isObject()){
             return false;
         }
-
-        // fetch array
-        JSObject * arr = &args[1].toObject();
-
+        
+        // fetch arrays
+        JSObject * vertex = &args[1].toObject();
+        JSObject * normal = &args[2].toObject();
+        JSObject * uv     = &args[3].toObject();
+        
         // verify if really an array
-        if(!JS_IsArrayObject(cx,arr)){
-            cerr << "second argument is not an array" << endl;
+        if(!JS_IsArrayObject(cx,vertex)){
+            cerr << "vertex data is not an array" << endl;
+            return false;
+        }
+        if(!JS_IsArrayObject(cx,normal)){
+            cerr << "normal data is not an array" << endl;
+            return false;
+        }
+        if(!JS_IsArrayObject(cx,uv)){
+            cerr << "uv is not an array" << endl;
             return false;
         }
 
-        // Used to fetch length
-        uint32_t length;
+        // Used to fetch size
+        uint32_t vertex_size;
+        uint32_t normal_size;
+        uint32_t uv_size;
         
-        // Get length
-        JS_GetArrayLength(cx, arr, &length);
+        // Get size
+        JS_GetArrayLength(cx, vertex, &vertex_size);
+        JS_GetArrayLength(cx, normal, &normal_size);
+        JS_GetArrayLength(cx, uv, &uv_size);
         
-        cout << "Creating array" << endl;
+        cout << "Creating arrays" << endl;
 
         // Temporary buffer data
-        GLfloat * buffer_data;
+        GLfloat * vertex_buffer_data;
+        GLfloat * normal_buffer_data;
+        GLfloat * uv_buffer_data;
 
-        buffer_data = new GLfloat[length];
+        vertex_buffer_data = new GLfloat[vertex_size];
+        normal_buffer_data = new GLfloat[normal_size];
+        uv_buffer_data = new GLfloat[uv_size];
         
         // Current element in loop
         JS::Value element;
         
-        for(int i = 0; i < length; i++){
-            JS_GetElement(cx, arr, i, &element);
-            buffer_data[i] = element.toNumber();
+        for(int i = 0; i < vertex_size; i++){
+            JS_GetElement(cx, vertex, i, &element);
+            vertex_buffer_data[i] = element.toNumber();
         }
-        
+        for(int i = 0; i < normal_size; i++){
+            JS_GetElement(cx, normal, i, &element);
+            normal_buffer_data[i] = element.toNumber();
+        }
+        for(int i = 0; i < uv_size; i++){
+            JS_GetElement(cx, uv, i, &element);
+            uv_buffer_data[i] = element.toNumber();
+        }
+
         const char * index_cstr =
             JS_EncodeString(cx,args[0].toString());
         
@@ -343,14 +377,34 @@ namespace jsfn{
 
         FloatArrayTracker * tracker = new FloatArrayTracker();
         float_arrays[index] = tracker;
-        tracker->size = length;
+        tracker->vertex_size = vertex_size;
+        tracker->normal_size = normal_size;
+        tracker->uv_size = uv_size;
         
-        glGenBuffers(1, &tracker->buffer_id);
-        glBindBuffer(GL_ARRAY_BUFFER, tracker->buffer_id);
+        glGenBuffers(1, &tracker->vertex_id);
+        glBindBuffer(GL_ARRAY_BUFFER, tracker->vertex_id);
         glBufferData(
             GL_ARRAY_BUFFER,
-            sizeof(GLfloat) * length,
-            buffer_data,
+            sizeof(GLfloat) * vertex_size,
+            vertex_buffer_data,
+            GL_STATIC_DRAW
+        );
+
+        glGenBuffers(1, &tracker->normal_id);
+        glBindBuffer(GL_ARRAY_BUFFER, tracker->normal_id);
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            sizeof(GLfloat) * normal_size,
+            normal_buffer_data,
+            GL_STATIC_DRAW
+        );
+
+        glGenBuffers(1, &tracker->uv_id);
+        glBindBuffer(GL_ARRAY_BUFFER, tracker->uv_id);
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            sizeof(GLfloat) * uv_size,
+            uv_buffer_data,
             GL_STATIC_DRAW
         );
 
@@ -389,26 +443,48 @@ namespace jsfn{
             return false;
         }
 
-        GLuint type = GL_TRIANGLES;
-        GLuint slot = VERTEX_SLOT;
-
         // Todo: unhardcode this
-        GLuint id = desired->second->buffer_id;
-        int size = desired->second->size;
-        int indices = 3;
+        GLuint vertex_id = desired->second->vertex_id;
+        int vertex_size = desired->second->vertex_size;
+        GLuint normal_id = desired->second->normal_id;
+        int normal_size = desired->second->normal_size;
+        GLuint uv_id = desired->second->uv_id;
+        int uv_size = desired->second->uv_size;
         
-        glEnableVertexAttribArray(slot);
-        
-        glBindBuffer(GL_ARRAY_BUFFER, id);
+        glEnableVertexAttribArray(UV_SLOT);
+        glBindBuffer(GL_ARRAY_BUFFER, uv_id);
         glVertexAttribPointer(
-            slot, // layout
-            indices,
+            UV_SLOT, // layout
+            2,
             GL_FLOAT, // type
             GL_FALSE, // normalized?
             0, // stride
             (void*)0 // array buffer offset
             );
-        glDrawArrays(type, 0, size);
+
+        glEnableVertexAttribArray(NORMAL_SLOT);
+        glBindBuffer(GL_ARRAY_BUFFER, normal_id);
+        glVertexAttribPointer(
+            NORMAL_SLOT, // layout
+            3,
+            GL_FLOAT, // type
+            GL_FALSE, // normalized?
+            0, // stride
+            (void*)0 // array buffer offset
+            );
+
+        glEnableVertexAttribArray(VERTEX_SLOT);
+        glBindBuffer(GL_ARRAY_BUFFER, vertex_id);
+        glVertexAttribPointer(
+            VERTEX_SLOT, // layout
+            3,
+            GL_FLOAT, // type
+            GL_FALSE, // normalized?
+            0, // stride
+            (void*)0 // array buffer offset
+            );
+        
+        glDrawArrays(GL_TRIANGLES, 0, vertex_size);
         glDisableVertexAttribArray(VERTEX_SLOT);
         
         return true;

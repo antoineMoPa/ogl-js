@@ -1,10 +1,44 @@
-create_triangle_array("roads",[1,2,3,2,3,5,2,2]);
+create_triangle_array(
+    "roads",
+    [
+        0,1,0,
+        0,1,1,
+        1,1,0,
+        1,1,0,
+        0,1,1,
+        1,1,1
+    ],
+    [
+        0,1,0,
+        0,1,0,
+        0,1,0,
+        0,1,0,
+        0,1,0,
+        0,1,0
+    ],
+    [
+        0,1,0,
+        0,1,1,
+        1,1,0,
+        1,1,0,
+        0,1,1,
+        1,1,1
+    ]
+);
+
+load_shaders("main","vertex.glsl","fragment.glsl");
 
 function render(){
-    translate(-1,0,0);
-    scale(0.1,0.1,0.1);
-    for(var i = 0; i < 70; i++){
-        translate(0.3,0.1,0.1);
-        render_triangle_array("roads");
+    bind_shaders("main");
+    translate(-3,-2,2);
+    //scale(0.1,0.1,0.1);
+    for(var j = 0; j < 10; j++){
+        translate(2,0,-2);
+        push_matrix();
+        for(var i = 0; i < 20; i++){
+            translate(0,0.1,0);
+            render_triangle_array("roads");
+        }
+        pop_matrix();
     }
 }

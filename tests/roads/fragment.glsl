@@ -29,19 +29,6 @@ void main(){
     vec3 spec_color = light_color * light_power *
         pow(3.0,fac) / (dist * dist);
     
-    float z_window = 0.0;
-
-    if(int(pos_model.z / 10.0) % 2 == 0){
-        z_window = 1.0;
-    }
-
-    float x_window = floor(clamp(3.0*sin(pos_model.x * 30.0),0.0,1.0));
-    float y_window = floor(clamp(3.0*sin(pos_model.y * 30.0),0.0,1.0));
-    float window = x_window * y_window * z_window;
-
-    vec4 window_color = vec4(window,window,0.0,1.0);
-    
-    color = vec4(diff_color,1.0) + vec4(spec_color,1.0) - window_color;
-    
-    
+    color = vec4(diff_color,1.0) + vec4(spec_color,1.0);
+    color += vec4(UV,0,0);
 }

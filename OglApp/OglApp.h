@@ -409,7 +409,7 @@ namespace OglApp{
                     JS_FN("render_model", jsfn::render_model, 1, 0),
                     JS_FN("load_shaders", jsfn::load_shaders, 3, 0),
                     JS_FN("bind_shaders", jsfn::bind_shaders, 1, 0),
-                    JS_FN("create_triangle_array", jsfn::create_triangle_array, 2, 0),
+                    JS_FN("create_triangle_array", jsfn::create_triangle_array, 4, 0),
                     JS_FN("render_triangle_array", jsfn::render_triangle_array, 1, 0),
                     JS_FN("scale", jsfn::scale, 3, 0),
                     JS_FN("divide", jsfn::divide, 2, 0),
