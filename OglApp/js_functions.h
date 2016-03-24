@@ -9,6 +9,16 @@ using namespace std;
 using namespace OglApp;
 
 namespace jsfn{
+    
+    class FloatArrayTracker{
+    public:
+        GLuint buffer_id;
+        int size;
+    };
+    
+    using GLuintMap = std::map<std::string, FloatArrayTracker*>;
+    GLuintMap float_arrays;
+    
     static JSBool
         plus(JSContext *cx, unsigned argc, jsval *vp)
     {
@@ -256,6 +266,150 @@ namespace jsfn{
         OglApp::current_shader = &desired->second;
         
         compute_matrix();
+        
+        return true;
+    }
+
+    /**
+       2 js args: name, data
+       name is used to keep track of the data in
+       float_arrays
+       
+       TODO:
+       
+       - being able to delete object
+       - verify if object already exists (before overwriting)
+       - delete previous data if object already exists
+       
+     */
+    static JSBool
+        create_triangle_array(JSContext *cx, unsigned argc, jsval *vp)
+    {
+        JS::CallArgs args = CallArgsFromVp(argc, vp);
+
+        // Verify arguments
+        // string
+        if(!args[0].isString()){
+            return false;
+        }
+        // data
+        if(!args[1].isObject()){
+            return false;
+        }
+
+        // fetch array
+        JSObject * arr = &args[1].toObject();
+
+        // verify if really an array
+        if(!JS_IsArrayObject(cx,arr)){
+            cerr << "second argument is not an array" << endl;
+            return false;
+        }
+
+        // Used to fetch length
+        uint32_t length;
+        
+        // Get length
+        JS_GetArrayLength(cx, arr, &length);
+        
+        cout << "Creating array" << endl;
+
+        // Temporary buffer data
+        GLfloat * buffer_data;
+
+        buffer_data = new GLfloat[length];
+        
+        // Current element in loop
+        JS::Value element;
+        
+        for(int i = 0; i < length; i++){
+            JS_GetElement(cx, arr, i, &element);
+            buffer_data[i] = element.toNumber();
+        }
+        
+        const char * index_cstr =
+            JS_EncodeString(cx,args[0].toString());
+        
+        string index(index_cstr);
+        
+        GLuintMap::iterator desired = float_arrays.find(index);
+        
+        if(desired != float_arrays.end()){
+            cerr << "Array with name '"
+                 << index << "' already exist."
+                 << endl;
+            return false;
+        }
+
+        FloatArrayTracker * tracker = new FloatArrayTracker();
+        float_arrays[index] = tracker;
+        tracker->size = length;
+        
+        glGenBuffers(1, &tracker->buffer_id);
+        glBindBuffer(GL_ARRAY_BUFFER, tracker->buffer_id);
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            sizeof(GLfloat) * length,
+            buffer_data,
+            GL_STATIC_DRAW
+        );
+
+        return true;
+    }
+
+    /**
+       Argument:
+       the index of the shader (string)
+       TODO:
+       this, but for quads and stuff
+       this, but for normals
+     */
+    static JSBool
+        render_triangle_array(JSContext *cx, unsigned argc, jsval *vp)
+    {
+        JS::CallArgs args = CallArgsFromVp(argc, vp);
+
+        // Verify arguments
+        // string
+        if(!args[0].isString()){
+            return false;
+        }
+        
+        const char * index_cstr =
+            JS_EncodeString(cx,args[0].toString());
+        
+        string index(index_cstr);
+        
+        GLuintMap::iterator desired = float_arrays.find(index);
+        
+        if(desired == float_arrays.end()){
+            cerr << "Array with name '"
+                 << index << "' not found."
+                 << endl;
+            return false;
+        }
+
+        GLuint type = GL_TRIANGLES;
+        GLuint slot = VERTEX_SLOT;
+
+        // Todo: unhardcode this
+        GLuint id = desired->second->buffer_id;
+        int size = desired->second->size;
+        int indices = 3;
+        
+        glEnableVertexAttribArray(slot);
+        
+        glBindBuffer(GL_ARRAY_BUFFER, id);
+        glVertexAttribPointer(
+            slot, // layout
+            indices,
+            GL_FLOAT, // type
+            GL_FALSE, // normalized?
+            0, // stride
+            (void*)0 // array buffer offset
+            );
+        glDrawArrays(type, 0, size);
+        glDisableVertexAttribArray(VERTEX_SLOT);
         
         return true;
     }
