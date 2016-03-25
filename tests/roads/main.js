@@ -36,34 +36,44 @@ function multiply_matrix_3d(mat1,mat2){
 }
 
 function rotate_y(theta,mat){
+    // Build a rotation matrix
     var r = [
         Math.cos(theta),0,Math.sin(theta),
         0,1,0,
         (-Math.sin(theta)),0,Math.cos(theta)
     ];
+    // Rotate
     multiply_matrix_3d(r,mat);
 }
 
-function route(x,y,z,x2,y2,z2,k){
-    
-    x2 = x + k * (x2 - x);
-    y2 = y + k * (y2 - y);
-    z2 = z + k * (z2 - z);
-    
-    console.log([x,y,z]);
-    console.log([x2,y2,z2]);
-    
-    //x = x + x2;
-    //y = y + z2;
-    //z = z + z2;
+/*
+  Route profile:
+  
+  Example:
+  
+         ^   /^^^^/|_________/^^^^/|  ^
+  y axis |  /    /          /    //  /  z axis
+         |  |^^^^|_________|^^^^|/  /
+
+                 ----------->
+                   x axis
+                   
+  Part with z < 0.5 is used as one end
+  Part with z > 0.5 is used as the other end
+
+  route() rotates and moves each end to fit the
+  direction of the path.
+*/
+
+function base_route_shape(){
     vertex = vertex.concat(
         [
-            x,y,z,
-            x2,y2,z2,
-            x+1,y,z,
-            x+1,y,z,
-            x2,y2,z2,
-            x2+1,y2,z2,
+            0,0,0,
+            0,0,1,
+            1,0,0,
+            1,0,0,
+            0,0,1,
+            1,0,1,
         ]
     );
     normal = normal.concat(
@@ -76,6 +86,22 @@ function route(x,y,z,x2,y2,z2,k){
             0,1,0,
         ]
     );
+    return {
+        vertex: vertex,
+        normal: normal
+    };
+}
+
+function route(
+    x1,y1,z1,
+    x2,y2,z2,
+    x3,y3,z3,
+    x4,y4,z4,
+    k
+){
+    var shape = base_route_shape();
+    vertex = shape.vertex;
+    normal = shape.normal;
 }
 
 function routes(points){
@@ -92,8 +118,7 @@ function routes(points){
 }
 
 routes(points);
-
-rotate_y(0.8,vertex);
+rotate_y(0.2,vertex);
 
 create_triangle_array(
     "roads",
