@@ -21,7 +21,7 @@ void main(){
 
     normal = (MVP * vec4(v_normal,1.0)).xyz;
 
-    light_power = 30.0;
+    light_power = 60.0;
     light_pos = light_position;
     UV = vertexUV;
 }

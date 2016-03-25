@@ -26,9 +26,9 @@ void main(){
     vec3 diff_color = light_color * light_power *
          fac / (dist * dist);
 
-    vec3 spec_color = light_color * light_power *
-        pow(3.0,fac) / (dist * dist);
+    //vec3 spec_color = light_color * light_power *
+    //    pow(3.0,fac) / (dist * dist);
     
-    color = vec4(diff_color,1.0) + vec4(spec_color,1.0);
-    color += vec4(UV,0,0);
+    color = vec4(diff_color,1.0);
+    color += vec4(1.0,1.0,1.0,1.0);
 }
