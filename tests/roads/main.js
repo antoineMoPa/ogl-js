@@ -1,14 +1,33 @@
 var points = [
-    0,0,2,
-    0,0,1,
     0,0,0,
-    0,0,-1,
-    0,0,-2,
-    1,0,-2,
+    1,0,-1,
     2,0,-2,
     3,0,-3,
-    4,0,-4
+    4,0,-4,
+    4,0,-5,
+    4,0,-6,
+    4,0,-6,
+    4,0,-6,
+    3,0,-6,
+    2,0,-6,
+    1,0,-6,
+    0,0,-6,
 ];
+/*
+var points = [
+    1,0,-1,
+    1,0,-2,
+    1,0,-3,
+    1,0,-4,
+];
+
+var points = [
+    1,0,-2,
+    2,0,-2,
+    3,0,-2,
+    4,0,-2,
+];*/
+
 
 load_shaders("main","vertex.glsl","fragment.glsl");
 
@@ -121,7 +140,7 @@ function angle(dx,dy){
 var final_shape = {vertex:[],normal:[]};
 
 function routes(points){
-    for(var i = 0; i <= points.length - 12; i+=3){
+    for(var i = 0; i <= points.length - 8; i+=3){
         // fetch points
         var x1 = points[i+0];
         var y1 = points[i+1];
@@ -132,35 +151,42 @@ function routes(points){
         var x3 = points[i+6];
         var y3 = points[i+7];
         var z3 = points[i+8];
-        var x4 = points[i+9];
-        var y4 = points[i+10];
-        var z4 = points[i+11];
 
         // find angle of path ends
-        var angle_begin = angle(x2-x1,y2-y1);
-        var angle_end = angle(x4-x3,y4-y3);
+        var angle_begin = -angle(x2-x1,z2-z1) - Math.PI/2;
+        var angle_end = -angle(x3-x2,z3-z2) - Math.PI/2;;
         
         // Get base model
         var shape = base_route_shape();
-        vertex = shape.vertex;
-        normal = shape.normal;
+        var vertex = shape.vertex;
+        var normal = shape.normal;
 
         // Move parts of model
         // to the right place
         for(var j = 0; j <= vertex.length-3; j += 3){
-            var x = vertex[j+0];
-            var y = vertex[j+1];
-            var z = vertex[j+2];
-            
-            var arr = [x,y,z];
-
-            if(z > 0.5){
-                // End of the path
-                
+            if(vertex[j+2] < 0.5){
+                // Begining of the path
                 // bring back z to 0
-                vertex[j+2] = 0;
+                var arr = [vertex[j+0],vertex[j+1],0];
+
                 // rotate
-                rotate(angle_end,arr);
+                rotate_y(angle_begin,arr);
+
+                vertex[j+0] = arr[0];
+                vertex[j+1] = arr[1];
+                vertex[j+2] = arr[2];
+
+                // translate
+                vertex[j+0] += x1;
+                vertex[j+1] += y1;
+                vertex[j+2] += z1;
+            } else {
+                // End of the path
+
+                var arr = [vertex[j+0],vertex[j+1],0];
+                
+                // Rotate
+                rotate_y(angle_end,arr);
                 vertex[j+0] = arr[0];
                 vertex[j+1] = arr[1];
                 vertex[j+2] = arr[2];
@@ -169,19 +195,6 @@ function routes(points){
                 vertex[j+0] += x2;
                 vertex[j+1] += y2;
                 vertex[j+2] += z2;
-            } else {
-                // Begining of the path
-
-                // Rotate
-                rotate(angle_begin,arr);
-                vertex[j+0] = arr[0];
-                vertex[j+1] = arr[1];
-                vertex[j+2] = arr[2];
-
-                // translate
-                vertex[j+0] += x3;
-                vertex[j+1] += y3;
-                vertex[j+2] += z3;
             }
         }
         final_shape.vertex = final_shape.vertex
@@ -200,9 +213,12 @@ create_triangle_array(
     []
 );
 
+var it = 0;
+
 function render(){
     bind_shaders("main");
-    translate(-2,-2,-1);
+    it++;
+    translate(-2,-4 + it/100,-2);
     //rotate(new Date().getTime()/10000 % 2 * Math.PI,0,1,0);
     render_triangle_array("roads");
 }
