@@ -1,14 +1,13 @@
 var points = [
-    (-2),0,0,
+    0,0,2,
+    0,0,1,
     0,0,0,
+    0,0,-1,
     0,0,-2,
-    0,1,-4,
-    0,1,-8,
-    0,1,-12,
-    0,0,-18,
-    0,0,-22,
-    2,0,-22,
-    4,0,-22,
+    1,0,-2,
+    2,0,-2,
+    3,0,-3,
+    4,0,-4
 ];
 
 load_shaders("main","vertex.glsl","fragment.glsl");
@@ -66,7 +65,7 @@ function rotate_y(theta,mat){
 */
 
 function base_route_shape(){
-    vertex = vertex.concat(
+    var vertex = 
         [
             0,0,0,
             0,0,1,
@@ -74,9 +73,13 @@ function base_route_shape(){
             1,0,0,
             0,0,1,
             1,0,1,
-        ]
-    );
-    normal = normal.concat(
+        ];
+    
+    // Move 0.5 left
+    for(var i = 0; i < vertex.length; i+=3){
+        vertex[i] -= 0.5;
+    }
+    var normal = 
         [
             0,1,0,
             0,1,0,
@@ -84,8 +87,8 @@ function base_route_shape(){
             0,1,0,
             0,1,0,
             0,1,0,
-        ]
-    );
+        ];
+
     return {
         vertex: vertex,
         normal: normal
@@ -99,37 +102,107 @@ function route(
     x4,y4,z4,
     k
 ){
-    var shape = base_route_shape();
-    vertex = shape.vertex;
-    normal = shape.normal;
+    
 }
 
+// Calculates angle of 2d vector
+function angle(dx,dy){
+    if(dy == 0){
+        return dx > 0 ? 0 : Math.PI;;
+    }
+    var m = dy/dx;
+    var theta = Math.atan(m);
+    if(dx < 0){
+        theta += Math.PI;
+    }
+    return theta;
+}
+
+var final_shape = {vertex:[],normal:[]};
+
 function routes(points){
-    for(var i = 0; i <= points.length - 6; i+=3){
-        var x,y,z,x2,y2,z2;
-        x = points[i+0];
-        y = points[i+1];
-        z = points[i+2];
-        x2 = points[i+3];
-        y2 = points[i+4];
-        z2 = points[i+5];
-        route(x,y,z,x2,y2,z2,0.99);
+    for(var i = 0; i <= points.length - 12; i+=3){
+        // fetch points
+        var x1 = points[i+0];
+        var y1 = points[i+1];
+        var z1 = points[i+2];
+        var x2 = points[i+3];
+        var y2 = points[i+4];
+        var z2 = points[i+5];
+        var x3 = points[i+6];
+        var y3 = points[i+7];
+        var z3 = points[i+8];
+        var x4 = points[i+9];
+        var y4 = points[i+10];
+        var z4 = points[i+11];
+
+        // find angle of path ends
+        var angle_begin = angle(x2-x1,y2-y1);
+        var angle_end = angle(x4-x3,y4-y3);
+        
+        // Get base model
+        var shape = base_route_shape();
+        vertex = shape.vertex;
+        normal = shape.normal;
+
+        // Move parts of model
+        // to the right place
+        for(var j = 0; j <= vertex.length-3; j += 3){
+            var x = vertex[j+0];
+            var y = vertex[j+1];
+            var z = vertex[j+2];
+            
+            var arr = [x,y,z];
+
+            if(z > 0.5){
+                // End of the path
+                
+                // bring back z to 0
+                vertex[j+2] = 0;
+                // rotate
+                rotate(angle_end,arr);
+                vertex[j+0] = arr[0];
+                vertex[j+1] = arr[1];
+                vertex[j+2] = arr[2];
+
+                // translate
+                vertex[j+0] += x2;
+                vertex[j+1] += y2;
+                vertex[j+2] += z2;
+            } else {
+                // Begining of the path
+
+                // Rotate
+                rotate(angle_begin,arr);
+                vertex[j+0] = arr[0];
+                vertex[j+1] = arr[1];
+                vertex[j+2] = arr[2];
+
+                // translate
+                vertex[j+0] += x3;
+                vertex[j+1] += y3;
+                vertex[j+2] += z3;
+            }
+        }
+        final_shape.vertex = final_shape.vertex
+            .concat(vertex);
+        final_shape.normal = final_shape.normal
+            .concat(normal);
     }
 }
 
 routes(points);
-rotate_y(0.2,vertex);
 
 create_triangle_array(
     "roads",
-    vertex,
-    normal,
+    final_shape.vertex,
+    final_shape.normal,
     []
 );
 
 function render(){
     bind_shaders("main");
-    translate(0,-2,-5);
+    translate(-2,-2,-1);
     //rotate(new Date().getTime()/10000 % 2 * Math.PI,0,1,0);
     render_triangle_array("roads");
 }
