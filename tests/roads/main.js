@@ -1,4 +1,4 @@
-var points = [
+/*var points = [
     0,0,0,
     1,0,-1,
     2,0,-2,
@@ -13,21 +13,26 @@ var points = [
     1,0,-6,
     0,0,-6,
 ];
-/*
+
+
 var points = [
     1,0,-1,
     1,0,-2,
     1,0,-3,
     1,0,-4,
 ];
-
+*/
 var points = [
+    (-2),0,-2,
+    (-1),0,-2,
+    0,0,-2,
     1,0,-2,
     2,0,-2,
     3,0,-2,
     4,0,-2,
-];*/
-
+    4,0,-3,
+    4,0,-4
+];
 
 load_shaders("main","vertex.glsl","fragment.glsl");
 
@@ -126,8 +131,8 @@ function route(
 
 // Calculates angle of 2d vector
 function angle(dx,dy){
-    if(dy == 0){
-        return dx > 0 ? 0 : Math.PI;;
+    if(dx == 0){
+        return dy > 0 ? 0 : Math.PI;;
     }
     var m = dy/dx;
     var theta = Math.atan(m);
@@ -140,7 +145,7 @@ function angle(dx,dy){
 var final_shape = {vertex:[],normal:[]};
 
 function routes(points){
-    for(var i = 0; i <= points.length - 8; i+=3){
+    for(var i = 0; i < points.length - 9; i+=3){
         // fetch points
         var x1 = points[i+0];
         var y1 = points[i+1];
@@ -183,10 +188,11 @@ function routes(points){
             } else {
                 // End of the path
 
-                var arr = [vertex[j+0],vertex[j+1],0];
+                var arr = [vertex[j+0],vertex[j+1],vertex[j+2]];
                 
                 // Rotate
                 rotate_y(angle_end,arr);
+                
                 vertex[j+0] = arr[0];
                 vertex[j+1] = arr[1];
                 vertex[j+2] = arr[2];
