@@ -333,7 +333,7 @@ namespace jsfn{
         JS_GetArrayLength(cx, vertex, &vertex_size);
         JS_GetArrayLength(cx, normal, &normal_size);
         JS_GetArrayLength(cx, uv, &uv_size);
-        
+        cout << vertex_size << endl;
         cout << "Creating arrays" << endl;
 
         // Temporary buffer data
@@ -408,12 +408,16 @@ namespace jsfn{
             GL_STATIC_DRAW
         );
 
+        delete vertex_buffer_data;
+        delete normal_buffer_data;
+        delete uv_buffer_data;
+        
         return true;
     }
 
     /**
        Argument:
-       the index of the shader (string)
+       the index of the buffer (string)
        TODO:
        this, but for quads and stuff
        this, but for normals
@@ -443,7 +447,6 @@ namespace jsfn{
             return false;
         }
 
-        // Todo: unhardcode this
         GLuint vertex_id = desired->second->vertex_id;
         int vertex_size = desired->second->vertex_size;
         GLuint normal_id = desired->second->normal_id;
