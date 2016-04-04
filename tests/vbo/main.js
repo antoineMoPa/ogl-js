@@ -20,9 +20,9 @@ load_shaders("main","vertex.glsl","fragment.glsl");
   1,0
   1,1
 
- */
+*/
 create_triangle_array(
-    "plane",
+    "xzplane",
     [
         0,0,0,
         1,0,0,
@@ -49,6 +49,35 @@ create_triangle_array(
     ]
 );
 
+create_triangle_array(
+    "xyplane",
+    [
+        0,0,0,
+        1,0,0,
+        0,1,0,
+        0,1,0,
+        1,0,0,
+        1,1,0
+    ],
+    [
+        0,0,1,
+        0,0,1,
+        0,0,1,
+        0,0,1,
+        0,0,1,
+        0,0,1
+    ],
+    [
+        0,0,
+        0,0,
+        0,0,
+        0,0,
+        0,0,
+        0,0
+    ]
+);
+
+
 var it = 0;
 
 function render(){
@@ -57,5 +86,9 @@ function render(){
 
     translate(-2,-2 + it/100,-2);
     
-    render_triangle_array("plane");
+    render_triangle_array("xzplane");
+
+    translate(0,0,-0.1);
+    
+    render_triangle_array("xyplane");
 }
