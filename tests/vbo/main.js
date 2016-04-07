@@ -125,15 +125,33 @@ create_triangle_array(
  */
 function multiply_matrix_3d(mat1,mat2){
     var num;
-    for(var i = 0; i < mat2.length / 3; i++){
-        for(var j = 0; j < 3; j++){
-            // initialize
-            num = 0;
-            for(var k = 0; k < 3; k++){
-                num += mat1[3*j + k] * mat2[3*i+k];
-            }
-            mat2[3 * i + j] = num;
-        }
+
+    var a = mat1[0];
+    var b = mat1[1];
+    var c = mat1[2];
+    
+    var d = mat1[3];
+    var e = mat1[4];
+    var f = mat1[5];
+
+    var g = mat1[6];
+    var h = mat1[7];
+    var i = mat1[8];
+
+    var l = mat2.length;
+
+    // I hate math
+    // Math is nice
+    
+    for(var j = 0; j <= l-3; j+=3){
+        // initialize
+        var x = mat2[j + 0];
+        var y = mat2[j + 1];
+        var z = mat2[j + 2];
+        
+        mat2[j + 0] = a * x + b * y + c * z;
+        mat2[j + 1] = d * x + e * y + f * z;
+        mat2[j + 2] = g * x + h * y + i * z;
     }
 }
 
