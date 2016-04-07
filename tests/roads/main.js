@@ -156,9 +156,6 @@ function routes(points){
         var angle_begin = angle(x2-x1,z2-z1) - Math.PI/2;
         var angle_end = angle(x3-x2,z3-z2) - Math.PI/2;
         
-        console.log(angle_begin)
-        console.log(angle_end)
-        
         // Get base model
         var shape = base_route_shape();
         var vertex = shape.vertex;
@@ -208,7 +205,34 @@ function routes(points){
     }
 }
 
-routes(points);
+function random_routes(){
+    var points = [];
+    
+    // Current point
+    var currpoint = [0,0,0];
+    // Current direction
+    var currdir = [0,0,-1];
+    
+    // Add points in random directions
+    for(var i = 0; i < 30; i++){
+        points = points.concat(currpoint);
+        
+        if(Math.random() <= 0.5){
+            currdir[0] += Math.random() - 0.5;
+            currdir[1] += Math.random() - 0.5;
+            currdir[2] += Math.random() - 0.5;
+        }
+        
+        currpoint[0] += currdir[0];
+        currpoint[1] += currdir[1];
+        currpoint[2] += currdir[2];
+    }
+    return points;
+}
+
+for(var i = 0; i < 40; i++){
+    routes(random_routes());
+}
 
 create_triangle_array(
     "roads",
