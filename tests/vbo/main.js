@@ -166,7 +166,7 @@ function rotate_y(theta,mat){
     multiply_matrix_3d(r,mat);
 }
 
-rotate_y(0.8*Math.PI,xy_xz_plane_vert);
+rotate_y(Math.PI*1.25,xy_xz_plane_vert);
 
 create_triangle_array(
     "xyplane+xzplane_rotated",
