@@ -1,37 +1,17 @@
-/*var points = [
-    0,0,0,
-    1,0,-1,
-    2,0,-2,
-    3,0,-3,
-    4,0,-4,
-    4,0,-5,
-    4,0,-6,
-    4,0,-6,
-    4,0,-6,
-    3,0,-6,
-    2,0,-6,
-    1,0,-6,
-    0,0,-6,
-];
-
 
 var points = [
     1,0,-1,
     1,0,-2,
     1,0,-3,
     1,0,-4,
-];
-*/
-var points = [
-    (-2),0,-2,
-    (-1),0,-2,
-    0,0,-2,
-    1,0,-2,
-    2,0,-2,
-    3,0,-2,
-    4,0,-2,
-    4,0,-3,
-    4,0,-4
+    2,0,-5,
+    3,0,-5,
+    4,0.3,-5,
+    5,0.3,-5,
+    6,0,-5,
+    7,0,-5,
+    8,0,-5,
+    9,0,-5,
 ];
 
 load_shaders("main","vertex.glsl","fragment.glsl");
@@ -44,17 +24,36 @@ var normal = [];
   multiply_matrix_3d(mat1,mat2) =
   [a,b,c,a2,b2,c2,a3,b3,c3] * [x,y,z,x2,y2,z2,...]
  */
+
 function multiply_matrix_3d(mat1,mat2){
     var num;
-    for(var i = 0; i < mat2.length / 3; i++){
-        for(var j = 0; j < 3; j++){
-            // initialize
-            num = 0;
-            for(var k = 0; k < 3; k++){
-                num += mat1[3*j + k] * mat2[3*i+k];
-            }
-            mat2[3 * i + j] = num;
-        }
+
+    var a = mat1[0];
+    var b = mat1[1];
+    var c = mat1[2];
+    
+    var d = mat1[3];
+    var e = mat1[4];
+    var f = mat1[5];
+
+    var g = mat1[6];
+    var h = mat1[7];
+    var i = mat1[8];
+
+    var l = mat2.length;
+
+    // I hate math
+    // Math is nice
+    
+    for(var j = 0; j <= l-3; j+=3){
+        // initialize
+        var x = mat2[j + 0];
+        var y = mat2[j + 1];
+        var z = mat2[j + 2];
+        
+        mat2[j + 0] = a * x + b * y + c * z;
+        mat2[j + 1] = d * x + e * y + f * z;
+        mat2[j + 2] = g * x + h * y + i * z;
     }
 }
 
@@ -131,14 +130,7 @@ function route(
 
 // Calculates angle of 2d vector
 function angle(dx,dy){
-    if(dx == 0){
-        return dy > 0 ? 0 : Math.PI;;
-    }
-    var m = dy/dx;
-    var theta = Math.atan(m);
-    if(dx < 0){
-        theta += Math.PI;
-    }
+    var theta = Math.atan2(dy,dx);
     return theta;
 }
 
@@ -146,26 +138,32 @@ var final_shape = {vertex:[],normal:[]};
 
 function routes(points){
     for(var i = 0; i < points.length - 9; i+=3){
-        // fetch points
+        // fetch 3 points
+        // P1
         var x1 = points[i+0];
         var y1 = points[i+1];
         var z1 = points[i+2];
+        // P2
         var x2 = points[i+3];
         var y2 = points[i+4];
         var z2 = points[i+5];
+        // P3
         var x3 = points[i+6];
         var y3 = points[i+7];
         var z3 = points[i+8];
 
         // find angle of path ends
-        var angle_begin = -angle(x2-x1,z2-z1) - Math.PI/2;
-        var angle_end = -angle(x3-x2,z3-z2) - Math.PI/2;;
+        var angle_begin = angle(x2-x1,z2-z1) - Math.PI/2;
+        var angle_end = angle(x3-x2,z3-z2) - Math.PI/2;
+        
+        console.log(angle_begin)
+        console.log(angle_end)
         
         // Get base model
         var shape = base_route_shape();
         var vertex = shape.vertex;
         var normal = shape.normal;
-
+        
         // Move parts of model
         // to the right place
         for(var j = 0; j <= vertex.length-3; j += 3){
@@ -187,9 +185,9 @@ function routes(points){
                 vertex[j+2] += z1;
             } else {
                 // End of the path
-
-                var arr = [vertex[j+0],vertex[j+1],vertex[j+2]];
                 
+                var arr = [vertex[j+0],vertex[j+1],0];
+
                 // Rotate
                 rotate_y(angle_end,arr);
                 
