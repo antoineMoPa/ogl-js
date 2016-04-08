@@ -209,18 +209,18 @@ function random_routes(){
     var points = [];
     
     // Current point
-    var currpoint = [0,0,0];
+    var currpoint = [0,0.1,0];
     // Current direction
-    var currdir = [0,0,-1];
+    var currdir = [0,0,-2];
     
     // Add points in random directions
-    for(var i = 0; i < 30; i++){
+    for(var i = 0; i < 50; i++){
         points = points.concat(currpoint);
         
         if(Math.random() <= 0.5){
-            currdir[0] += Math.random() - 0.5;
-            currdir[1] += Math.random() - 0.5;
-            currdir[2] += Math.random() - 0.5;
+            currdir[0] += (Math.random() - 0.5);
+            currdir[1] = currpoint[1] / 6;
+            currdir[2] += (Math.random() - 0.5);
         }
         
         currpoint[0] += currdir[0];
@@ -230,7 +230,7 @@ function random_routes(){
     return points;
 }
 
-for(var i = 0; i < 40; i++){
+for(var i = 0; i < 70; i++){
     routes(random_routes());
 }
 
@@ -246,7 +246,9 @@ var it = 0;
 function render(){
     bind_shaders("main");
     it++;
-    translate(-2,-4 + it/100,-2);
-    //rotate(new Date().getTime()/10000 % 2 * Math.PI,0,1,0);
+    translate(0,-4,0);
+    //angle = 0 + Math.sin((new Date().getTime())/1000);
+    angle = 0;
+    rotate(angle,0,1,0);
     render_triangle_array("roads");
 }
