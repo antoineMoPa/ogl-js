@@ -31,4 +31,5 @@ void main(){
     
     color = vec4(diff_color,1.0);
     color += vec4(1.0,1.0,1.0,1.0);
+    color *= pow(sin(pos_model.y*10.0),2.0);
 }
