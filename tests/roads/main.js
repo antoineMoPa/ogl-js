@@ -221,11 +221,11 @@ function random_routes(x,y,z){
         if(Math.random() < 0.2){
             if(Math.random() <= 1/4){
                 currdir[0] = 1;
-                currdir[1] = 1;
-                currdir[2] = 1;
+                currdir[1] = 0;
+                currdir[2] = 0;
             } else if(Math.random() <= 1/3){
                 currdir[0] = -1;
-                currdir[1] = -1;
+                currdir[1] = 0;
                 currdir[2] = 0;
             } else if(Math.random() <= 1/2){
                 currdir[0] = 0;
@@ -261,6 +261,64 @@ create_triangle_array(
     []
 );
 
+function new_building(){
+    var building = {
+        vertex: [
+            0,0,0,
+            10,0,0,
+            0,10,0,
+            0,10,0,
+            10,0,0,
+            10,10,0
+        ],
+        normal: [
+            0,0,1,
+            0,0,1,
+            0,0,1,
+            0,0,1,
+            0,0,1,
+            0,0,1
+        ],
+        uv: [
+            0,0,
+            0,0,
+            0,0,
+            0,0,
+            0,0,
+            0,0
+        ]
+    };
+    return building;
+}
+
+var buildings = {
+    vertex: [
+    ],
+    normal: [
+    ],
+    uv: [
+    ]
+};
+
+for(var i = 0; i < 10; i++){
+    var building = new_building();
+    multiply_matrix_3d([
+        1,Math.random(),Math.random(),
+        1,1,Math.random(),
+        1,Math.random(),1,
+    ],building.vertex);
+    buildings.vertex = buildings.vertex.concat(building.vertex);
+    buildings.normal = buildings.normal.concat(building.uv);
+    buildings.uv = buildings.normal.concat(building.uv);
+}
+
+create_triangle_array(
+    "buildings",
+    buildings.vertex,
+    buildings.normal,
+    buildings.uv
+);
+
 var it = 0;
 
 function render(){
@@ -269,7 +327,9 @@ function render(){
     translate(0,-4,0);
     //angle = 0 + Math.sin((new Date().getTime())/1000);
     angle = 0;
-    rotate(Math.sin(new Date().getTime()/20000)*2*Math.PI,0,1,0);
+    rotate(Math.sin(new Date().getTime()/8000)*2*Math.PI,0,1,0);
     
     render_triangle_array("roads");
+    translate(0,0,-4);
+    render_triangle_array("buildings");
 }
