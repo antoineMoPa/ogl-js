@@ -221,11 +221,11 @@ function random_routes(x,y,z){
         if(Math.random() < 0.2){
             if(Math.random() <= 1/4){
                 currdir[0] = 1;
-                currdir[1] = 0;
-                currdir[2] = 0;
+                currdir[1] = 1;
+                currdir[2] = 1;
             } else if(Math.random() <= 1/3){
                 currdir[0] = -1;
-                currdir[1] = 0;
+                currdir[1] = -1;
                 currdir[2] = 0;
             } else if(Math.random() <= 1/2){
                 currdir[0] = 0;
@@ -269,7 +269,7 @@ function render(){
     translate(0,-4,0);
     //angle = 0 + Math.sin((new Date().getTime())/1000);
     angle = 0;
-    rotate(Math.sin(new Date().getTime()/2000)*2*Math.PI,0,1,0);
+    rotate(Math.sin(new Date().getTime()/20000)*2*Math.PI,0,1,0);
     
     render_triangle_array("roads");
 }
