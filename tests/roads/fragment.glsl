@@ -30,11 +30,50 @@ void main(){
     //vec3 spec_color = light_color * light_power *
     //    pow(3.0,fac) / (dist * dist);
 
+    // Streetlamp light
     vec3 lamp_color = vec3(0.8,0.4,0.2);
 
+    // Less intensity towards the center of the road
     lamp_color *= pow(UV.x - 0.5,2);
+    // Less intensity at edges of road part
     lamp_color *= pow(UV.y - 0.5,2);
     lamp_color *= 10.0;
-    
-    color = vec4(diff_color + lamp_color,1.0);
+
+    // Street marks
+
+    vec3 yellow_marks = vec3(0.9,0.7,0.0);
+    vec3 white_marks = vec3(0.9,0.9,0.9);
+
+    // Divide the road at 40
+    // Put marks at desired places
+    int x_division = int(UV.x * 80.0);
+    int y_division = int(UV.y * 6.0);
+
+    // 2 Yellow marks at the middle of the road 
+    if(x_division != 39 && x_division != 41){
+        // Remove what's left
+        yellow_marks *= 0.0;
+    }
+
+    // White marks at 2 sides of the road.
+    if(x_division % 20 != 0){
+        // Remove what's left
+        white_marks *= 0.0;
+    }
+
+    // Alternate white marks
+    // Like that:
+    //
+    //  --  --  --  --  --
+    //
+    if(y_division % 2 == 0){
+        white_marks *= 0.0;
+    }
+
+    // Put all the colors together
+    color = vec4(diff_color +
+                 lamp_color +
+                 yellow_marks +
+                 white_marks
+                 ,1.0);
 }

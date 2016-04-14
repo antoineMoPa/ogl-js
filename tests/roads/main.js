@@ -406,10 +406,10 @@ var it = 0;
 function render(){
     bind_shaders("main");
     it++;
-    translate(0,-4,-30);
+    translate(0,-4,-10);
 
     // Rotate stuff according to time
-    rotate(Math.sin(new Date().getTime()/20000)*2*Math.PI,0,1,0);
+    rotate(Math.sin(new Date().getTime()/40000)*2*Math.PI,0,1,0);
     
     render_triangle_array("roads");
     translate(0,0,-4);
