@@ -112,10 +112,20 @@ function base_route_shape(){
             0,1,0,
             0,1,0,
         ];
-
+    
+    var uv = [
+        0,0,
+        0,1,
+        1,0,
+        1,0,
+        0,1,
+        1,1,
+    ];
+    
     return {
         vertex: vertex,
-        normal: normal
+        normal: normal,
+        uv: uv,
     };
 }
 
@@ -135,7 +145,7 @@ function angle(dx,dy){
     return theta;
 }
 
-var final_shape = {vertex:[],normal:[]};
+var final_shape = {vertex:[],normal:[],uv:[]};
 
 function routes(points){
     for(var i = 0; i < points.length - 9; i+=3){
@@ -161,6 +171,7 @@ function routes(points){
         var shape = base_route_shape();
         var vertex = shape.vertex;
         var normal = shape.normal;
+        var uv = shape.uv;
         
         // Move parts of model
         // to the right place
@@ -203,6 +214,9 @@ function routes(points){
             .concat(vertex);
         final_shape.normal = final_shape.normal
             .concat(normal);
+        final_shape.uv = final_shape.uv
+            .concat(uv);
+
     }
 }
 
@@ -260,7 +274,7 @@ create_triangle_array(
     "roads",
     final_shape.vertex,
     final_shape.normal,
-    []
+    final_shape.uv
 );
 
 function new_building(){

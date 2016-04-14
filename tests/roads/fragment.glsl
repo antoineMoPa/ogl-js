@@ -32,8 +32,9 @@ void main(){
 
     vec3 lamp_color = vec3(0.8,0.4,0.2);
 
-    lamp_color *= sin(pos_model.x*8.0) + 0.5;
-    lamp_color *= sin(pos_model.z*8.0) + 0.5;
+    lamp_color *= pow(UV.x - 0.5,2);
+    lamp_color *= pow(UV.y - 0.5,2);
+    lamp_color *= 10.0;
     
     color = vec4(diff_color + lamp_color,1.0);
 }
