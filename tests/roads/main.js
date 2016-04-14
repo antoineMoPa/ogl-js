@@ -245,6 +245,7 @@ function random_routes(x,y,z){
     return points;
 }
 
+// Start random routes at specific points
 for(var i = 0; i < 20; i++){
     var x,y,z;
     x = y = z = 0;
@@ -262,6 +263,17 @@ create_triangle_array(
 );
 
 function new_building(){
+    /*
+     I created the coordinates using the default cube in Blender
+     Steps:
+     
+     1 - Save as .obj (triangulate faces, write normals)
+     2 - Replace manually faces in .obj file:
+         f 1//2 4//2 4//4
+         means:
+         f <value of first vertex> // <value of 2nd normal>
+     3 - Use that to create vertex and normal array here
+     */
     var building = {
         vertex: [
             1.0,0.0,-1.0,1.0,0.0,1.0,-1.0,0.0,1.0,
@@ -298,6 +310,7 @@ function new_building(){
     return building;
 }
 
+// We will concatenate all building vertices & normals here
 var buildings = {
     vertex: [
     ],
@@ -307,6 +320,7 @@ var buildings = {
     ]
 };
 
+// Some small function to translate an array
 function translate_3d(x,y,z,arr){
     for(var i = 0; i < arr.length; i+=3){
         arr[i+0] += x;
@@ -315,22 +329,30 @@ function translate_3d(x,y,z,arr){
     }
 }
 
+// Create buildings in this loop
 for(var i = 0; i < 600; i++){
     var building = new_building();
+    // Rotate my a multiple of 90°
     var angle = Math.floor(3*(Math.random())) * Math.PI/2;
 
+    // City surface radius
     var spread = 40;
+    // Downtown surface radius
     var downtown_ring = 20;
-    
+
+    // Position "randomly"
     var x = Math.floor((Math.random()-0.5) * 8 * spread)/(4);
     var z = Math.floor((Math.random()-0.5) * 8 * spread)/(4);
     var y = 0;
 
+    // Find distances from city center
     var dist_from_center = Math.sqrt(
         Math.pow(x,2) +
         Math.pow(z,2)
     );
 
+    // Create a factor that is higher at city center
+    // And 0 outside of downtown_ring
     function downtown_fac(dist){
         if(dist < downtown_ring){
             return 5*Math.pow(1-(dist/downtown_ring),2);
@@ -338,20 +360,25 @@ for(var i = 0; i < 600; i++){
             return 0;
         }
     }
-    
+
+    // Create height using many factors
     var height = Math.random() * 2.0 *
         downtown_fac(dist_from_center) + 1;
-    
+
+    // Scale according to height + random z axis factor
     multiply_matrix_3d([
         1,0,0,
         0,height,0,
         0,0,Math.random() * 0.5,
     ],building.vertex);
-    
+
+    // Rotate that building
     rotate_y(angle,building.vertex);
-    
+
+    // Translate that building
     translate_3d(x,y,z,building.vertex);
-    
+
+    // Add building to final array
     buildings.vertex = buildings.vertex.concat(building.vertex);
     buildings.normal = buildings.normal.concat(building.normal);
     buildings.uv = buildings.uv.concat(building.uv);
@@ -370,8 +397,8 @@ function render(){
     bind_shaders("main");
     it++;
     translate(0,-4,-30);
-    //angle = 0 + Math.sin((new Date().getTime())/1000);
-    angle = 0;
+
+    // Rotate stuff according to time
     rotate(Math.sin(new Date().getTime()/8000)*2*Math.PI,0,1,0);
     
     render_triangle_array("roads");
