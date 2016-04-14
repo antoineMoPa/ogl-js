@@ -6,6 +6,7 @@ layout(location=0) out vec4 color;
 
 in vec2 UV;
 in vec3 pos_model;
+in vec3 normal_model;
 in vec3 normal;
 in vec3 light_pos;
 in float light_power;
@@ -30,7 +31,4 @@ void main(){
     //    pow(3.0,fac) / (dist * dist);
     
     color = vec4(diff_color,1.0);
-    color += vec4(1.0,1.0,1.0,1.0);
-    color *= pow(sin(pos_model.y*10.0),2.0);
-    color *= pow(sin(pos_model.x*10.0),2.0);
 }

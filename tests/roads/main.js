@@ -15,6 +15,7 @@ var points = [
 ];
 
 load_shaders("main","vertex.glsl","fragment.glsl");
+load_shaders("buildings","vertex.glsl","buildings/fragment.glsl");
 
 var vertex = [];
 var normal = [];
@@ -332,13 +333,11 @@ function translate_3d(x,y,z,arr){
 // Create buildings in this loop
 for(var i = 0; i < 600; i++){
     var building = new_building();
-    // Rotate my a multiple of 90°
-    var angle = Math.floor(3*(Math.random())) * Math.PI/2;
 
     // City surface radius
     var spread = 40;
     // Downtown surface radius
-    var downtown_ring = 20;
+    var downtown_ring = 30;
 
     // Position "randomly"
     var x = Math.floor((Math.random()-0.5) * 8 * spread)/(4);
@@ -372,9 +371,6 @@ for(var i = 0; i < 600; i++){
         0,0,Math.random() * 0.5,
     ],building.vertex);
 
-    // Rotate that building
-    rotate_y(angle,building.vertex);
-
     // Translate that building
     translate_3d(x,y,z,building.vertex);
 
@@ -399,9 +395,11 @@ function render(){
     translate(0,-4,-30);
 
     // Rotate stuff according to time
-    rotate(Math.sin(new Date().getTime()/8000)*2*Math.PI,0,1,0);
+    rotate(Math.sin(new Date().getTime()/20000)*2*Math.PI,0,1,0);
     
     render_triangle_array("roads");
     translate(0,0,-4);
+
+    bind_shaders("buildings");
     render_triangle_array("buildings");
 }
