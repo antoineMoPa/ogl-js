@@ -12,12 +12,20 @@ namespace jsfn{
     
     class FloatArrayTracker{
     public:
+        ~FloatArrayTracker(){
+            delete vertex_buffer_data;
+            delete normal_buffer_data;
+            delete uv_buffer_data;
+        }
         GLuint vertex_id;
         GLuint normal_id;
         GLuint uv_id;
         int vertex_size;
         int normal_size;
         int uv_size;
+        GLfloat * vertex_buffer_data;
+        GLfloat * normal_buffer_data;
+        GLfloat * uv_buffer_data;
     };
     
     using GLuintMap = std::map<std::string, FloatArrayTracker*>;
@@ -304,7 +312,26 @@ namespace jsfn{
            !args[3].isObject()){
             return false;
         }
+
+        // Get name
+        const char * index_cstr =
+            JS_EncodeString(cx,args[0].toString());
         
+        string index(index_cstr);
+        
+        GLuintMap::iterator desired = float_arrays.find(index);
+        
+        if(desired != float_arrays.end()){
+            cerr << "Array with name '"
+                 << index << "' already exist."
+                 << endl;
+            return false;
+        }
+
+        // Create tracker for ids and data
+        FloatArrayTracker * tracker = new FloatArrayTracker();
+        float_arrays[index] = tracker;
+
         // fetch arrays
         JSObject * vertex = &args[1].toObject();
         JSObject * normal = &args[2].toObject();
@@ -333,50 +360,29 @@ namespace jsfn{
         JS_GetArrayLength(cx, vertex, &vertex_size);
         JS_GetArrayLength(cx, normal, &normal_size);
         JS_GetArrayLength(cx, uv, &uv_size);
-        cout << vertex_size << endl;
+
         cout << "Creating arrays" << endl;
 
-        // Temporary buffer data
-        GLfloat * vertex_buffer_data;
-        GLfloat * normal_buffer_data;
-        GLfloat * uv_buffer_data;
-
-        vertex_buffer_data = new GLfloat[vertex_size];
-        normal_buffer_data = new GLfloat[normal_size];
-        uv_buffer_data = new GLfloat[uv_size];
+        tracker->vertex_buffer_data = new GLfloat[vertex_size];
+        tracker->normal_buffer_data = new GLfloat[normal_size];
+        tracker->uv_buffer_data = new GLfloat[uv_size];
         
         // Current element in loop
         JS::Value element;
         
         for(int i = 0; i < vertex_size; i++){
             JS_GetElement(cx, vertex, i, &element);
-            vertex_buffer_data[i] = element.toNumber();
+            tracker->vertex_buffer_data[i] = element.toNumber();
         }
         for(int i = 0; i < normal_size; i++){
             JS_GetElement(cx, normal, i, &element);
-            normal_buffer_data[i] = element.toNumber();
+            tracker->normal_buffer_data[i] = element.toNumber();
         }
         for(int i = 0; i < uv_size; i++){
             JS_GetElement(cx, uv, i, &element);
-            uv_buffer_data[i] = element.toNumber();
+            tracker->uv_buffer_data[i] = element.toNumber();
         }
-
-        const char * index_cstr =
-            JS_EncodeString(cx,args[0].toString());
         
-        string index(index_cstr);
-        
-        GLuintMap::iterator desired = float_arrays.find(index);
-        
-        if(desired != float_arrays.end()){
-            cerr << "Array with name '"
-                 << index << "' already exist."
-                 << endl;
-            return false;
-        }
-
-        FloatArrayTracker * tracker = new FloatArrayTracker();
-        float_arrays[index] = tracker;
         tracker->vertex_size = vertex_size;
         tracker->normal_size = normal_size;
         tracker->uv_size = uv_size;
@@ -386,7 +392,7 @@ namespace jsfn{
         glBufferData(
             GL_ARRAY_BUFFER,
             sizeof(GLfloat) * vertex_size,
-            vertex_buffer_data,
+            tracker->vertex_buffer_data,
             GL_STATIC_DRAW
         );
 
@@ -395,7 +401,7 @@ namespace jsfn{
         glBufferData(
             GL_ARRAY_BUFFER,
             sizeof(GLfloat) * normal_size,
-            normal_buffer_data,
+            tracker->normal_buffer_data,
             GL_STATIC_DRAW
         );
 
@@ -404,14 +410,10 @@ namespace jsfn{
         glBufferData(
             GL_ARRAY_BUFFER,
             sizeof(GLfloat) * uv_size,
-            uv_buffer_data,
+            tracker->uv_buffer_data,
             GL_STATIC_DRAW
         );
 
-        delete vertex_buffer_data;
-        delete normal_buffer_data;
-        delete uv_buffer_data;
-        
         return true;
     }
 
@@ -488,6 +490,7 @@ namespace jsfn{
             );
         
         glDrawArrays(GL_TRIANGLES, 0, vertex_size);
+        
         glDisableVertexAttribArray(VERTEX_SLOT);
         
         return true;

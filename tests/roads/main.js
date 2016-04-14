@@ -300,16 +300,16 @@ var buildings = {
     ]
 };
 
-for(var i = 0; i < 10; i++){
+for(var i = 0; i < 1; i++){
     var building = new_building();
     multiply_matrix_3d([
-        1,Math.random(),Math.random(),
-        1,1,Math.random(),
+        0,Math.random(),Math.random(),
+        0,1,Math.random(),
         1,Math.random(),1,
     ],building.vertex);
     buildings.vertex = buildings.vertex.concat(building.vertex);
-    buildings.normal = buildings.normal.concat(building.uv);
-    buildings.uv = buildings.normal.concat(building.uv);
+    buildings.normal = buildings.normal.concat(building.normal);
+    buildings.uv = buildings.uv.concat(building.uv);
 }
 
 create_triangle_array(
@@ -319,12 +319,18 @@ create_triangle_array(
     buildings.uv
 );
 
+console.log([
+    buildings.vertex,
+    buildings.normal.length,
+    buildings.uv.length
+])
+
 var it = 0;
 
 function render(){
     bind_shaders("main");
     it++;
-    translate(0,-4,0);
+    translate(0,-4,-10);
     //angle = 0 + Math.sin((new Date().getTime())/1000);
     angle = 0;
     rotate(Math.sin(new Date().getTime()/8000)*2*Math.PI,0,1,0);

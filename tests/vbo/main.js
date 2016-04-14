@@ -181,7 +181,7 @@ function render(){
     bind_shaders("main");
     it++;
 
-    translate(-3,-2 + it/100,-2);
+    translate(-3,2 * Math.sin((new Date().getTime())/500),-2);
     
     render_triangle_array("xzplane");
     
