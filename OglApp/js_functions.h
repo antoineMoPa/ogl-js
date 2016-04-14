@@ -489,7 +489,7 @@ namespace jsfn{
             (void*)0 // array buffer offset
             );
         
-        glDrawArrays(GL_TRIANGLES, 0, vertex_size);
+        glDrawArrays(GL_TRIANGLES, 0, vertex_size/3);
         
         glDisableVertexAttribArray(VERTEX_SLOT);
         

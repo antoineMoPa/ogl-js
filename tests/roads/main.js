@@ -300,12 +300,12 @@ var buildings = {
     ]
 };
 
-for(var i = 0; i < 1; i++){
+for(var i = 0; i < 10; i++){
     var building = new_building();
     multiply_matrix_3d([
-        0,Math.random(),Math.random(),
-        0,1,Math.random(),
-        1,Math.random(),1,
+        1,0,0,
+        Math.random(),1,0,
+        0,Math.random(),1,
     ],building.vertex);
     buildings.vertex = buildings.vertex.concat(building.vertex);
     buildings.normal = buildings.normal.concat(building.normal);
@@ -318,12 +318,6 @@ create_triangle_array(
     buildings.normal,
     buildings.uv
 );
-
-console.log([
-    buildings.vertex,
-    buildings.normal.length,
-    buildings.uv.length
-])
 
 var it = 0;
 
