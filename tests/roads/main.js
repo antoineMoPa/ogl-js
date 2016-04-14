@@ -290,15 +290,9 @@ function new_building(){
             (-1.0),-0.0,-0.0,-1.0,-0.0,-0.0,-1.0,-0.0,-0.0,
             0.0,0.0,-1.0,0.0,0.0,-1.0,0.0,0.0,-1.0,
             0.0,0.0,-1.0,0.0,0.0,-1.0,0.0,0.0,-1.0,
-
         ],
         uv: [
-            0,0,
-            0,0,
-            0,0,
-            0,0,
-            0,0,
-            0,0
+            
         ]
     };
     return building;
@@ -321,22 +315,41 @@ function translate_3d(x,y,z,arr){
     }
 }
 
-for(var i = 0; i < 10; i++){
+for(var i = 0; i < 600; i++){
     var building = new_building();
     var angle = Math.floor(3*(Math.random())) * Math.PI/2;
 
+    var spread = 40;
+    var downtown_ring = 20;
+    
+    var x = Math.floor((Math.random()-0.5) * 8 * spread)/(4);
+    var z = Math.floor((Math.random()-0.5) * 8 * spread)/(4);
+    var y = 0;
+
+    var dist_from_center = Math.sqrt(
+        Math.pow(x,2) +
+        Math.pow(z,2)
+    );
+
+    function downtown_fac(dist){
+        if(dist < downtown_ring){
+            return 5*Math.pow(1-(dist/downtown_ring),2);
+        } else {
+            return 0;
+        }
+    }
+    
+    var height = Math.random() * 2.0 *
+        downtown_fac(dist_from_center) + 1;
+    
     multiply_matrix_3d([
         1,0,0,
-        0,Math.random() * 2,0,
+        0,height,0,
         0,0,Math.random() * 0.5,
     ],building.vertex);
     
     rotate_y(angle,building.vertex);
     
-    var x = Math.random() * 10;
-    var z = Math.random() * 10;
-    var y = 0;
-
     translate_3d(x,y,z,building.vertex);
     
     buildings.vertex = buildings.vertex.concat(building.vertex);
@@ -356,7 +369,7 @@ var it = 0;
 function render(){
     bind_shaders("main");
     it++;
-    translate(0,-4,-10);
+    translate(0,-4,-30);
     //angle = 0 + Math.sin((new Date().getTime())/1000);
     angle = 0;
     rotate(Math.sin(new Date().getTime()/8000)*2*Math.PI,0,1,0);
