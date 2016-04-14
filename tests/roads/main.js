@@ -300,13 +300,32 @@ var buildings = {
     ]
 };
 
+function translate_3d(x,y,z,arr){
+    for(var i = 0; i < arr.length; i+=3){
+        arr[i+0] += x;
+        arr[i+1] += y;
+        arr[i+2] += z;
+    }
+}
+
 for(var i = 0; i < 10; i++){
     var building = new_building();
+    var angle = Math.floor(3*(Math.random())) * Math.PI/2;
+
     multiply_matrix_3d([
         1,0,0,
-        Math.random(),1,0,
-        0,Math.random(),1,
+        0,Math.random() * 2,0,
+        0,0,Math.random() * 0.5,
     ],building.vertex);
+    
+    rotate_y(angle,building.vertex);
+    
+    var x = Math.random() * 10;
+    var z = Math.random() * 10;
+    var y = 0;
+
+    translate_3d(x,y,z,building.vertex);
+    
     buildings.vertex = buildings.vertex.concat(building.vertex);
     buildings.normal = buildings.normal.concat(building.normal);
     buildings.uv = buildings.uv.concat(building.uv);
