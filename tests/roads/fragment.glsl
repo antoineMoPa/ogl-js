@@ -56,7 +56,7 @@ void main(){
     }
 
     // White marks at 2 sides of the road.
-    if(x_division % 20 != 0){
+    if(x_division % 20 != 0 || x_division == 40){
         // Remove what's left
         white_marks *= 0.0;
     }
