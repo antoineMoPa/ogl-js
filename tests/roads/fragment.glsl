@@ -25,10 +25,15 @@ void main(){
     
     // diffuse part
     vec3 diff_color = light_color * light_power *
-         fac / (dist * dist);
-
+        fac / (dist * dist);
+    
     //vec3 spec_color = light_color * light_power *
     //    pow(3.0,fac) / (dist * dist);
+
+    vec3 lamp_color = vec3(0.8,0.4,0.2);
+
+    lamp_color *= sin(pos_model.x*8.0) + 0.5;
+    lamp_color *= sin(pos_model.z*8.0) + 0.5;
     
-    color = vec4(diff_color,1.0);
+    color = vec4(diff_color + lamp_color,1.0);
 }
