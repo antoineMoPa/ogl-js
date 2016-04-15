@@ -34,9 +34,9 @@ void main(){
     vec3 lamp_color = vec3(0.8,0.4,0.2);
 
     // Less intensity towards the center of the road
-    lamp_color *= pow(UV.x - 0.5,2);
+    lamp_color *= pow(UV.x - 0.5,2.0);
     // Less intensity at edges of road part
-    lamp_color *= pow(UV.y - 0.5,2);
+    lamp_color *= pow(UV.y - 0.5,1.1);
     lamp_color *= 10.0;
 
     // Street marks
