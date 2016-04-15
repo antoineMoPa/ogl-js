@@ -26,14 +26,11 @@ void main(){
     vec3 diff_color = light_color * light_power *
          fac / (dist * dist);
 
-    //vec3 spec_color = light_color * light_power *
-    //    pow(3.0,fac) / (dist * dist);
-    
     color = vec4(diff_color,1.0);
-    //color += vec4(1.0,1.0,1.0,1.0);
 
     vec4 window_color = vec4(1.0,0.8,0.4,1.0);
-
+    vec4 closed_window_color = vec4(0.04,0.05,0.3,1.0);
+    
     int x_id;
     float scale = 10.0;
     
@@ -57,11 +54,17 @@ void main(){
                          float(x_id) * 4.0 +
                          float(y_id) * 2.0 +
                          float(y_id) * 0.4 * sin(float(x_id))
-                         
-                         );
+                            );
     
-    if(x_id % 2 == 0 && y_id % 2 == 0 && rand_window > 0.0){
-        color += window_color * is_wall * sin(rand_window);
+    if(x_id % 2 == 0 && y_id % 2 == 0){
+        // Open window
+        if(rand_window > 0.0){
+            color += window_color * is_wall * sin(rand_window);
+        }
+        // Closed window
+        else {
+            color += closed_window_color * is_wall;
+        }
     }
     color.a = 1.0;
 }
