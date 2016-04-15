@@ -220,55 +220,26 @@ function routes(points){
     }
 }
 
-function random_routes(x,y,z){
-    var points = [];
-    
-    // Current point
-    var currpoint = [x,y,z];
-    // Current direction
-    var currdir = [0,0,-1];
-    
-    // Add points in random directions
-    for(var i = 0; i < 80; i++){
-        points = points.concat(currpoint);
-
-
-        if(Math.random() < 0.2){
-            if(Math.random() <= 1/4){
-                currdir[0] = 1;
-                currdir[1] = 0;
-                currdir[2] = 0;
-            } else if(Math.random() <= 1/3){
-                currdir[0] = -1;
-                currdir[1] = 0;
-                currdir[2] = 0;
-            } else if(Math.random() <= 1/2){
-                currdir[0] = 0;
-                currdir[1] = 0;
-                currdir[2] = 1;
-            } else {
-                currdir[0] = 0;
-                currdir[1] = 0;
-                currdir[2] = -1;
-            }
+function routes_grid(){
+    // Routes grid
+    for(var i = 0; i < 20; i++){
+        points = [];
+        points2 = [];
+        var x,y,z;
+        x = y = z = 0;
+        for(var j = 0; j < 20; j++){
+            x = i * 4 - 10;
+            z = j - 10;
+            y = 0;
+            points = points.concat([x,y,z]);
+            points2 = points2.concat([z,y + 0.2,x]);
         }
-        
-        currpoint[0] += currdir[0];
-        currpoint[1] += currdir[1];
-        currpoint[2] += currdir[2];
+        routes(points);
+        routes(points2);
     }
-    return points;
 }
 
-// Start random routes at specific points
-for(var i = 0; i < 20; i++){
-    var x,y,z;
-    x = y = z = 0;
-    x = Math.random() * 20 - 10;
-    z = Math.random() * 20 - 10;
-    y = Math.floor(Math.random() * 10 - 5) / 4;
-    routes(random_routes(x,y,z));
-}
+routes_grid();
 
 create_triangle_array(
     "roads",
