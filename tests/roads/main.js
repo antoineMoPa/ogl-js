@@ -352,7 +352,7 @@ for(var i = 0; i < size; i++){
         // Create height using many factors
         var height = Math.random() * 2.0 *
             downtown_fac(dist_from_center) + 1;
-        height = 0.0
+
         // Scale according to height + random z axis factor
         multiply_matrix_3d([
             1.5,0,0,
@@ -384,9 +384,11 @@ function render(){
     it++;
 
     // Rotate stuff according to time
-    rotate(Math.sin(new Date().getTime()/4000)*2*Math.PI,0,1,0);
+    //rotate(Math.sin(new Date().getTime()/1000)*0.6+0.8,0,1,0);
+    rotate(0.8,0,1,0);
+    var z = Math.sin(new Date().getTime()/4000) * 7 - 8;
     
-    translate(0,-3,-20);
+    translate(-2,z,-41);
     
     render_triangle_array("roads");
 
