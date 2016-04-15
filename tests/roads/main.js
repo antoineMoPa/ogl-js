@@ -220,24 +220,55 @@ function routes(points){
     }
 }
 
+var size = 20;
+
+function i_j_to_angle(i, j, size_offset){
+    return j/(size - size_offset) * 2 * Math.PI;
+}
+function i_j_to_xyz(i, j, size_offset){
+    var offset = 0;
+    if(size_offset != undefined){
+        offset = size_offset;
+    }
+
+    var theta = i_j_to_angle(i,j,offset);
+    var r = 20;
+    var x,y,z;
+
+    x = r * Math.cos(theta);
+    y = r * Math.sin(theta);
+    z = i * 4 - size / 2;
+
+    return [x,y,z];
+}
+
 function routes_grid(){
     // Routes grid
-    var size = 20;
+    // Circles
     for(var i = 0; i < size; i++){
-        points = [];
-        points2 = [];
+        var points = [];
         var x,y,z;
         for(var j = 0; j < size; j++){
-            x = i * 4 - size / 2;
-            z = j * 4 - size / 2;
-            y = 0;
+            var xyz = i_j_to_xyz(i,j,3);
+            x = xyz[0];
+            y = xyz[1];
+            z = xyz[2];
             points = points.concat([x,y,z]);
-            z = i * 4 - size / 2;
-            x = j * 4 - size / 2;
-            points2 = points2.concat([x,y + 0.1,z]);
         }
         routes(points);
-        routes(points2);
+    }
+    for(var i = 0; i < size; i++){
+        var points = [];
+        var x,y,z;        
+        for(var j = 0; j < size; j++){
+            var xyz = i_j_to_xyz(j,i);
+            x = xyz[0];
+            y = xyz[1];
+            z = xyz[2];
+
+            points = points.concat([x,y,z]);
+        }
+        routes(points);
     }
 }
 
@@ -322,9 +353,10 @@ var size = 20;
 // Create buildings in this loop
 for(var i = 0; i < size; i++){
     for(var j = 0; j < size; j++){
-        var x = i * 4 - size/2 + 2;
-        var z = j * 4 - size/2 + 2;
-        var y = 0;
+        var xyz = i_j_to_xyz(i,j);
+        x = xyz[0];
+        y = xyz[1];
+        z = xyz[2];
         
         var building = new_building();
         
@@ -384,11 +416,11 @@ function render(){
     it++;
 
     // Rotate stuff according to time
-    //rotate(Math.sin(new Date().getTime()/1000)*0.6+0.8,0,1,0);
+    rotate(Math.sin(new Date().getTime()/10000)*2+0.8,0,1,0);
     rotate(0.8,0,1,0);
     var z = Math.sin(new Date().getTime()/4000) * 7 - 8;
     
-    translate(-2,-1,-41);
+    translate(-2,z,-41);
     
     render_triangle_array("roads");
 
