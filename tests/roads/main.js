@@ -222,17 +222,19 @@ function routes(points){
 
 function routes_grid(){
     // Routes grid
-    for(var i = 0; i < 20; i++){
+    var size = 20;
+    for(var i = 0; i < size; i++){
         points = [];
         points2 = [];
         var x,y,z;
-        x = y = z = 0;
-        for(var j = 0; j < 20; j++){
-            x = i * 4 - 10;
-            z = j - 10;
+        for(var j = 0; j < size; j++){
+            x = i * 4 - size / 2;
+            z = j * 4 - size / 2;
             y = 0;
             points = points.concat([x,y,z]);
-            points2 = points2.concat([z,y + 0.2,x]);
+            z = i * 4 - size / 2;
+            x = j * 4 - size / 2;
+            points2 = points2.concat([x,y + 0.1,z]);
         }
         routes(points);
         routes(points2);
@@ -315,26 +317,28 @@ function translate_3d(x,y,z,arr){
     }
 }
 
+var size = 20;
+
 // Create buildings in this loop
-for(var i = 0; i < 20; i++){
-    for(var j = 0; j < 20; j++){
-        var x = i * 4 - 12;
-        var z = j * 4 - 12;
+for(var i = 0; i < size; i++){
+    for(var j = 0; j < size; j++){
+        var x = i * 4 - size/2 + 2;
+        var z = j * 4 - size/2 + 2;
         var y = 0;
         
         var building = new_building();
         
         // City surface radius
-        var spread = 40;
+        var spread = 60;
         // Downtown surface radius
         var downtown_ring = 30;
         
         // Find distances from city center
         var dist_from_center = Math.sqrt(
-            Math.pow(x,2) +
-                Math.pow(z,2)
+            Math.pow(x-size,2) +
+                Math.pow(z-size,2)
         );
-        
+
         // Create a factor that is higher at city center
         // And 0 outside of downtown_ring
         function downtown_fac(dist){
@@ -348,7 +352,7 @@ for(var i = 0; i < 20; i++){
         // Create height using many factors
         var height = Math.random() * 2.0 *
             downtown_fac(dist_from_center) + 1;
-        height = 1
+        height = 0.0
         // Scale according to height + random z axis factor
         multiply_matrix_3d([
             1.5,0,0,
@@ -378,13 +382,13 @@ var it = 0;
 function render(){
     bind_shaders("main");
     it++;
-    translate(0,-4,-10);
 
     // Rotate stuff according to time
-    rotate(Math.sin(new Date().getTime()/40000)*2*Math.PI,0,1,0);
+    rotate(Math.sin(new Date().getTime()/4000)*2*Math.PI,0,1,0);
+    
+    translate(0,-3,-20);
     
     render_triangle_array("roads");
-    translate(0,0,-4);
 
     bind_shaders("buildings");
     render_triangle_array("buildings");
