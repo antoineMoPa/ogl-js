@@ -316,53 +316,54 @@ function translate_3d(x,y,z,arr){
 }
 
 // Create buildings in this loop
-for(var i = 0; i < 600; i++){
-    var building = new_building();
-
-    // City surface radius
-    var spread = 40;
-    // Downtown surface radius
-    var downtown_ring = 30;
-
-    // Position "randomly"
-    var x = Math.floor((Math.random()-0.5) * 8 * spread)/(4);
-    var z = Math.floor((Math.random()-0.5) * 8 * spread)/(4);
-    var y = 0;
-
-    // Find distances from city center
-    var dist_from_center = Math.sqrt(
-        Math.pow(x,2) +
-        Math.pow(z,2)
-    );
-
-    // Create a factor that is higher at city center
-    // And 0 outside of downtown_ring
-    function downtown_fac(dist){
-        if(dist < downtown_ring){
-            return 5*Math.pow(1-(dist/downtown_ring),2);
-        } else {
-            return 0;
+for(var i = 0; i < 20; i++){
+    for(var j = 0; j < 20; j++){
+        var x = i * 4 - 12;
+        var z = j * 4 - 12;
+        var y = 0;
+        
+        var building = new_building();
+        
+        // City surface radius
+        var spread = 40;
+        // Downtown surface radius
+        var downtown_ring = 30;
+        
+        // Find distances from city center
+        var dist_from_center = Math.sqrt(
+            Math.pow(x,2) +
+                Math.pow(z,2)
+        );
+        
+        // Create a factor that is higher at city center
+        // And 0 outside of downtown_ring
+        function downtown_fac(dist){
+            if(dist < downtown_ring){
+                return 5*Math.pow(1-(dist/downtown_ring),2);
+            } else {
+                return 0;
+            }
         }
+        
+        // Create height using many factors
+        var height = Math.random() * 2.0 *
+            downtown_fac(dist_from_center) + 1;
+        height = 1
+        // Scale according to height + random z axis factor
+        multiply_matrix_3d([
+            1.5,0,0,
+            0,height,0,
+            0,0,1.5,
+        ],building.vertex);
+        
+        // Translate that building
+        translate_3d(x,y,z,building.vertex);
+        
+        // Add building to final array
+        buildings.vertex = buildings.vertex.concat(building.vertex);
+        buildings.normal = buildings.normal.concat(building.normal);
+        buildings.uv = buildings.uv.concat(building.uv);
     }
-
-    // Create height using many factors
-    var height = Math.random() * 2.0 *
-        downtown_fac(dist_from_center) + 1;
-
-    // Scale according to height + random z axis factor
-    multiply_matrix_3d([
-        1,0,0,
-        0,height,0,
-        0,0,Math.random() * 0.5,
-    ],building.vertex);
-
-    // Translate that building
-    translate_3d(x,y,z,building.vertex);
-
-    // Add building to final array
-    buildings.vertex = buildings.vertex.concat(building.vertex);
-    buildings.normal = buildings.normal.concat(building.normal);
-    buildings.uv = buildings.uv.concat(building.uv);
 }
 
 create_triangle_array(
