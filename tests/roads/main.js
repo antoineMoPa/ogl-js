@@ -388,7 +388,7 @@ function render(){
     rotate(0.8,0,1,0);
     var z = Math.sin(new Date().getTime()/4000) * 7 - 8;
     
-    translate(-2,z,-41);
+    translate(-2,-1,-41);
     
     render_triangle_array("roads");
 

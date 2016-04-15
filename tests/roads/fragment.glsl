@@ -15,10 +15,6 @@ vec3 light_color = vec3(1.0f,1.0f,1.0f);
 
 
 void main(){
-    //color = texture(texSampler,UV).rgb;
-    //color = sin(pos_m);
-    //color = vec3(UV.x,UV.y,0);
-
     float dist = distance(pos_model,light_pos);
 
     float fac = clamp(dot(normal,light_pos),0.0,1.0);
@@ -27,9 +23,6 @@ void main(){
     vec3 diff_color = light_color * light_power *
         fac / (dist * dist);
     
-    //vec3 spec_color = light_color * light_power *
-    //    pow(3.0,fac) / (dist * dist);
-
     // Streetlamp light
     vec3 lamp_color = vec3(0.8,0.4,0.2);
 
@@ -56,7 +49,7 @@ void main(){
     }
 
     // White marks at 2 sides of the road.
-    if(x_division % 20 != 0 || x_division == 40){
+    if(x_division % 20 != 0 || x_division == 40 || x_division == 0){
         // Remove what's left
         white_marks *= 0.0;
     }
@@ -70,10 +63,14 @@ void main(){
         white_marks *= 0.0;
     }
 
+    // Darker in lanes
+    float bump_color = 0.1 * sin(UV.x * 30.0);
+    
     // Put all the colors together
     color = vec4(diff_color +
                  lamp_color +
                  yellow_marks +
+                 vec3(bump_color)+
                  white_marks
                  ,1.0);
 }
