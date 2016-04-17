@@ -222,22 +222,14 @@ function routes(points){
 
 var size = 20;
 
-function i_j_to_angle(i, j, size_offset){
-    return j/(size - size_offset) * 2 * Math.PI;
-}
 function i_j_to_xyz(i, j, size_offset){
     var offset = 0;
-    if(size_offset != undefined){
-        offset = size_offset;
-    }
 
-    var theta = i_j_to_angle(i,j,offset);
-    var r = 20;
     var x,y,z;
 
-    x = r * Math.cos(theta);
-    y = r * Math.sin(theta);
-    z = i * 4 - size / 2;
+    x = j * 4;
+    y = 0;
+    z = i * 4;
 
     return [x,y,z];
 }
@@ -263,7 +255,7 @@ function routes_grid(){
         for(var j = 0; j < size; j++){
             var xyz = i_j_to_xyz(j,i);
             x = xyz[0];
-            y = xyz[1];
+            y = xyz[1] + 0.1;
             z = xyz[2];
 
             points = points.concat([x,y,z]);
@@ -348,15 +340,13 @@ function translate_3d(x,y,z,arr){
     }
 }
 
-var size = 20;
-
 // Create buildings in this loop
 for(var i = 0; i < size; i++){
     for(var j = 0; j < size; j++){
         var xyz = i_j_to_xyz(i,j);
-        x = xyz[0];
+        x = xyz[0] + 2;
         y = xyz[1];
-        z = xyz[2];
+        z = xyz[2] + 2;
         
         var building = new_building();
         
@@ -380,10 +370,10 @@ for(var i = 0; i < size; i++){
                 return 0;
             }
         }
-        
+
         // Create height using many factors
         var height = Math.random() * 2.0 *
-            downtown_fac(dist_from_center) + 1;
+            downtown_fac(dist_from_center) + 0.2 + Math.random();
 
         // Scale according to height + random z axis factor
         multiply_matrix_3d([
@@ -414,12 +404,12 @@ var it = 0;
 function render(){
     bind_shaders("main");
     it++;
-
-    // Rotate stuff according to time
-    rotate(Math.sin(new Date().getTime()/10000)*2+0.8,0,1,0);
-    rotate(0.8,0,1,0);
-    var z = Math.sin(new Date().getTime()/4000) * 7 - 8;
     
+    // Rotate stuff according to time
+    //rotate(Math.sin(new Date().getTime()/1000)*0.5+1.3,0,1,0);
+    rotate(1.4,0,1,0);
+
+    var z = Math.sin(new Date().getTime()/4000) * 7 - 8;
     translate(-2,z,-41);
     
     render_triangle_array("roads");

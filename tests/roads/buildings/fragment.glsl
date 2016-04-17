@@ -56,15 +56,21 @@ void main(){
                          float(y_id) * 0.4 * sin(float(x_id))
                             );
     
-    if(x_id % 2 == 0 && y_id % 2 == 0){
+    if(x_id % 2 == 0 && y_id % 2 == 0 && is_wall >= 0.99){
         // Open window
         if(rand_window > 0.0){
             color += window_color * is_wall * sin(rand_window);
+            color.a -= 0.2 * is_wall;
         }
         // Closed window
         else {
             color += closed_window_color * is_wall;
         }
+    } else if(is_roof >= 0.99) {
+        color = vec4(0.2,0.2,0.2,1.0);
+        color.xyz *= 0.1 * floor(10.0*cos(100.0 * pos_model.x));
+        color.xyz *= 0.1 * floor(10.0*cos(100.0 * pos_model.z));
+    } else {
+        color = vec4(0.1,0.1,0.1,1.0);
     }
-    color.a = 1.0;
 }
