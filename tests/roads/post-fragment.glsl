@@ -42,7 +42,7 @@ void main(){
                 }
                 
                 // Find disance between point and (0,0)
-                dist_fac = sqrt(pow(i,2.0) + pow(j,2.0))/3.0;
+                dist_fac = sqrt(pow(float(i),2.0) + pow(float(j),2.0))/3.0;
                 
                 // Circle shape (Remove for square)
                 if(dist_fac > 1.0){
@@ -62,6 +62,6 @@ void main(){
         // I could also have divided by the area of the circle
         // But this is shorter
         // And I have to study
-        color /= pow(radius,2.0);
+        color /= pow(float(radius),2.0);
     }
 }
