@@ -60,6 +60,58 @@ namespace jsfn{
         return true;
     }
 
+    /**
+       Returns window width
+     */
+    static JSBool
+        window_width(JSContext *cx, unsigned argc, jsval *vp)
+    {
+        JS::CallArgs args = CallArgsFromVp(argc, vp);
+        args.rval().setInt32(OglApp::w);
+        return true;
+    }
+
+    /**
+       Returns window height
+     */
+    static JSBool
+        window_height(JSContext *cx, unsigned argc, jsval *vp)
+    {
+        JS::CallArgs args = CallArgsFromVp(argc, vp);
+        args.rval().setInt32(OglApp::h);
+        return true;
+    }
+
+    /**
+       Creates a texture for use in GLSL shaders
+       
+       Args: 
+       
+       name
+       width
+       height
+     */
+    static JSBool
+        create_texture(JSContext *cx, unsigned argc, jsval *vp)
+    {
+        JS::CallArgs args = CallArgsFromVp(argc, vp);
+
+        if(!args[0].isString()){
+            return false;
+        }
+
+        int w = args[1].toInt32();
+        int h = args[2].toInt32();
+        
+        const char * str =
+            JS_EncodeString(cx,args[0].toString());
+        
+        string index(str);
+        
+        OglApp::js_textures[index].init(w,h);
+        
+        return true;
+    }
     
     static JSBool
         rotate(JSContext *cx, unsigned argc, jsval *vp)

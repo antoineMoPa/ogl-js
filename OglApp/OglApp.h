@@ -25,6 +25,7 @@
 namespace OglApp{
     Shader * current_shader = nullptr;
     Shader post_process_shader;
+    int frame_count = 0;
 }
 
 #include "Image.h"
@@ -33,6 +34,8 @@ namespace OglApp{
     // The texture that we can post process
     // (and render on the quad)
     Image * rendered_tex;
+    using TextureMap = std::map<std::string,Image>;
+    TextureMap js_textures;
 }
 
 #include "Model.h"
@@ -67,6 +70,11 @@ namespace OglApp{
             glUniformMatrix4fv(MatrixID,1,GL_FALSE,&mvp[0][0]);
         }
     }
+
+    // Window width
+    int w = 100;
+    // Window height
+    int h = 100;
 }
 
 #include "js_functions.h"
@@ -76,11 +84,6 @@ namespace OglApp{
   https://developer.mozilla.org/en-US/docs/Mozilla/Projects/SpiderMonkey/How_to_embed_the_JavaScript_engine#Original_Document_Information
 */
 namespace OglApp{
-    // Window width
-    int w = 100;
-    // Window height
-    int h = 100;
-
     // The depth buffer
     GLuint depth_buf;
     // The render buffer
@@ -175,6 +178,11 @@ namespace OglApp{
         // Bind timestamp to variable
         glUniform1i(loc,get_timestamp());
 
+        loc = post_process_shader
+            .get_uniform_location("frame_count");
+
+        glUniform1i(loc,frame_count);
+            
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
         // Render the plane
@@ -187,6 +195,7 @@ namespace OglApp{
 
         glFlush();
         glutSwapBuffers();
+        frame_count++;
     }
 
     static void keyboard(unsigned char key, int x, int y){
@@ -399,7 +408,12 @@ namespace OglApp{
             {
                 JSAutoCompartment ac(cx, global);
                 JS_InitStandardClasses(cx, global);
-
+                /*
+                  function name in js,
+                  c++ function,
+                  argument count,
+                  flags
+                 */
                 static JSFunctionSpec my_functions[] = {
                     JS_FN("plus", jsfn::plus, 2, 0),
                     JS_FN("translate", jsfn::translate, 3, 0),
@@ -416,6 +430,9 @@ namespace OglApp{
                     JS_FN("log", jsfn::log, 1, 0),
                     JS_FN("push_matrix", jsfn::push_matrix, 0, 0),
                     JS_FN("pop_matrix", jsfn::pop_matrix, 0, 0),
+                    JS_FN("create_texture",jsfn::create_texture,3,0),
+                    JS_FN("window_width",jsfn::window_width,3,0),
+                    JS_FN("window_height",jsfn::window_height,3,0),
                     JS_FS_END
                 };
                 
