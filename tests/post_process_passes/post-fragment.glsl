@@ -19,20 +19,26 @@ void main(){
 
     if(time % 1000 < 500){
         color = last;
-        if(pass == 3){
-            //color = vec4(0.0);
+        if(pass == 1){
+            color = vec4(0.0);
         }
         if(UV.x < fac){
             color += vec4(0.3);
         }
     } else {
-        //color = last;
+        // Should display:
+        // first pass (blue) at left
+        // second pass (yellow) at right
         if(pass == 1){
             color = vec4(0.0,0.0,1.0,1.0);
         } else if (pass == 2){
             color = vec4(1.0,1.0,0.0,1.0);
         } else if (pass == 3){
-            color = texture(pass_2,UV);
+            if(UV.x < 0.5){
+                color = texture(pass_1,UV);
+            } else {
+                color = texture(pass_2,UV);
+            }
         }
     }
     
