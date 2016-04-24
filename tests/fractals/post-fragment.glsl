@@ -2,18 +2,22 @@
 
 in highp vec2 UV;
 out highp vec4 color;
-uniform sampler2D renderedTexture;
+uniform sampler2D last_pass;
+uniform sampler2D pass_0;
+uniform sampler2D pass_1;
+uniform sampler2D pass_2;
+uniform sampler2D pass_3;
 uniform int time;
+uniform int pass;
 uniform int frame_count;
+highp vec4 rand_var;
 
 void main(){
-    if(frame_count == 0){
-        color = vec4(UV.x,UV.y,1.0,1.0);
+    highp vec4 last = texture(last_pass,UV);
+    
+    if(pass == 0){
+        color = vec4(UV.x,UV.y,0.0,1.0);
     } else {
-        //color = texture(renderedTexture,UV);
-        //color += 0.01 * sin(UV.x);
-        //color += 0.01 * cos(UV.y);
+        color = last;
     }
-
-    //color = vec4(1.0,1.0,1.0,1.0);
 }

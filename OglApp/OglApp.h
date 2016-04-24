@@ -33,9 +33,22 @@ namespace OglApp{
 namespace OglApp{
     // The texture that we can post process
     // (and render on the quad)
-    Image * rendered_tex;
     using TextureMap = std::map<std::string,Image>;
     TextureMap js_textures;
+
+    /*
+      Contains data about an opengl framebuffer
+      And the texture it gets rendered to
+    */
+    class FrameBuffer{
+    public:
+        Image * rendered_tex;
+        GLuint fb_id;
+        GLuint depth_buf;
+    };
+
+    const int pass_total = 3;
+    FrameBuffer fbs [pass_total + 1];
 }
 
 #include "Model.h"
@@ -86,9 +99,8 @@ namespace OglApp{
 namespace OglApp{
     // The depth buffer
     GLuint depth_buf;
-    // The render buffer
-    GLuint fb_id;
-
+    FrameBuffer fb;
+    
     // The data of the render-to-texture quad
     GLuint quad_vertexbuffer;
 
@@ -131,20 +143,18 @@ namespace OglApp{
         JS_ShutDown();
     }
 
-    static void render(){
-        // Prepare to render to a texture
-        glBindFramebuffer(GL_FRAMEBUFFER, fb_id);
+    void main_render(){
         glViewport(0,0,w,h);
-
+        
         // Actual rendering
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
         // Reset camera transforms
         camera.mat.clear_model();
-
+        
         current_shader = &shaders[string("default")];
         current_shader->bind();
-        OglApp::rendered_tex->bind(3,"rendered_tex");
+        fbs[0].rendered_tex->bind(3,"rendered_tex");
         
         // return value and empty arg
         JS::RootedValue rval(cx);
@@ -161,23 +171,28 @@ namespace OglApp{
             rval.address()
             );
 
-        glFlush();
-        
-        // Render texture on a plane
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glFlush();        
+    }
+
+    void post_process_render(int pass){
         glViewport(0,0,w,h);
         post_process_shader.bind();
 
-        // bind texture
-        rendered_tex->bind(post_process_shader.get_id(),0,"renderedTexture");
-        
         // Add timestamp
         GLuint loc = post_process_shader
             .get_uniform_location("time");
-
+        
         // Bind timestamp to variable
         glUniform1i(loc,get_timestamp());
 
+        // Add render pass number
+        loc = post_process_shader
+            .get_uniform_location("pass");
+        
+        // Bind pass number
+        glUniform1i(loc,pass);
+
+        // Add frame count
         loc = post_process_shader
             .get_uniform_location("frame_count");
 
@@ -194,10 +209,56 @@ namespace OglApp{
         glDisableVertexAttribArray(0);
 
         glFlush();
+    }
+    
+    static void render(){
+        // Prepare to render to a texture
+        glBindFramebuffer(GL_FRAMEBUFFER, fbs[0].fb_id);
+        main_render();
+
+        int pass = 0;
+        GLuint pps = post_process_shader.get_id();
+        int last_fb = 0;
+        int curr_fb;
+
+        /*
+          Render each pass
+          Bind texture of last pass to pass_0/pass_1/etc.
+          pass_0 is the main rendered scene
+         */
+        for(pass = 0; pass <= pass_total; pass++){
+            curr_fb = pass;
+            
+            string num = "0";
+            num[0] += pass;
+            string pass_name("pass_");
+            pass_name += num;
+            
+            // bind texture
+            fbs[last_fb]
+                .rendered_tex->bind(pps,0,pass_name.c_str());
+
+            // bind texture
+            fbs[last_fb]
+                .rendered_tex->bind(pps,0,"last_pass");
+            
+            if(pass != pass_total){
+                // Render texture on a plane
+                glBindFramebuffer( GL_FRAMEBUFFER,
+                                   fbs[curr_fb].fb_id );
+            } else {
+                // Last pass: render to screen
+                glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            }
+            
+            post_process_render(pass);
+            last_fb = curr_fb;
+        }
+
         glutSwapBuffers();
         frame_count++;
     }
-
+    
     static void keyboard(unsigned char key, int x, int y){
         cout << "key " << key
              << " x: " << x
@@ -254,14 +315,16 @@ namespace OglApp{
 
         return ok;
     }
-
-    static void init_render_buffers(){
+    
+    static FrameBuffer init_render_buffers(){
+        FrameBuffer new_fb;
+        
         // Create framebuffer
-        glGenFramebuffers(1, &fb_id);
-        glGenRenderbuffers(1, &depth_buf);
-        glBindFramebuffer(GL_FRAMEBUFFER,fb_id);
+        glGenFramebuffers(1, &new_fb.fb_id);
+        glGenRenderbuffers(1, &new_fb.depth_buf);
+        glBindFramebuffer(GL_FRAMEBUFFER,new_fb.fb_id);
 
-        rendered_tex = new Image(w,h);
+        new_fb.rendered_tex = new Image(w,h);
 
         // Poor filtering. Needed !
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -271,21 +334,23 @@ namespace OglApp{
                                GL_FRAMEBUFFER,
                                GL_COLOR_ATTACHMENT0,
                                GL_TEXTURE_2D,
-                               rendered_tex->get_id(),0);
+                               new_fb.rendered_tex->get_id(),0);
 
         GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
         glDrawBuffers(1, DrawBuffers);
 
-        glBindRenderbuffer(GL_RENDERBUFFER, depth_buf);
+        glBindRenderbuffer(GL_RENDERBUFFER, new_fb.depth_buf);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, w, h);
 
         glFramebufferRenderbuffer(
-                                  GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth_buf
+                                  GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, new_fb.depth_buf
             );
 
         if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
             cerr << "Framebuffer setup error" << endl;
         }
+
+        return new_fb;
     }
 
     /**
@@ -357,9 +422,13 @@ namespace OglApp{
 
         // Create the plane for render-to-texture
         create_render_quad();
+        
         // Init buffers for render-to-texture
-        init_render_buffers();
-
+        // and post process
+        for(int i = 0; i < pass_total + 1; i++){
+            fbs[i] = init_render_buffers();
+        }
+        
         // The app becomes alive here
         glutMainLoop();
     }
