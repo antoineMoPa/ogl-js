@@ -176,8 +176,7 @@ namespace OglApp{
 
     void post_process_render(int pass){
         glViewport(0,0,w,h);
-        post_process_shader.bind();
-
+        
         // Add timestamp
         GLuint loc = post_process_shader
             .get_uniform_location("time");
@@ -216,32 +215,33 @@ namespace OglApp{
         glBindFramebuffer(GL_FRAMEBUFFER, fbs[0].fb_id);
         main_render();
 
-        int pass = 0;
+        int pass;
         GLuint pps = post_process_shader.get_id();
         int last_fb = 0;
         int curr_fb;
 
+        post_process_shader.bind();
+        
         /*
           Render each pass
           Bind texture of last pass to pass_0/pass_1/etc.
           pass_0 is the main rendered scene
          */
-        for(pass = 0; pass <= pass_total; pass++){
+        for(pass = 1; pass <= pass_total; pass++){
             curr_fb = pass;
             
             string num = "0";
-            num[0] += pass;
+            num[0] += pass - 1;
             string pass_name("pass_");
             pass_name += num;
 
-            // bind texture
+            // bind last texture
             fbs[last_fb]
-                .rendered_tex->bind(pps,0,pass_name.c_str());
+                .rendered_tex->bind(pps,3,"last_pass");
 
-            // bind texture
             fbs[last_fb]
-                .rendered_tex->bind(pps,0,"last_pass");
-            
+                .rendered_tex->bind(pps,3 + pass,pass_name.c_str());
+
             if(pass != pass_total){
                 // Render texture on a plane
                 glBindFramebuffer( GL_FRAMEBUFFER,
