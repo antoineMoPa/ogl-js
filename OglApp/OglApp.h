@@ -47,6 +47,7 @@ namespace OglApp{
         GLuint depth_buf;
     };
 
+    bool enable_2_pass_pp = false;
     const int pass_total = 3;
     FrameBuffer fbs [pass_total + 1];
 }
@@ -209,12 +210,8 @@ namespace OglApp{
 
         glFlush();
     }
-    
-    static void render(){
-        // Prepare to render to a texture
-        glBindFramebuffer(GL_FRAMEBUFFER, fbs[0].fb_id);
-        main_render();
 
+    void two_pass_pp(){
         int pass;
         GLuint pps = post_process_shader.get_id();
         int last_fb = 0;
@@ -222,12 +219,14 @@ namespace OglApp{
 
         post_process_shader.bind();
         
+        int limit = pass_total;
+
         /*
           Render each pass
           Bind texture of last pass to pass_0/pass_1/etc.
           pass_0 is the main rendered scene
          */
-        for(pass = 1; pass <= pass_total; pass++){
+        for(pass = 1; pass <= limit; pass++){
             curr_fb = pass;
             
             string num = "0";
@@ -253,6 +252,24 @@ namespace OglApp{
             
             post_process_render(pass);
             last_fb = curr_fb;
+        }
+    }
+    
+    static void render(){
+        // Prepare to render to a texture
+        glBindFramebuffer(GL_FRAMEBUFFER, fbs[0].fb_id);
+        main_render();
+
+        if(enable_2_pass_pp == true){
+            two_pass_pp();
+        } else {
+            GLuint pps = post_process_shader.get_id();
+            fbs[0]
+                .rendered_tex->bind(pps,0,"renderedTexture");
+
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            post_process_shader.bind();
+            post_process_render(0);
         }
 
         glutSwapBuffers();
