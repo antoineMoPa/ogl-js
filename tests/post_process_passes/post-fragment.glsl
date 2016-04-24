@@ -15,7 +15,19 @@ highp vec4 rand_var;
 
 void main(){
     highp vec4 last = texture(last_pass,UV);
-    
+
+    highp float fac = float(pass)/4.0;
+
+    if(time % 1000 < 500){
+        color = last;
+        if(pass == 0){
+            color = vec4(0.0);
+        }
+        if(UV.x < fac){
+            color += vec4(0.3);
+        }
+    }
+    /*
     if(pass == 0){
         color = vec4(0.0,1.0,0.0,1.0);
     } else if (pass == 1){
@@ -32,6 +44,6 @@ void main(){
         } else {
             color = texture(pass_4,UV);
         }
-    }
+        }*/
     
 }

@@ -233,7 +233,7 @@ namespace OglApp{
             num[0] += pass;
             string pass_name("pass_");
             pass_name += num;
-            
+
             // bind texture
             fbs[last_fb]
                 .rendered_tex->bind(pps,0,pass_name.c_str());
