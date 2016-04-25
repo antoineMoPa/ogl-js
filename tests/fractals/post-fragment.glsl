@@ -66,11 +66,9 @@ void main(){
     if(frame_count == 0){
 
     } else if(pass == 1){
+        color = vec4(0.2,0.8,1.0,1.0);
         // Set color according to current step
-        color.r = 1.0 - float(current_step) / float(iterations);
-        color.g = 0.0;
-        color.b = color.r;
-        color.a = 1.0;
+        color.rgb *= float(current_step) / float(iterations);
     } else if(pass == 2){
         color = last;
     } else if(pass == 3){
