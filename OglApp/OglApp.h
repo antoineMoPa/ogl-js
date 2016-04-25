@@ -327,6 +327,39 @@ namespace OglApp{
     }
     
     static void keyboard(unsigned char key, int x, int y){
+        // return value and empty arg
+        JS::RootedValue rval(cx);
+        JS::AutoValueVector argv(cx);
+
+        argv.resize(3);
+        
+        JS::Value js_key;
+        JS::Value js_x;
+        JS::Value js_y;
+
+        string key_s = " ";
+        key_s[0] = key;
+        
+        js_key.setString(JS_NewStringCopyN(cx,key_s.c_str(),1));
+
+        js_x.setNumber((float)x/(float)w);
+        js_y.setNumber((float)y/(float)w);
+        
+        argv[0] = js_key;
+        argv[1] = js_x;
+        argv[2] = js_y;
+        
+        // Call javascript "render" function
+        // defined in the app's main.js
+        JSBool ok = JS_CallFunctionName(
+            cx,
+            *gl,
+            "on_key",
+            3,
+            argv.begin(),
+            rval.address()
+            );
+        
         cout << "key " << key
              << " x: " << x
              << " y: " << y
