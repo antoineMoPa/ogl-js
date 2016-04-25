@@ -26,7 +26,9 @@ void main(){
     int current_step = 0;
 
     highp float maximum = 10.0;
-    int iterations = 40;
+    
+    int iterations = int(10.0 * sin(float(time) / 300.0)) + 10;
+    
     for(int i = 0; i < iterations; i++){
         old_z = z;
         z.x = pow(z.x,2.0) - pow(z.y,2.0);
@@ -40,12 +42,12 @@ void main(){
     }
 
     if(frame_count == 0){
+
+    } else if(pass == 1){
         color.r = float(current_step) / float(iterations);
         color.g = 0.0;
         color.b = color.r;
         color.a = 1.0;
-    } else if(pass == 1){
-        color = texture(pass_2,UV);
     } else if(pass == 2){
         color = last;
     } else if(pass == 3){
