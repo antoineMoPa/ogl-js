@@ -12,30 +12,48 @@ uniform int frame_count;
 highp vec4 rand_var;
 
 void main(){
+    // Last post processed screen
+    // Not used in this script
     highp vec4 last = texture(last_pass,UV);
 
-    highp float fac = float(pass - 1)/4.0;
-
-    // a,b = c
+    // Complex numbers
     highp vec2 z,c,old_z;
 
+    // Z and C have a real and an imaginary part
+    // C is initialized with screen coordinates
+    
     z = vec2(0.00,0.00);
+
+    // 5.0 is the zoom factor
     c = 5.0 * vec2(UV.x - 0.5, UV.y - 0.5);
+    // Move that a little
     c.x -= 0.5;
 
     int current_step = 0;
 
-    highp float maximum = 10.0;
-    
     int iterations = int(10.0 * sin(float(time) / 300.0)) + 10;
-    
+
+    // Iterate and do math
     for(int i = 0; i < iterations; i++){
+        // 'next value of z' = z ^2 + c
+        // If you do the math:
+        // z = a + bj
+        // next z real part = a^2 - b^2
+        // next z img part = 2 * a * b * i
+        // next z img part = 2 * a * b * j (Engineers)
+
+        // Keep the current (old) value
         old_z = z;
+
+        // Set new values according to math
         z.x = pow(z.x,2.0) - pow(z.y,2.0);
         z.y = 2.0 * old_z.x * old_z.y;
         z += c;
-        
-        if(distance(z,vec2(0.0,0.0)) > maximum){
+
+        // If z goes out of some value (10.0), we know
+        // it is not in the mandelbrot set
+        // (So we'll color this place)
+        if(distance(z,vec2(0.0,0.0)) > 10.0){
             break;
         }
         current_step++;
@@ -44,6 +62,7 @@ void main(){
     if(frame_count == 0){
 
     } else if(pass == 1){
+        // Set color according to current step
         color.r = float(current_step) / float(iterations);
         color.g = 0.0;
         color.b = color.r;
