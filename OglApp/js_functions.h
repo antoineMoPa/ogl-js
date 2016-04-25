@@ -74,13 +74,16 @@ namespace jsfn{
 
         const char * str =
             JS_EncodeString(cx,args[0].toString());
-        
-        if(args[1].isNumber()){
-            GLuint loc = OglApp::post_process_shader
-                .get_uniform_location(str);
-            
+
+        GLuint loc = OglApp::post_process_shader
+            .get_uniform_location(str);
+
+        if(args[1].isInt32()){
+            glUniform1i(loc,args[1].toInt32());
+        } else if (args[1].isNumber()){
             glUniform1f(loc,args[1].toNumber());
         }
+        
 
         return true;
     }

@@ -7,6 +7,9 @@ uniform sampler2D pass_0;
 uniform sampler2D pass_1;
 uniform sampler2D pass_2;
 uniform highp float zoom;
+uniform highp float x_offset;
+uniform highp float y_offset;
+uniform int iterations;
 uniform int time;
 uniform int pass;
 uniform int frame_count;
@@ -29,9 +32,10 @@ void main(){
     // Move that a little
     c.x -= 0.5;
 
-    int current_step = 0;
+    c.x += x_offset;
+    c.y += y_offset;
 
-    int iterations = 10;
+    int current_step = 0;
 
     // Iterate and do math
     for(int i = 0; i < iterations; i++){
