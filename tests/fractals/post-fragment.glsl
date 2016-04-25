@@ -6,6 +6,7 @@ uniform sampler2D last_pass;
 uniform sampler2D pass_0;
 uniform sampler2D pass_1;
 uniform sampler2D pass_2;
+uniform highp float zoom;
 uniform int time;
 uniform int pass;
 uniform int frame_count;
@@ -24,14 +25,13 @@ void main(){
     
     z = vec2(0.00,0.00);
 
-    // 5.0 is the zoom factor
-    c = 5.0 * vec2(UV.x - 0.5, UV.y - 0.5);
+    c = zoom * vec2(UV.x - 0.5, UV.y - 0.5);
     // Move that a little
     c.x -= 0.5;
 
     int current_step = 0;
 
-    int iterations = int(10.0 * sin(float(time) / 300.0)) + 10;
+    int iterations = 10;
 
     // Iterate and do math
     for(int i = 0; i < iterations; i++){

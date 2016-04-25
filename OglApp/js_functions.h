@@ -61,6 +61,31 @@ namespace jsfn{
     }
 
     /**
+       Pass a variable to the GLSL shader
+     */
+    static JSBool
+        shader_var(JSContext *cx, unsigned argc, jsval *vp)
+    {
+        JS::CallArgs args = CallArgsFromVp(argc, vp);
+
+        if(!args[0].isString()){
+            return false;
+        }
+
+        const char * str =
+            JS_EncodeString(cx,args[0].toString());
+        
+        if(args[1].isNumber()){
+            GLuint loc = OglApp::post_process_shader
+                .get_uniform_location(str);
+            
+            glUniform1f(loc,args[1].toNumber());
+        }
+
+        return true;
+    }
+
+    /**
        Returns window width
      */
     static JSBool

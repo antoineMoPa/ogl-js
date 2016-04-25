@@ -57,6 +57,7 @@ namespace OglApp{
             return ShaderID;
         }
         GLuint get_uniform_location(const char * name){
+            bind();
             glGetUniformLocation(ProgramID,name);
         }
         bool load(const char * vertex_path, const char * fragment_path){

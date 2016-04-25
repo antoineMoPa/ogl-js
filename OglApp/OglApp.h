@@ -266,7 +266,7 @@ namespace OglApp{
         GLuint pps = post_process_shader.get_id();
         int last_fb = 0;
         int curr_fb;
-
+        
         post_process_shader.bind();
         
         int limit = pass_total;
@@ -359,11 +359,6 @@ namespace OglApp{
             argv.begin(),
             rval.address()
             );
-        
-        cout << "key " << key
-             << " x: " << x
-             << " y: " << y
-             << endl;
     }
 
     static void load_default_shaders(){
@@ -566,6 +561,7 @@ namespace OglApp{
                     JS_FN("window_width",jsfn::window_width,3,0),
                     JS_FN("window_height",jsfn::window_height,3,0),
                     JS_FN("enable_2_pass_pp",jsfn::enable_2_pass_pp,0,0),
+                    JS_FN("shader_var",jsfn::shader_var,2,0),
                     JS_FS_END
                 };
                 
