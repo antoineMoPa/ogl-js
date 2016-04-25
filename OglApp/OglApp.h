@@ -45,6 +45,52 @@ namespace OglApp{
         Image * rendered_tex;
         GLuint fb_id;
         GLuint depth_buf;
+
+        void delete_ressources(){
+            rendered_tex->delete_ressources();
+            glDeleteRenderbuffers(1, &depth_buf);
+            glDeleteRenderbuffers(1, &fb_id);
+        }
+        
+        void create(int w, int h){
+            // Create framebuffer
+            glGenFramebuffers(1, &fb_id);
+            glGenRenderbuffers(1, &depth_buf);
+            glBindFramebuffer(GL_FRAMEBUFFER, fb_id);
+            
+            rendered_tex = new Image(w,h);
+            
+            // Poor filtering. Needed !
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            
+            glFramebufferTexture2D(
+                                   GL_FRAMEBUFFER,
+                                   GL_COLOR_ATTACHMENT0,
+                                   GL_TEXTURE_2D,
+                                   rendered_tex->get_id(),0);
+            
+            GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
+            glDrawBuffers(1, DrawBuffers);
+
+            glBindRenderbuffer(GL_RENDERBUFFER, depth_buf);
+            glRenderbufferStorage(GL_RENDERBUFFER,
+                                  GL_DEPTH_COMPONENT, w, h);
+            
+            glFramebufferRenderbuffer(
+                                      GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth_buf
+                                      );
+             
+            if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
+                cerr << "Framebuffer setup error" << endl;
+            }
+        }
+        
+        void resize(int w, int h){
+            delete_ressources();
+            create(w, h);
+            rendered_tex->resize(w, h);
+        }
     };
 
     bool enable_2_pass_pp = false;
@@ -133,6 +179,10 @@ namespace OglApp{
         w = rhs_w;
         h = rhs_h;
         camera.mat.resize(w,h);
+        
+        for(int i = 0; i < pass_total + 1; i++){
+            fbs[i].resize(w, h);
+        }
     }
 
     /**
@@ -332,43 +382,6 @@ namespace OglApp{
 
         return ok;
     }
-    
-    static FrameBuffer init_render_buffers(){
-        FrameBuffer new_fb;
-        
-        // Create framebuffer
-        glGenFramebuffers(1, &new_fb.fb_id);
-        glGenRenderbuffers(1, &new_fb.depth_buf);
-        glBindFramebuffer(GL_FRAMEBUFFER,new_fb.fb_id);
-
-        new_fb.rendered_tex = new Image(w,h);
-
-        // Poor filtering. Needed !
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-
-        glFramebufferTexture2D(
-                               GL_FRAMEBUFFER,
-                               GL_COLOR_ATTACHMENT0,
-                               GL_TEXTURE_2D,
-                               new_fb.rendered_tex->get_id(),0);
-
-        GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
-        glDrawBuffers(1, DrawBuffers);
-
-        glBindRenderbuffer(GL_RENDERBUFFER, new_fb.depth_buf);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, w, h);
-
-        glFramebufferRenderbuffer(
-                                  GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, new_fb.depth_buf
-            );
-
-        if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
-            cerr << "Framebuffer setup error" << endl;
-        }
-
-        return new_fb;
-    }
 
     /**
        Creates the plane that will be used to render everything on
@@ -443,7 +456,7 @@ namespace OglApp{
         // Init buffers for render-to-texture
         // and post process
         for(int i = 0; i < pass_total + 1; i++){
-            fbs[i] = init_render_buffers();
+            fbs[i].create(w, h);
         }
         
         // The app becomes alive here

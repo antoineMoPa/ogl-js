@@ -9,7 +9,7 @@ public:
     Image(){
 
     }
-
+    
     /* generate empty image */
     Image(int w, int h){
         init(w,h);
@@ -18,6 +18,15 @@ public:
     void init(int w, int h){
         // Create framebuffer texture
         glGenTextures(1, &textureID);
+
+        resize(w, h);
+    }
+
+    void delete_ressources(){
+        glDeleteTextures(1, &textureID);
+    }
+
+    void resize(int w, int h){
         glBindTexture(GL_TEXTURE_2D, textureID);
         
         glTexImage2D(
@@ -118,6 +127,7 @@ public:
         if(data != nullptr){
             delete data;
         }
+        delete_ressources();
     }
     
     GLuint textureID;

@@ -63,7 +63,7 @@ void main(){
 
     } else if(pass == 1){
         // Set color according to current step
-        color.r = float(current_step) / float(iterations);
+        color.r = 1.0 - float(current_step) / float(iterations);
         color.g = 0.0;
         color.b = color.r;
         color.a = 1.0;
