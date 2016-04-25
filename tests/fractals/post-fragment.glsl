@@ -23,19 +23,27 @@ void main(){
     c = 5.0 * vec2(UV.x - 0.5, UV.y - 0.5);
     c.x -= 0.5;
 
-    for(int i = 0; i < 10; i++){
+    int current_step = 0;
+
+    highp float maximum = 10.0;
+    int iterations = 10;
+    for(int i = 0; i < iterations; i++){
         old_z = z;
         z.x = pow(z.x,2.0) - pow(z.y,2.0);
         z.y = 2.0 * old_z.x * old_z.y;
         z += c;
+        
+        if(distance(z,vec2(0.0,0.0)) > maximum){
+            break;
+        }
+        current_step++;
     }
 
     if(frame_count == 0){
-        if(distance(z,vec2(0.0,0.0)) > 10.0){
-            color = vec4(1.0);
-        } else {
-            color = vec4(0.0);
-        }
+        color.r = float(current_step) / float(iterations);
+        color.g = 0.0;
+        color.b = color.r;
+        color.a = 1.0;
     } else if(pass == 1){
         color = texture(pass_2,UV);
     } else if(pass == 2){
