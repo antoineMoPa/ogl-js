@@ -26,7 +26,7 @@ void main(){
     int current_step = 0;
 
     highp float maximum = 10.0;
-    int iterations = 10;
+    int iterations = 40;
     for(int i = 0; i < iterations; i++){
         old_z = z;
         z.x = pow(z.x,2.0) - pow(z.y,2.0);
