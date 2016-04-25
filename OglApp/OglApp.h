@@ -227,9 +227,19 @@ namespace OglApp{
 
     void post_process_render(int pass){
         glViewport(0,0,w,h);
+
+        // TODO document all these defined values in some place
+        // for new users
         
-        // Add timestamp
+        // Add aspect ratio
         GLuint loc = post_process_shader
+            .get_uniform_location("ratio");
+        
+        // Bind it
+        glUniform1f(loc,(float)w/(float)h);
+
+        // Add timestamp
+        loc = post_process_shader
             .get_uniform_location("time");
         
         // Bind timestamp to variable

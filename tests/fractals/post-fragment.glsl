@@ -9,6 +9,7 @@ uniform sampler2D pass_2;
 uniform highp float zoom;
 uniform highp float x_offset;
 uniform highp float y_offset;
+uniform highp float ratio;
 uniform int iterations;
 uniform int time;
 uniform int pass;
@@ -28,9 +29,8 @@ void main(){
     
     z = vec2(0.00,0.00);
 
-    c = zoom * vec2(UV.x - 0.5, UV.y - 0.5);
-    // Move that a little
-    c.x -= 0.5;
+    c = zoom * vec2(UV.x * ratio - 0.5, UV.y - 0.5);
+    c.x -= 1.0;
 
     c.x += x_offset;
     c.y += y_offset;

@@ -32,13 +32,13 @@ function on_key(key, x, y){
     } else if (key == "-"){
         zoom *= 1.05;
     } else if (key == "a"){
-        x_offset -= 0.1 * zoom;
+        x_offset -= 0.03 * zoom;
     } else if (key == "d"){
-        x_offset += 0.1 * zoom;
+        x_offset += 0.03 * zoom;
     } else if (key == "s"){
-        y_offset -= 0.1 * zoom;
+        y_offset -= 0.03 * zoom;
     } else if (key == "w"){
-        y_offset += 0.1 * zoom;
+        y_offset += 0.03 * zoom;
     } else if (key == "i"){
         iterations++;
     }
