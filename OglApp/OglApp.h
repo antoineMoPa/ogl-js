@@ -519,6 +519,7 @@ namespace OglApp{
                     JS_FN("create_texture",jsfn::create_texture,3,0),
                     JS_FN("window_width",jsfn::window_width,3,0),
                     JS_FN("window_height",jsfn::window_height,3,0),
+                    JS_FN("enable_2_pass_pp",jsfn::enable_2_pass_pp,0,0),
                     JS_FS_END
                 };
                 

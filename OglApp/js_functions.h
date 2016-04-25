@@ -548,6 +548,33 @@ namespace jsfn{
         return true;
     }
 
+    /**
+       Enable 2 pass post process.
+       
+       In this mode, post-fragment.glsl shader will
+       receive:
+       
+       uniform sampler2D last_pass;
+       uniform sampler2D pass_0; // render result
+       uniform sampler2D pass_1; // result of first pass
+       uniform sampler2D pass_2; // result of second pass
+       uniform int time;
+       uniform int pass; // current pass
+       [...]
+       At every pass, the shader is run. 
+       You have access to the last pass color in a texture.
+       (You have to set color at each pass)
+       
+    */
+    static JSBool
+        enable_2_pass_pp(JSContext *cx, unsigned argc, jsval *vp)
+    {
+
+        OglApp::enable_2_pass_pp = true;
+        cout << "2 pass post processing enabled." << endl;
+        
+        return true;
+    }
     
     /**
        log strings

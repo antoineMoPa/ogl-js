@@ -6,7 +6,6 @@ uniform sampler2D last_pass;
 uniform sampler2D pass_0;
 uniform sampler2D pass_1;
 uniform sampler2D pass_2;
-uniform sampler2D pass_3;
 uniform int time;
 uniform int pass;
 uniform int frame_count;
