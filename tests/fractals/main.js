@@ -14,11 +14,11 @@ enable_2_pass_pp();
 var zoom = 2.5;
 var x_offset = 0.0;
 var y_offset = 0.0;
-var iterations = 10;
+var iterations = 1;
 var fractal = 0;
 
 console.log("\n    WELCOME TO THE SMALL MANDELBROT BROWSER    \n");
-console.log("wasd to move, +(=)/- to zoom/unzoom, i to iterate more.");
+console.log("wasd to move, +(=)/- to zoom/unzoom, i/I to iterate more/less.");
 
 function render(){
     shader_var("zoom",zoom);
@@ -43,6 +43,8 @@ function on_key(key, x, y){
         y_offset += 0.03 * zoom;
     } else if (key == "i"){
         iterations++;
+    } else if (key == "I"){
+        iterations--;
     } else if (key == "f"){
         fractal++;
     }

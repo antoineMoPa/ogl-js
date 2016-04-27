@@ -21,11 +21,7 @@ highp vec2 screen(){
     return zoom * vec2(UV.x * ratio - 0.5, UV.y - 0.5);
 }
 
-void main(){
-    // Last post processed screen
-    // Not used in this script
-    highp vec4 last = texture(last_pass,UV);
-
+highp vec4 fractals(){
     // Complex numbers
     highp vec2 z,c,old_z;
 
@@ -42,7 +38,7 @@ void main(){
         
         z = vec2(0,0);
         
-        z.y = 0.5 * time_fac * sqrt(zoom);
+        //z.y = 0.5 * time_fac * sqrt(zoom);
     } else if (fractal == 1){
         // Julia
         z = screen();
@@ -54,7 +50,6 @@ void main(){
 
         c.y = 0.5 * time_fac * sqrt(zoom);
     }
-
     
     int current_step = 0;
 
@@ -83,15 +78,36 @@ void main(){
         }
         current_step++;
     }
+    
+    highp vec4 color = vec4(0.2,0.8,1.0,1.0);
+    // Set color according to current step
+    color.rgb *= float(current_step) / float(iterations);
 
+    return color;
+}
+
+void main(){
+    // Last post processed screen
+    // Not used in this script
+    highp vec4 last = texture(last_pass,UV);
+    
     if(frame_count == 0){
 
     } else if(pass == 1){
-        color = vec4(0.2,0.8,1.0,1.0);
-        // Set color according to current step
-        color.rgb *= float(current_step) / float(iterations);
+        color = fractals();
     } else if(pass == 2){
-        color = last;
+
+        highp vec2 x_offset = vec2(0.001,0.000);
+        highp vec2 y_offset = vec2(0.000,0.001);
+        
+        color =
+            texture(last_pass,UV + x_offset) -
+            texture(last_pass,UV - x_offset) +
+            texture(last_pass,UV + y_offset) -
+            texture(last_pass,UV - y_offset);
+            
+        color = abs(color);
+        color.a = 1.0;
     } else if(pass == 3){
         color = last;
     }
