@@ -14,7 +14,12 @@ uniform int iterations;
 uniform int time;
 uniform int pass;
 uniform int frame_count;
+uniform int fractal;
 highp vec4 rand_var;
+
+highp vec2 screen(){
+    return zoom * vec2(UV.x * ratio - 0.5, UV.y - 0.5);
+}
 
 void main(){
     // Last post processed screen
@@ -24,17 +29,30 @@ void main(){
     // Complex numbers
     highp vec2 z,c,old_z;
 
-    // Z and C have a real and an imaginary part
-    // C is initialized with screen coordinates
+    if(fractal == 0){
+        // Mandelbrot
+        c = screen();
+        c.x -= 1.0;
+        
+        c.x += x_offset;
+        c.y += y_offset;
+        
+        z = vec2(0,0);
+        
+        //z.y = cos(float(time % 5000)/5000.0 * 2.0 * 3.1415);
+    } else if (fractal == 1){
+        // Julia
+        z = screen();
+        
+        z.x += x_offset;
+        z.y += y_offset;
+        
+        c = vec2(-0.835,-0.2321);
+        
+        c.y = cos(float(time % 5000)/5000.0 * 2.0 * 3.1415);
+    }
+
     
-    z = vec2(0.00,0.00);
-
-    c = zoom * vec2(UV.x * ratio - 0.5, UV.y - 0.5);
-    c.x -= 1.0;
-
-    c.x += x_offset;
-    c.y += y_offset;
-
     int current_step = 0;
 
     // Iterate and do math
