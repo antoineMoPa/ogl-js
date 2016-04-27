@@ -29,6 +29,9 @@ void main(){
     // Complex numbers
     highp vec2 z,c,old_z;
 
+    highp float time_fac = 1.0 * cos( float(time % 50000)/50000.0 *
+                                2.0 * 3.1415 );
+    
     if(fractal == 0){
         // Mandelbrot
         c = screen();
@@ -39,17 +42,17 @@ void main(){
         
         z = vec2(0,0);
         
-        //z.y = cos(float(time % 5000)/5000.0 * 2.0 * 3.1415);
+        z.y = 0.5 * time_fac * sqrt(zoom);
     } else if (fractal == 1){
         // Julia
         z = screen();
         
-        z.x += x_offset;
+        z.x += x_offset - 0.5;
         z.y += y_offset;
         
         c = vec2(-0.835,-0.2321);
-        
-        c.y = cos(float(time % 5000)/5000.0 * 2.0 * 3.1415);
+
+        c.y = 0.5 * time_fac * sqrt(zoom);
     }
 
     
