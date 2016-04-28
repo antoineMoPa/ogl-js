@@ -15,19 +15,39 @@ uniform int time;
 uniform int pass;
 uniform int frame_count;
 uniform int fractal;
+uniform int post_proc;
 highp vec4 rand_var;
 
+/*
+  return coordinates from the screen
+ */
 highp vec2 screen(){
     return zoom * vec2(UV.x * ratio - 0.5, UV.y - 0.5);
 }
 
+/*
+  Complex square
+ */
+highp vec2 to_the_2(highp vec2 z){
+    highp vec2 old_z;
+    // Keep the current (old) value
+    old_z = z;
+    
+    // Set new values according to math
+    z.x = pow(z.x,2.0) - pow(z.y,2.0);
+    z.y = 2.0 * old_z.x * old_z.y;
+
+    return z;
+}
+
 highp vec4 fractals(){
     // Complex numbers
-    highp vec2 z,c,old_z;
+    highp vec2 z,c;
     
     highp float time_fac = 1.0 *
         cos(float(time % 50000)/50000.0 * 2.0 * 3.1415 );
-    
+
+    // Initial conditions
     if(fractal == 0){
         // Mandelbrot
         c = screen();
@@ -48,7 +68,17 @@ highp vec4 fractals(){
         
         c = vec2(0.345,0.003);
         
-        //c.y = 0.5 * time_fac * sqrt(zoom);
+        c.y = 0.5 * time_fac * sqrt(zoom);
+    } else if (fractal == 2){
+        // Julia
+        z = screen();
+        
+        z.x += x_offset - 0.5;
+        z.y += y_offset;
+        
+        c = vec2(0.915,0.03);
+        
+        c.y = 0.5 * time_fac * sqrt(zoom);
     }
     
     int current_step = 0;
@@ -62,14 +92,16 @@ highp vec4 fractals(){
         // next z img part = 2 * a * b * i
         // next z img part = 2 * a * b * j (Engineers)
 
-        // Keep the current (old) value
-        old_z = z;
-
-        // Set new values according to math
-        z.x = pow(z.x,2.0) - pow(z.y,2.0);
-        z.y = 2.0 * old_z.x * old_z.y;
+        z = to_the_2(z);
+        
+        // higher powers
+        if(fractal == 2){
+            z = to_the_2(z);
+            z = to_the_2(z);
+        }
+        
         z += c;
-
+        
         // If z goes out of some value (10.0), we know
         // it is not in the mandelbrot set
         // (So we'll color this place)
@@ -96,21 +128,28 @@ void main(){
     } else if(pass == 1){
         color = fractals();
     } else if(pass == 2){
-        highp vec3 old = texture(pass_2,UV).rgb;
-        highp vec2 x_offset = vec2(0.001,0.000);
-        highp vec2 y_offset = vec2(0.000,0.001);
-        
-        color =
-            texture(last_pass,UV + x_offset) -
-            texture(last_pass,UV - x_offset) +
-            texture(last_pass,UV + y_offset) -
-            texture(last_pass,UV - y_offset);
-            
-        color = abs(color);
-        color.a = 1.0;
+        if(post_proc == 0){
+            color = last;
+            return;
+        } else if (post_proc == 1){
 
-        // Fun stuff:
-        //color.rgb += old;
+            highp vec3 old = texture(pass_2,UV).rgb;
+            
+            highp vec2 x_offset = vec2(0.001,0.000);
+            highp vec2 y_offset = vec2(0.000,0.001);
+            
+            color =
+                texture(last_pass,UV + x_offset) -
+                texture(last_pass,UV - x_offset) +
+                texture(last_pass,UV + y_offset) -
+                texture(last_pass,UV - y_offset);
+            
+            color = abs(color);
+            color.a = 1.0;
+            
+            // Fun stuff:
+            //color.rgb += old;
+        }
     } else if(pass == 3){
         color = last;
     }
