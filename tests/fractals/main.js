@@ -26,7 +26,7 @@ function render(){
     shader_var("x_offset",x_offset);
     shader_var("y_offset",y_offset);
     shader_var("iterations",iterations);
-    shader_var("fractal",fractal % 3);
+    shader_var("fractal",fractal % 4);
     shader_var("post_proc",post_proc % 2);
 }
 
@@ -49,6 +49,7 @@ function on_key(key, x, y){
         iterations--;
     } else if (key == "f"){
         fractal++;
+        console.log("fractal "+fractal % 4);
     } else if (key == "p"){
         post_proc++;
     }

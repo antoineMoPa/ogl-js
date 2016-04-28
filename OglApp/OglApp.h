@@ -25,6 +25,7 @@
 namespace OglApp{
     Shader * current_shader = nullptr;
     Shader post_process_shader;
+    // This frame counter resets at frame resize
     int frame_count = 0;
 }
 
@@ -183,6 +184,7 @@ namespace OglApp{
         for(int i = 0; i < pass_total + 1; i++){
             fbs[i].resize(w, h);
         }
+        frame_count = 0;
     }
 
     /**
@@ -257,9 +259,13 @@ namespace OglApp{
             .get_uniform_location("frame_count");
 
         glUniform1i(loc,frame_count);
-            
-        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
+        if(pass < 1){
+            glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+        } else {
+            glClear(GL_DEPTH_BUFFER_BIT);
+        }
+        
         // Render the plane
         glEnableVertexAttribArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);

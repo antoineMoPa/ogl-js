@@ -59,7 +59,7 @@ highp vec4 fractals(){
         z = vec2(0,0);
         
         z.x = time_fac * sqrt(zoom);
-    } else if (fractal == 1){
+    } else if (fractal == 1 || fractal == 2 || fractal == 3){
         // Julia
         z = screen();
         
@@ -69,20 +69,11 @@ highp vec4 fractals(){
         c = vec2(0.345,0.003);
         
         c.y = 0.5 * time_fac * sqrt(zoom);
-    } else if (fractal == 2){
-        // Julia
-        z = screen();
-        
-        z.x += x_offset - 0.5;
-        z.y += y_offset;
-        
-        c = vec2(0.915,0.03);
-        
-        c.y = 0.5 * time_fac * sqrt(zoom);
     }
     
     int current_step = 0;
-
+    highp vec2 old_z;
+    
     // Iterate and do math
     for(int i = 0; i < iterations; i++){
         // 'next value of z' = z ^2 + c
@@ -92,6 +83,8 @@ highp vec4 fractals(){
         // next z img part = 2 * a * b * i
         // next z img part = 2 * a * b * j (Engineers)
 
+        old_z = z;
+        
         z = to_the_2(z);
         
         // higher powers
@@ -100,7 +93,11 @@ highp vec4 fractals(){
             z = to_the_2(z);
         }
         
-        z += c;
+        if(fractal == 3){
+            z += c + old_z / to_the_2(old_z);
+        } else {
+            z += c;
+        }
         
         // If z goes out of some value (10.0), we know
         // it is not in the mandelbrot set
@@ -124,15 +121,12 @@ void main(){
     highp vec4 last = texture(last_pass,UV);
     
     if(frame_count == 0){
-
     } else if(pass == 1){
         color = fractals();
     } else if(pass == 2){
         if(post_proc == 0){
             color = last;
-            return;
-        } else if (post_proc == 1){
-
+        } else {
             highp vec3 old = texture(pass_2,UV).rgb;
             
             highp vec2 x_offset = vec2(0.001,0.000);
