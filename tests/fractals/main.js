@@ -14,7 +14,7 @@ enable_2_pass_pp();
 var zoom = 2.5;
 var x_offset = 0.0;
 var y_offset = 0.0;
-var iterations = 1;
+var iterations = 10;
 var fractal = 0;
 
 console.log("\n    WELCOME TO THE SMALL MANDELBROT BROWSER    \n");
@@ -24,6 +24,10 @@ function render(){
     shader_var("zoom",zoom);
     shader_var("x_offset",x_offset);
     shader_var("y_offset",y_offset);
+    iterations = new Date().getTime();
+    iterations /= 100;
+    iterations = parseInt(20 * Math.sin(iterations)) + 40;
+
     shader_var("iterations",iterations);
     shader_var("fractal",fractal % 2);
 }

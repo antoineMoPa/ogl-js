@@ -24,9 +24,9 @@ highp vec2 screen(){
 highp vec4 fractals(){
     // Complex numbers
     highp vec2 z,c,old_z;
-
-    highp float time_fac = 1.0 * cos( float(time % 50000)/50000.0 *
-                                2.0 * 3.1415 );
+    
+    highp float time_fac = 1.0 *
+        cos(float(time % 50000)/50000.0 * 2.0 * 3.1415 );
     
     if(fractal == 0){
         // Mandelbrot
@@ -38,7 +38,7 @@ highp vec4 fractals(){
         
         z = vec2(0,0);
         
-        //z.y = 0.5 * time_fac * sqrt(zoom);
+        z.x = time_fac * sqrt(zoom);
     } else if (fractal == 1){
         // Julia
         z = screen();
@@ -46,9 +46,9 @@ highp vec4 fractals(){
         z.x += x_offset - 0.5;
         z.y += y_offset;
         
-        c = vec2(-0.835,-0.2321);
-
-        c.y = 0.5 * time_fac * sqrt(zoom);
+        c = vec2(0.345,0.003);
+        
+        //c.y = 0.5 * time_fac * sqrt(zoom);
     }
     
     int current_step = 0;
@@ -96,7 +96,7 @@ void main(){
     } else if(pass == 1){
         color = fractals();
     } else if(pass == 2){
-
+        highp vec3 old = texture(pass_2,UV).rgb;
         highp vec2 x_offset = vec2(0.001,0.000);
         highp vec2 y_offset = vec2(0.000,0.001);
         
@@ -108,6 +108,9 @@ void main(){
             
         color = abs(color);
         color.a = 1.0;
+
+        // Fun stuff:
+        //color.rgb += old;
     } else if(pass == 3){
         color = last;
     }
