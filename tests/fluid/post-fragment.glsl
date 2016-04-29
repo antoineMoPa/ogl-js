@@ -24,10 +24,10 @@ void main(){
 
     if(distance(UV,vec2(mouse_x,mouse_y)) < 0.01){
         if(resistance < 0.5){
-            speed += 0.8 * sin(float(time%100000)/100.0);
+            speed += 0.05 * sin(float(time%100000)/100.0);
         }
     }
-    
+
     if(frame_count == 0){
         // here we store height
         color = vec4(0.5,0.5,1.0,1.0);
@@ -82,6 +82,7 @@ void main(){
     } else if(pass == 3){
         // Draw stuff
         color = last;
+        color.rgb = vec3(color.x);
         color.a = 1.0;
     }
 }
