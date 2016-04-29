@@ -359,7 +359,7 @@ namespace OglApp{
         js_key.setString(JS_NewStringCopyN(cx,key_s.c_str(),1));
 
         js_x.setNumber((float)x/(float)w);
-        js_y.setNumber((float)y/(float)w);
+        js_y.setNumber(1.0 - (float)y/(float)h);
         
         argv[0] = js_key;
         argv[1] = js_x;
@@ -377,6 +377,39 @@ namespace OglApp{
             );
     }
 
+    static void mouse_func(int button, int state, int x, int y){
+        // TODO: create a class containing mouse state
+        // and update it here
+    }
+
+    static void mouse_motion(int x, int y){
+        // return value and empty arg
+        JS::RootedValue rval(cx);
+        JS::AutoValueVector argv(cx);
+        
+        argv.resize(2);
+        
+        JS::Value js_x;
+        JS::Value js_y;
+
+        js_x.setNumber((float)x/(float)w);
+        js_y.setNumber(1.0 - (float)y/(float)h);
+        
+        argv[0] = js_x;
+        argv[1] = js_y;
+        
+        // Call javascript "render" function
+        // defined in the app's main.js
+        JSBool ok = JS_CallFunctionName(
+            cx,
+            *gl,
+            "on_mouse_move",
+            2,
+            argv.begin(),
+            rval.address()
+            );
+    }
+    
     static void load_default_shaders(){
         // default shaders
         char * vertex_path =
@@ -471,7 +504,10 @@ namespace OglApp{
 
         // Listen to the keyboard
         glutKeyboardFunc((*keyboard));
-
+        // Listen to mouse move
+        glutMotionFunc((*mouse_motion));
+        glutPassiveMotionFunc((*mouse_motion));
+        
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LESS);
 

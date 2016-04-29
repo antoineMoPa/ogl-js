@@ -10,6 +10,8 @@ uniform int time;
 uniform int pass;
 uniform int frame_count;
 uniform highp float ratio;
+uniform highp float mouse_x;
+uniform highp float mouse_y;
 highp vec4 rand_var;
 
 void main(){
@@ -20,24 +22,27 @@ void main(){
     highp float speed = data.y - 0.5;
     highp float resistance = data.z;
 
-    if(distance(UV,vec2(0.5,0.5)) < 0.01){
-        height = 1.0 * sin(float(time%100000)/100.0);
+    if(distance(UV,vec2(mouse_x,mouse_y)) < 0.01){
+        if(resistance < 0.5){
+            speed += 0.8 * sin(float(time%100000)/100.0);
+        }
     }
     
     if(frame_count == 0){
         // here we store height
         color = vec4(0.5,0.5,1.0,1.0);
-        if(UV.x > 0.3 &&
-           UV.x < 0.7 &&
-           UV.y > 0.3 &&
-           UV.y < 0.7
+        highp float border = 0.01;
+        if(UV.x > border&&
+           UV.x < 1.0 - border &&
+           UV.y > border &&
+           UV.y < 1.0 - border
            ){
             // No resistance here
             color.z = 0.0;
         }
     } else if(pass == 1){
         // Compute speed
-        highp float pixel_width = 0.002;
+        highp float pixel_width = 0.001;
         highp vec2 x_offset = vec2(pixel_width,0.00);
         highp vec2 y_offset = vec2(0.00,pixel_width * ratio);
         
@@ -50,13 +55,10 @@ void main(){
              height - (texture(pass_2,UV + y_offset).x - 0.5) +
              height - (texture(pass_2,UV - y_offset).x - 0.5)
              );
-
-        // Damp factor
-        speed *= 0.999999;
-
-        height += (0.3 * speed * (1.0 - resistance));
         
-        // Update speed
+        // Damp speed
+        speed *= 0.9999;
+                
         color = vec4(
                      height + 0.5,
                      speed + 0.5,
@@ -67,10 +69,19 @@ void main(){
     } else if(pass == 2){
         color = last;
         speed = color.y - 0.5;
+        height = color.x - 0.5;
+        resistance = color.z;
+        height += (0.3 * speed * (1.0 - resistance));
+
+        color = vec4(
+             height + 0.5,
+             speed + 0.5,
+             resistance,
+             1.0 );
+        
     } else if(pass == 3){
         // Draw stuff
         color = last;
-        color.x = color.y = color.z = pow(color.x,4.0);
         color.a = 1.0;
     }
 }
