@@ -12,9 +12,9 @@ function render(){
     boat.y += boat.dy;
     boat.angle += boat.dangle;
     
-    boat.dx *= 0.98;
-    boat.dy *= 0.98;
-    boat.dangle *= 0.98;
+    boat.dx *= 0.99;
+    boat.dy *= 0.99;
+    boat.dangle *= 0.93;
     
     shader_var("boat_x",boat.x);
     shader_var("boat_y",boat.y);
@@ -31,9 +31,9 @@ function accelerate(force){
 
 function on_key(key, x, y){
     if(key == "w"){
-        accelerate(0.001);
+        accelerate(0.0001);
     } else if(key == "s"){
-        
+        accelerate(-0.0001);
     } else if(key == "a"){
         boat.dangle += 0.01;
     } else if(key == "d"){

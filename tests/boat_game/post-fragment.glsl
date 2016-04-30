@@ -88,7 +88,7 @@ void main(){
     // Enter boat render logic when close enough
     if(boat_dist < 1.0 * b_length){
         highp vec2 point = UV - vec2(boat_x,boat_y);
-
+        point.x *= ratio;
         // Boat rotation
         highp float r = length(point);
         highp float p_angle = atan(-point.y,point.x);
@@ -187,7 +187,11 @@ void main(){
         // last.z = wall
         color.rgb = vec3(last.x + last.z);
 
-        if(is_boat){
+        if(!is_boat){
+            // Make it blue
+            color.rgb *= vec3(0.1,0.2,0.8);
+            color.rgb += vec3(0.1,0.2,0.2);
+        } else {
             color.rgb = vec3(0.4,0.8,0.5);
         }
         
