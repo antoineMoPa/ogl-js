@@ -14,6 +14,7 @@ uniform int pause;
 uniform highp float ratio;
 uniform highp float boat_x;
 uniform highp float boat_y;
+uniform highp float boat_angle;
 highp vec4 rand_var;
 
 /*
@@ -25,7 +26,7 @@ highp vec4 rand_var;
   is in the triangle.
  */
 bool point_in_triangle(
-                       highp vec2 pt,
+                       highp vec2 p,
                        highp vec2 t1,
                        highp vec2 t2,
                        highp vec2 t3){
@@ -35,17 +36,17 @@ bool point_in_triangle(
     highp vec2 w = t2 - t3;
 
     highp mat2 m =
-        inverse(mat2(
-                     u,
-                     v
-                     ));
-
-    pt = m * pt;
-
-    if(pt.x > 0.0 && pt.y > 0.0){
-        return true;
-    }
+        inverse(mat2(u,v));
     
+    highp vec2 pt2 = m * (p - t1);
+    
+    if(pt2.x > 0.0 && pt2.y > 0.0){
+        m = inverse(mat2(-v,w));
+        pt2 = m * (p - t3);
+        if(pt2.x > 0.0 && pt2.y > 0.0){
+            return true;
+        }
+    }
     return false;
 }
 
@@ -78,19 +79,41 @@ void main(){
     
 
     // Boat data
-    highp float b_length = 0.05;
-    highp float b_width = 0.01;
-    highp float b_nose = 0.01;
+    highp float b_length = 0.1;
+    highp float b_width = 0.05;
+    highp float b_nose = 0.05;
+
+    bool is_boat = false;
 
     // Enter boat render logic when close enough
-    if(boat_dist < 2.0 * b_length){
-        if(point_in_rect(UV,
-                         vec2(0.2,0.2),
-                         vec2(0.8,0.2),
-                         vec2(0.2,0.8),
-                         vec2(0.8,0.8)
-                         )){
-            height = 0.2;
+    if(boat_dist < 1.0 * b_length){
+        highp vec2 point = UV - vec2(boat_x,boat_y);
+
+        // Boat rotation
+        highp float r = length(point);
+        highp float p_angle = atan(-point.y,point.x);
+        p_angle += boat_angle;
+        
+        point = r * vec2(cos(p_angle),sin(p_angle));
+
+        if(
+           point_in_rect(
+                         point,
+                         vec2(-b_length/2.0,-b_width/2.0),
+                         vec2(-b_length/2.0,b_width/2.0),
+                         vec2(b_length/2.0,-b_width/2.0),
+                         vec2(b_length/2.0,b_width/2.0)
+                         )
+           ||
+           point_in_triangle(
+                             point,
+                             vec2(b_length/2.0,-b_width/2.0),
+                             vec2(b_length/2.0,b_width/2.0),
+                             vec2(b_length/2.0 + b_nose,0.0)
+                             )
+           ){
+            is_boat = true;
+            height = 0.01;
         }
     }
     
@@ -145,7 +168,7 @@ void main(){
         // Damp speed
         // no damping = weird behaviour
         // to much damping = you don't see anything
-        speed *= 0.998;
+        speed *= 0.98;
         
         // We store data in the color
         color = vec4(
@@ -163,6 +186,11 @@ void main(){
         // last.x = height
         // last.z = wall
         color.rgb = vec3(last.x + last.z);
+
+        if(is_boat){
+            color.rgb = vec3(0.4,0.8,0.5);
+        }
+        
         color.a = 1.0;
     }
 }

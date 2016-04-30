@@ -1,7 +1,7 @@
 
 enable_2_pass_pp();
 
-var boat = {x:0.5,y:0.5,dx:0,dy:0};
+var boat = {x:0.5,y:0.5,dx:0,dy:0,angle:0};
 var pause = -1;
 
 function render(){
@@ -16,7 +16,12 @@ function render(){
     
     shader_var("boat_x",boat.x);
     shader_var("boat_y",boat.y);
+    shader_var("boat_angle",boat.angle);
     shader_var("pause",pause);
+
+    var current_angle = Math.atan2(boat.dy,boat.dx);
+    boat.angle = boat.angle * 0.95 + 0.05 * current_angle;
+    
     reset = 0;
 }
 
