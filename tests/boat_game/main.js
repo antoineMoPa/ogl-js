@@ -1,7 +1,7 @@
 
 enable_2_pass_pp();
 
-var boat = {x:0.5,y:0.5,dx:0,dy:0,angle:0};
+var boat = {x:0.5,y:0.5,dx:0,dy:0,angle:0,dangle:0};
 var pause = -1;
 
 function render(){
@@ -10,31 +10,34 @@ function render(){
 
     boat.x += boat.dx;
     boat.y += boat.dy;
-
+    boat.angle += boat.dangle;
+    
     boat.dx *= 0.98;
     boat.dy *= 0.98;
+    boat.dangle *= 0.98;
     
     shader_var("boat_x",boat.x);
     shader_var("boat_y",boat.y);
     shader_var("boat_angle",boat.angle);
     shader_var("pause",pause);
 
-    var current_angle = Math.atan2(boat.dy,boat.dx);
-    boat.angle = boat.angle * 0.95 + 0.05 * current_angle;
-    
     reset = 0;
+}
+
+function accelerate(force){
+    boat.dx += force * Math.cos(boat.angle);
+    boat.dy += force * Math.sin(boat.angle);
 }
 
 function on_key(key, x, y){
     if(key == "w"){
-        boat.dy += 0.001;
+        accelerate(0.001);
     } else if(key == "s"){
-        boat.dy -= 0.001;
+        
     } else if(key == "a"){
-        boat.dx -= 0.001;
+        boat.dangle += 0.01;
     } else if(key == "d"){
-        boat.dx += 0.001;
-
+        boat.dangle -= 0.01;
     } else if(key == "p"){
         pause *= -1;
     }
