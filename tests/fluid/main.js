@@ -9,6 +9,10 @@ var pause = -1;
 var radius = 0.003;
 
 function render(){
+    var speed = 0.7;
+    var time = speed * new Date().getTime() / 10000;
+    mouse.x = time % 1;
+    mouse.y = 0.5;
     shader_var("mouse_x",mouse.x);
     shader_var("mouse_y",mouse.y);
     shader_var("damp",damp);
