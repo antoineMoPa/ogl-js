@@ -87,6 +87,16 @@ void main(){
     bool is_boat = false;
     bool is_motor = false;
 
+    // Wave source
+
+    if( distance(UV,vec2(0.0,0.0)) < 0.04 ||
+        distance(UV,vec2(1.0,1.0)) < 0.04 ||
+        distance(UV,vec2(0.0,1.0)) < 0.04 ||
+        distance(UV,vec2(1.0,0.0)) < 0.04
+        ){
+        height += 0.3 * sin(float(mod(time,10000))/10.0);
+    }
+    
     // Enter boat render logic when close enough
     if(boat_dist < 2.0 * b_length){
         highp vec2 point = UV - vec2(boat_x,boat_y);
@@ -124,10 +134,10 @@ void main(){
              vec2(-b_length, b_width/4.5));
         
         if (is_boat){
-            height = 0.0;
+            height = 0.4;
         }
         if (is_motor){
-            height = boat_acc * 0.2;
+            height = boat_acc * 0.1;
             if(mod(frame_count,10) < 5.0){
                 height *= 0.0;
             }
@@ -172,7 +182,7 @@ void main(){
              height - (texture(pass_2,UV + y_offset).x - 0.5) +
              height - (texture(pass_2,UV - y_offset).x - 0.5)
              );
-
+        
         // Modify height according to speed
         // The factor is adjusted so that the
         // simulation works.
@@ -185,8 +195,8 @@ void main(){
         // Damp speed
         // no damping = weird behaviour
         // to much damping = you don't see anything
-        speed *= 0.98;
-        
+        speed *= 0.99;
+        height *= 0.999;
         // We store data in the color
         color = vec4(
                      height + 0.5,
@@ -202,12 +212,11 @@ void main(){
         // Draw stuff
         // last.x = height
         // last.z = wall
-        color.rgb = vec3(last.x + last.z);
+        color.rgb = vec3(last.x + 0.5 + last.z);
 
         if(!is_boat){
             // Make it blue
-            color.rgb *= vec3(0.1,0.2,0.5);
-            color.rgb += vec3(0.1,0.4,0.4);
+            color.rgb *= vec3(0.2,0.4,1.0);
         } else {
             color.rgb = vec3(0.4,0.8,0.5);
         }
