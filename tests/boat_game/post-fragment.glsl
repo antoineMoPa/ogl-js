@@ -142,11 +142,11 @@ void main(){
              vec2(-b_length, b_width/4.5));
         
         if (is_boat){
-            height = 0.0;
+            height *= 0.9;
         }
         if (is_motor){
             height = boat_acc * 0.1;
-            if(mod(frame_count,10) < 5.0){
+            if(mod(frame_count,5) < 2.0){
                 height *= 0.0;
             }
         }
@@ -198,7 +198,8 @@ void main(){
         // to much damping = you don't see anything
         speed *= 0.99;
         height *= 0.999;
-        
+
+        // Limit too intense values
         if(abs(speed) > 0.5){
             speed *= 0.3;
             height *= 0.3;
@@ -241,26 +242,26 @@ void main(){
 
             normal = normalize(normal);
             
-            highp vec3 sun_direction = vec3(-1.0,-1.0,1.0);
-            
-            color.rgb = dot(-normal,sun_direction) *
-                vec3(0.2,0.3,0.7);
+            highp vec3 sun_direction = vec3(1.0,1.0,1.0);
+
+            highp float diff = dot(-normal,sun_direction);
+                
+            color.rgb = diff * vec3(0.1,0.4,0.7);
 
             highp vec3 reflection = sun_direction -
                 (2.0 * dot(sun_direction,normal) * normal);
 
-            highp float spec = dot(reflection,sun_direction);
-
+            highp float spec = 0.2 *
+                pow(dot(reflection,sun_direction),4.0);
+            
             if(spec > 0.0){
                 color.rgb += spec * vec3(.3,.4,.9);
             }
-            
-            // Make it blue
-            //color.rgb *= vec3(0.2,0.4,1.0);
+            color.rgb -= (height + 0.5) *
+                vec3(0.3,0.2,0.4);
         } else {
-            color.rgb = vec3(0.4,0.8,0.5);
+            color.rgb = vec3(0.3,0.1,0.0);
         }
-        
         color.a = 1.0;
     }
 }
