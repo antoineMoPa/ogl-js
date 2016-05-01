@@ -15,6 +15,7 @@ uniform highp float ratio;
 uniform highp float boat_x;
 uniform highp float boat_y;
 uniform highp float boat_angle;
+uniform highp float boat_acc;
 highp vec4 rand_var;
 
 /*
@@ -79,14 +80,15 @@ void main(){
     
 
     // Boat data
-    highp float b_length = 0.1;
+    highp float b_length = 0.05;
     highp float b_width = 0.05;
     highp float b_nose = 0.05;
 
     bool is_boat = false;
+    bool is_motor = false;
 
     // Enter boat render logic when close enough
-    if(boat_dist < 1.0 * b_length){
+    if(boat_dist < 2.0 * b_length){
         highp vec2 point = UV - vec2(boat_x,boat_y);
         point.x *= ratio;
         // Boat rotation
@@ -96,24 +98,39 @@ void main(){
         
         point = r * vec2(cos(p_angle),sin(p_angle));
 
-        if(
-           point_in_rect(
-                         point,
-                         vec2(-b_length/2.0,-b_width/2.0),
-                         vec2(-b_length/2.0,b_width/2.0),
-                         vec2(b_length/2.0,-b_width/2.0),
-                         vec2(b_length/2.0,b_width/2.0)
-                         )
-           ||
-           point_in_triangle(
-                             point,
-                             vec2(b_length/2.0,-b_width/2.0),
-                             vec2(b_length/2.0,b_width/2.0),
-                             vec2(b_length/2.0 + b_nose,0.0)
-                             )
-           ){
-            is_boat = true;
-            height = 0.01;
+        is_boat = point_in_rect(
+                                point,
+                                vec2(-b_length,-b_width/2.0),
+                                vec2(-b_length,b_width/2.0),
+                                vec2(b_length,-b_width/2.0),
+                                vec2(b_length,b_width/2.0)
+                                );
+        
+        is_boat = is_boat ||
+            point_in_triangle(
+                              point,
+                              vec2(b_length,-b_width/2.0),
+                              vec2(b_length,b_width/2.0),
+                              vec2(b_length + b_nose,0.0)
+                              );
+
+        is_motor =
+            point_in_rect
+            (
+             point,
+             vec2(-b_length * 1.3 * boat_acc, -b_width/8.5),
+             vec2(-b_length * 1.3 * boat_acc, b_width/8.5),
+             vec2(-b_length, -b_width/4.5),
+             vec2(-b_length, b_width/4.5));
+        
+        if (is_boat){
+            height = 0.0;
+        }
+        if (is_motor){
+            height = boat_acc * 0.2;
+            if(mod(frame_count,10) < 5.0){
+                height *= 0.0;
+            }
         }
     }
     
