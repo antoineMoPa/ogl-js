@@ -86,7 +86,15 @@ void main(){
 
     bool is_boat = false;
     bool is_motor = false;
-
+    
+    // Not the real pixel size
+    // (Can be anything)
+    highp float pixel_width = 0.003;
+    
+    // Create these values to find neighboring cells
+    highp vec2 x_offset = vec2(pixel_width,0.00);
+    highp vec2 y_offset = vec2(0.00,pixel_width * ratio);
+    
     // Wave source
 
     if( distance(UV,vec2(0.0,0.0)) < 0.04 ||
@@ -134,7 +142,7 @@ void main(){
              vec2(-b_length, b_width/4.5));
         
         if (is_boat){
-            height = 0.4;
+            height = 0.0;
         }
         if (is_motor){
             height = boat_acc * 0.1;
@@ -166,14 +174,7 @@ void main(){
             color = texture(pass_1,UV);
             return;
         }
-
-        // Not the real pixel size
-        // (Can be anything)
-        highp float pixel_width = 0.003;
-        // Create these values to find neighboring cells
-        highp vec2 x_offset = vec2(pixel_width,0.00);
-        highp vec2 y_offset = vec2(0.00,pixel_width * ratio);
-
+        
         // Fluid transfer between neighboring cells
         speed -= 0.25 *
             (
@@ -197,7 +198,7 @@ void main(){
         // to much damping = you don't see anything
         speed *= 0.99;
         height *= 0.999;
-
+        
         if(abs(speed) > 0.5){
             speed *= 0.3;
             height *= 0.3;
@@ -222,8 +223,40 @@ void main(){
         color.rgb = vec3(last.x + 0.5 + last.z);
         
         if(!is_boat){
+
+            highp float dx = 0.1;
+            
+            highp float dyi =
+                (texture(pass_2,UV + x_offset).x - 0.5) -
+                (texture(pass_2,UV - x_offset).x - 0.5);
+            
+            highp float dyj =
+                (texture(pass_2,UV + y_offset).x - 0.5) -
+                (texture(pass_2,UV - y_offset).x - 0.5);
+
+            
+            highp vec3 norm_i = vec3(-dyi,0.0,-dx);
+            highp vec3 norm_j = vec3(0.0,-dyj,-dx);
+            highp vec3 normal = norm_i + norm_j;
+
+            normal = normalize(normal);
+            
+            highp vec3 sun_direction = vec3(-1.0,-1.0,1.0);
+            
+            color.rgb = dot(-normal,sun_direction) *
+                vec3(0.2,0.3,0.7);
+
+            highp vec3 reflection = sun_direction -
+                (2.0 * dot(sun_direction,normal) * normal);
+
+            highp float spec = dot(reflection,sun_direction);
+
+            if(spec > 0.0){
+                color.rgb += spec * vec3(.3,.4,.9);
+            }
+            
             // Make it blue
-            color.rgb *= vec3(0.2,0.4,1.0);
+            //color.rgb *= vec3(0.2,0.4,1.0);
         } else {
             color.rgb = vec3(0.4,0.8,0.5);
         }
