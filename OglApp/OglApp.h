@@ -341,8 +341,15 @@ namespace OglApp{
         glutSwapBuffers();
         frame_count++;
     }
-    
-    static void keyboard(unsigned char key, int x, int y){
+
+    /**
+       Manages up/down event
+       Was made instead of writing almost the same code 
+       in key_up and key_down.
+     */
+    static void key_event( unsigned char key,
+                           int x, int y,
+                           bool is_down ){
         // return value and empty arg
         JS::RootedValue rval(cx);
         JS::AutoValueVector argv(cx);
@@ -364,19 +371,31 @@ namespace OglApp{
         argv[0] = js_key;
         argv[1] = js_x;
         argv[2] = js_y;
-        
-        // Call javascript "render" function
-        // defined in the app's main.js
+
         JSBool ok = JS_CallFunctionName(
             cx,
             *gl,
-            "on_key",
+            is_down? "on_key_down": "on_key_up",
             3,
             argv.begin(),
             rval.address()
             );
     }
 
+    /**
+       Fired when a key is pressed
+     */
+    static void key_down(unsigned char key, int x, int y){
+        key_event(key, x, y, true);
+    }
+
+    /**
+       Fired when a key is released
+     */
+    static void key_up(unsigned char key, int x, int y){
+        key_event(key, x, y, false);
+    }
+    
     static void mouse_func(int button, int state, int x, int y){
         // TODO: create a class containing mouse state
         // and update it here
@@ -503,7 +522,10 @@ namespace OglApp{
         load_default_shaders();
 
         // Listen to the keyboard
-        glutKeyboardFunc((*keyboard));
+        glutKeyboardFunc((*key_down));
+        // Listen to the keyboard
+        glutKeyboardUpFunc((*key_up));
+        
         // Listen to mouse move
         glutMotionFunc((*mouse_motion));
         glutPassiveMotionFunc((*mouse_motion));

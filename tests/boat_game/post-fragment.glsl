@@ -189,8 +189,8 @@ void main(){
 
         if(!is_boat){
             // Make it blue
-            color.rgb *= vec3(0.1,0.2,0.8);
-            color.rgb += vec3(0.1,0.2,0.2);
+            color.rgb *= vec3(0.1,0.2,0.5);
+            color.rgb += vec3(0.1,0.4,0.4);
         } else {
             color.rgb = vec3(0.4,0.8,0.5);
         }

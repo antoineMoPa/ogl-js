@@ -24,7 +24,7 @@ function render(){
     reset = 0;
 }
 
-function on_key(key, x, y){
+function on_key_down(key, x, y){
     if(key == "d"){
         damp+=0.1;
     } else if(key == "w"){

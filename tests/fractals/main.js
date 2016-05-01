@@ -30,7 +30,7 @@ function render(){
     shader_var("post_proc",post_proc % 2);
 }
 
-function on_key(key, x, y){
+function on_key_down(key, x, y){
     if(key == "="){
         zoom *= 0.95;
     } else if (key == "-"){
