@@ -94,7 +94,7 @@ void main(){
         distance(UV,vec2(0.0,1.0)) < 0.04 ||
         distance(UV,vec2(1.0,0.0)) < 0.04
         ){
-        height += 0.3 * sin(float(mod(time,10000))/10.0);
+        height = 0.5 * sin(float(mod(time,10000))/10.0);
     }
     
     // Enter boat render logic when close enough
@@ -191,12 +191,18 @@ void main(){
 
         // Compute resistance to borders / walls / etc.
         speed *= 1.0 - resistance;
-
+        
         // Damp speed
         // no damping = weird behaviour
         // to much damping = you don't see anything
         speed *= 0.99;
         height *= 0.999;
+
+        if(abs(speed) > 0.5){
+            speed *= 0.3;
+            height *= 0.3;
+        }
+        
         // We store data in the color
         color = vec4(
                      height + 0.5,
@@ -212,8 +218,9 @@ void main(){
         // Draw stuff
         // last.x = height
         // last.z = wall
+        //color.rgb = last.rgb + vec3(0.5,0.5,0.0);
         color.rgb = vec3(last.x + 0.5 + last.z);
-
+        
         if(!is_boat){
             // Make it blue
             color.rgb *= vec3(0.2,0.4,1.0);
