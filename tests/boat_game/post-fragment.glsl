@@ -243,22 +243,27 @@ void main(){
             normal = normalize(normal);
             
             highp vec3 sun_direction = vec3(1.0,1.0,1.0);
-
+            highp vec3 lamp = vec3(0.3,0.6,0.8);
+            
             highp float diff = dot(-normal,sun_direction);
                 
-            color.rgb = diff * vec3(0.1,0.4,0.7);
+            color.rgb = diff * lamp;
 
             highp vec3 reflection = sun_direction -
                 (2.0 * dot(sun_direction,normal) * normal);
 
-            highp float spec = 0.2 *
+            highp float spec = 0.02 *
                 pow(dot(reflection,sun_direction),4.0);
             
             if(spec > 0.0){
-                color.rgb += spec * vec3(.3,.4,.9);
+                color.rgb += spec * lamp;
             }
+
             color.rgb -= (height + 0.5) *
                 vec3(0.3,0.2,0.4);
+
+            // Ambiant
+            color.rgb += vec3(0.0,0.1,0.1);
         } else {
             color.rgb = vec3(0.3,0.1,0.0);
         }
