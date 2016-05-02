@@ -52,7 +52,7 @@ void main(){
             if(resistance < 0.5){
                 // Give this a sine in function of time
                 height += 100.0 *
-                    sin(float(mod(time,10000))/100.0);
+                    sin(float(mod(float(time),float(10000)))/100.0);
             }
         }
     } else if(source_type == 1){
@@ -60,7 +60,7 @@ void main(){
             UV.y < 0.8 &&
             UV.y > 0.2 ){
             height += 100.0 *
-                sin(float(mod(time,10000))/100.0);
+                sin(float(mod(float(time),float(10000)))/100.0);
         }
     }
 
