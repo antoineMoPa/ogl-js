@@ -110,7 +110,7 @@ void main(){
         distance(UV,vec2(0.0,1.0)) < 0.04 ||
         distance(UV,vec2(1.0,0.0)) < 0.04
         ){
-        height = 0.5 * sin(float(mod(time,10000))/10.0);
+        height = 0.5 * sin(float(mod(float(time),10000.0))/10.0);
     }
     
     // Enter boat render logic when close enough
@@ -161,7 +161,7 @@ void main(){
         // In motor area: oscillate
         if (is_motor){
             height = boat_acc * 0.1;
-            if(mod(frame_count,5) < 2.0){
+            if(mod(float(frame_count),5.0) < 2.0){
                 height *= 0.0;
             }
         }
