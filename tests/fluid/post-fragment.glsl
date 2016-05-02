@@ -12,6 +12,8 @@ uniform int frame_count;
 uniform int wall;
 uniform int reset;
 uniform int pause;
+uniform int shading;
+uniform int source_type;
 uniform highp float ratio;
 uniform highp float damp;
 uniform highp float radius;
@@ -43,14 +45,33 @@ void main(){
     highp float mouse_dist =
         distance(UV * uv_ratio,
                  vec2(mouse_x,mouse_y) * uv_ratio);
-    
-    // Activate source if close enough to mouse
-    if(mouse_dist < radius){
-        if(resistance < 0.5){
-            // Give this a sine in function of time
-            height += 100.0 * sin(float(mod(time,10000))/100.0);
+
+    if(source_type == 0){
+        // Activate source if close enough to mouse
+        if(mouse_dist < radius){
+            if(resistance < 0.5){
+                // Give this a sine in function of time
+                height += 100.0 *
+                    sin(float(mod(time,10000))/100.0);
+            }
+        }
+    } else if(source_type == 1){
+        if( abs(UV.x - mouse_x) < 0.01 &&
+            UV.y < 0.8 &&
+            UV.y > 0.2 ){
+            height += 100.0 *
+                sin(float(mod(time,10000))/100.0);
         }
     }
+
+
+    // Not the real pixel size
+    // (Can be anything)
+    highp float pixel_width = 0.002;
+    
+    // Create these values to find neighboring cells
+    highp vec2 x_offset = vec2(pixel_width,0.00);
+    highp vec2 y_offset = vec2(0.00,pixel_width * ratio);
     
     if(frame_count == 0 || reset == 1){
         // Set initial conditions
@@ -88,14 +109,7 @@ void main(){
             color = texture(pass_1,UV);
             return;
         }
-
-        // Not the real pixel size
-        // (Can be anything)
-        highp float pixel_width = 0.003;
-        // Create these values to find neighboring cells
-        highp vec2 x_offset = vec2(pixel_width,0.00);
-        highp vec2 y_offset = vec2(0.00,pixel_width * ratio);
-
+        
         // Fluid transfer between neighboring cells
         speed -= 0.25 *
             (
@@ -134,10 +148,68 @@ void main(){
         // We do nothing here
         color = last;
     } else if(pass == 3){
+        // Find gradient
+        // Arbitrary space between pixels
+        highp float dx = 0.1;
+        // Height delta in one axis
+        highp float dyi =
+            (texture(pass_2,UV + x_offset).x - 0.5) -
+            (texture(pass_2,UV - x_offset).x - 0.5);
+        // Height delta in other axis
+        highp float dyj =
+            (texture(pass_2,UV + y_offset).x - 0.5) -
+            (texture(pass_2,UV - y_offset).x - 0.5);
+        
+        // Compute normal
+        highp vec3 norm_i = vec3(-dyi,0.0,-dx);
+        highp vec3 norm_j = vec3(0.0,-dyj,-dx);
+        highp vec3 normal = norm_i + norm_j;
+        
+        // Normalize it
+        normal = normalize(normal);
+        
+        // Scene data
+        // Sun:
+        highp vec3 sun_direction = vec3(1.0,1.0,1.0);
+        // lamp color
+        highp vec3 lamp = vec3(0.3,0.4,0.8);
+        
+        // Reflection vector for spec
+        highp vec3 reflection = sun_direction -
+            (2.0 * dot(sun_direction,normal) * normal);
+        
         // Draw stuff
-        // last.x = height
-        // last.z = wall
-        color.rgb = vec3(last.x + last.z);
+        if(shading == 0){
+            // Diffuse factor
+            highp float diff = dot(-normal,sun_direction);
+            color.rgb = diff * lamp;
+
+            // Specular factor
+            highp float spec = 0.003 *
+                pow(dot(reflection,sun_direction),8.0);
+
+            // Use specular factor
+            color.rgb += spec * lamp;
+
+            // Modulate with height
+            // (I'm so artistic)
+            color.rgb -= (height + 0.9) *
+                vec3(0.3,0.2,0.4);
+
+            // Ambiant light
+            color.rgb += vec3(0.0,0.1,0.1);
+            
+            color.rgb += last.z * vec3(1.0);
+        } else if (shading == 1){
+            // last.x = height
+            // last.z = wall
+            color.rgb = vec3(last.x + last.z);
+        } else if (shading == 2){
+            color.rgb = normal;
+        } else if (shading == 3){
+            color.rgb = reflection;
+        }
+        
         color.a = 1.0;
     }
 }
