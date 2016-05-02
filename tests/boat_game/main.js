@@ -38,7 +38,7 @@ function accelerate(force){
 
 function manage_keys(){
     if(keys["w"] == true){
-        accelerate(0.00009);
+        accelerate(0.00004);
     }
     if(keys["s"] == true){
         accelerate(-0.00003);

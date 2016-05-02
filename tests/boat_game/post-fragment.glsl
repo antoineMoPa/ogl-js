@@ -51,6 +51,11 @@ bool point_in_triangle(
     return false;
 }
 
+/* 
+   Method:
+   
+   Return true if in 2 triangles formed by rectangle.
+ */
 bool point_in_rect(
                    highp vec2 pt,
                    highp vec2 p1,
@@ -67,23 +72,27 @@ bool point_in_rect(
 void main(){
     highp vec4 last = texture(last_pass,UV);
 
+    // Extract data
     highp vec4 data = texture(pass_2,UV);
     highp float height = data.x - 0.5;
     highp float speed = data.y - 0.5;
     highp float resistance = data.z;
 
+    // Take screen ratio into account
     highp vec2 uv_ratio = vec2(1.0,1.0 / ratio);
 
+    // Find distance between boat an current UV
     highp float boat_dist =
         distance(UV * uv_ratio,
                  vec2(boat_x,boat_y) * uv_ratio);
     
 
-    // Boat data
+    // Boat measurements
     highp float b_length = 0.05;
     highp float b_width = 0.05;
     highp float b_nose = 0.05;
 
+    // Is pixel in boat/motor area?
     bool is_boat = false;
     bool is_motor = false;
     
@@ -95,8 +104,7 @@ void main(){
     highp vec2 x_offset = vec2(pixel_width,0.00);
     highp vec2 y_offset = vec2(0.00,pixel_width * ratio);
     
-    // Wave source
-
+    // Wave source at screen corners
     if( distance(UV,vec2(0.0,0.0)) < 0.04 ||
         distance(UV,vec2(1.0,1.0)) < 0.04 ||
         distance(UV,vec2(0.0,1.0)) < 0.04 ||
@@ -108,7 +116,9 @@ void main(){
     // Enter boat render logic when close enough
     if(boat_dist < 2.0 * b_length){
         highp vec2 point = UV - vec2(boat_x,boat_y);
+        // Screen is not a square so:
         point.x *= ratio;
+        
         // Boat rotation
         highp float r = length(point);
         highp float p_angle = atan(-point.y,point.x);
@@ -116,6 +126,8 @@ void main(){
         
         point = r * vec2(cos(p_angle),sin(p_angle));
 
+        // This is where I drew the boat
+        // Rectangle part
         is_boat = point_in_rect(
                                 point,
                                 vec2(-b_length,-b_width/2.0),
@@ -123,7 +135,7 @@ void main(){
                                 vec2(b_length,-b_width/2.0),
                                 vec2(b_length,b_width/2.0)
                                 );
-        
+        // Triangle (nose) part
         is_boat = is_boat ||
             point_in_triangle(
                               point,
@@ -132,6 +144,7 @@ void main(){
                               vec2(b_length + b_nose,0.0)
                               );
 
+        // Motor area
         is_motor =
             point_in_rect
             (
@@ -144,6 +157,8 @@ void main(){
         if (is_boat){
             height *= 0.9;
         }
+
+        // In motor area: oscillate
         if (is_motor){
             height = boat_acc * 0.1;
             if(mod(frame_count,5) < 2.0){
@@ -222,51 +237,62 @@ void main(){
         // last.z = wall
         //color.rgb = last.rgb + vec3(0.5,0.5,0.0);
         color.rgb = vec3(last.x + 0.5 + last.z);
-        
-        if(!is_boat){
 
+        // Add color to the water
+        if(!is_boat){
+            // Find gradient
+            // Arbitrary space between pixels
             highp float dx = 0.1;
-            
+            // Height delta in one axis
             highp float dyi =
                 (texture(pass_2,UV + x_offset).x - 0.5) -
                 (texture(pass_2,UV - x_offset).x - 0.5);
-            
+            // Height delta in other axis
             highp float dyj =
                 (texture(pass_2,UV + y_offset).x - 0.5) -
                 (texture(pass_2,UV - y_offset).x - 0.5);
 
-            
+            // Compute normal
             highp vec3 norm_i = vec3(-dyi,0.0,-dx);
             highp vec3 norm_j = vec3(0.0,-dyj,-dx);
             highp vec3 normal = norm_i + norm_j;
 
+            // Normalize it
             normal = normalize(normal);
-            
+
+            // Scene data
+            // Sun:
             highp vec3 sun_direction = vec3(1.0,1.0,1.0);
-            highp vec3 lamp = vec3(0.3,0.6,0.8);
-            
+            // lamp color
+            highp vec3 lamp = vec3(0.3,0.4,0.8);
+
+            // Diffuse factor
             highp float diff = dot(-normal,sun_direction);
-                
             color.rgb = diff * lamp;
 
+            // Reflection vector for spec
             highp vec3 reflection = sun_direction -
                 (2.0 * dot(sun_direction,normal) * normal);
 
-            highp float spec = 0.02 *
-                pow(dot(reflection,sun_direction),4.0);
-            
-            if(spec > 0.0){
-                color.rgb += spec * lamp;
-            }
+            // Specular factor
+            highp float spec = 0.003 *
+                pow(dot(reflection,sun_direction),8.0);
 
-            color.rgb -= (height + 0.5) *
+            // Use specular factor
+            color.rgb += spec * lamp;
+
+            // Modulate with height
+            // (I'm so artistic)
+            color.rgb -= (height + 0.9) *
                 vec3(0.3,0.2,0.4);
 
-            // Ambiant
+            // Ambiant light
             color.rgb += vec3(0.0,0.1,0.1);
         } else {
+            // Boat color
             color.rgb = vec3(0.3,0.1,0.0);
         }
+        // Set alpha to 1
         color.a = 1.0;
     }
 }
