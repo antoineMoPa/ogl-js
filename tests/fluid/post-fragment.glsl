@@ -67,7 +67,7 @@ void main(){
 
     // Not the real pixel size
     // (Can be anything)
-    highp float pixel_width = 0.002;
+    highp float pixel_width = 0.003;
     
     // Create these values to find neighboring cells
     highp vec2 x_offset = vec2(pixel_width,0.00);
@@ -111,12 +111,21 @@ void main(){
         }
         
         // Fluid transfer between neighboring cells
-        speed -= 0.25 *
+        speed -= 1.0/8.0 *
             (
              height - (texture(pass_2,UV + x_offset).x - 0.5) +
              height - (texture(pass_2,UV - x_offset).x - 0.5) +
              height - (texture(pass_2,UV + y_offset).x - 0.5) +
-             height - (texture(pass_2,UV - y_offset).x - 0.5)
+             height - (texture(pass_2,UV - y_offset).x - 0.5) +
+             
+             height - (texture(pass_2,UV +
+                               x_offset + y_offset).x - 0.5) +
+             height - (texture(pass_2,UV +
+                               x_offset - y_offset).x - 0.5) +
+             height - (texture(pass_2,UV -
+                               x_offset + y_offset).x - 0.5) +
+             height - (texture(pass_2,UV -
+                               x_offset - y_offset).x - 0.5)
              );
 
         // Modify height according to speed
