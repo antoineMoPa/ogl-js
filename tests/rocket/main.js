@@ -29,12 +29,14 @@ function render(){
         rocket.dx *= 0.99;
         rocket.dy *= 0.99;
 
-        if(rocket.y < floor){
+        if(rocket.y < floor ){
             rocket.y = floor;
-            rocket.dy *= -1;
-            if(rocket.angle > 0 && rocket.angle < Math.PI){
-            } else {
-                rocket.angle = 2 * Math.PI - rocket.angle;
+            if(Math.abs(rocket.dy) > 0.004){
+                rocket.dy *= -1;
+                if(rocket.angle > 0 && rocket.angle < Math.PI){
+                } else {
+                    rocket.angle = 2 * Math.PI - rocket.angle;
+                }
             }
         }
         rocket.acc *= 0.95;
@@ -44,7 +46,7 @@ function render(){
 
     shader_var("rocket_x",rocket.x);
     shader_var("rocket_y",rocket.y);
-    shader_var("rocket_acc",rocket.acc * 10000);
+    shader_var("rocket_acc",parseFloat(rocket.acc * 10000.0));
     shader_var("rocket_angle",rocket.angle);
     shader_var("pause",pause);
 

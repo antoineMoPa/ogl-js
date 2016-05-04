@@ -111,7 +111,7 @@ void main(){
     // Create these values to find neighboring cells
     highp vec2 x_offset = vec2(pixel_width,0.00);
     highp vec2 y_offset = vec2(0.00,pixel_width * ratio);
-    
+
     // Enter rocket render logic when close enough
     if(rocket_dist < 2.0 * b_length){
         highp vec2 point = UV - vec2(rocket_x,rocket_y);
@@ -148,8 +148,8 @@ void main(){
             point_in_rect
             (
              point,
-             vec2(-b_length * 1.4, -b_width/8.5),
-             vec2(-b_length * 1.4, b_width/8.5),
+             vec2(-b_length * 1.2, -b_width/8.5),
+             vec2(-b_length * 1.2, b_width/8.5),
              vec2(-b_length, -b_width/4.5),
              vec2(-b_length, b_width/4.5));
 
@@ -158,13 +158,9 @@ void main(){
         }
         
         // In motor area: oscillate
-        if (is_motor){
-            smoke_density += 0.5;
-            if(UV.x < 0.5){
-                flow_y -= 1.0;
-            } else {
-                flow_y = 0.5;
-            }
+        if (is_motor && rocket_acc >= 0.1){
+            smoke_density = rocket_acc;
+            flow_y = -0.5;
         }
     }
     
@@ -194,9 +190,8 @@ void main(){
         bottom_flow =
             texture(pass_1,UV - y_offset).b - 0.5;
 
-
         highp float flow_fac = 4.0;
-        
+
         flow_y =
             0.5 * (
                    p(-flow_fac * top_flow) * top_flow +
@@ -210,7 +205,6 @@ void main(){
             p(-flow_y) * top_density +
             (1.0 - p(flow_y) - p(-flow_y)) * smoke_density;
         
-        
         if(UV.y < 0.01){
             flow_y = 0.0;
         }
@@ -219,7 +213,7 @@ void main(){
         // no damping = weird behaviour
         // to much damping = you don't see anything
         flow_x *= 0.98;
-        flow_y *= 0.98;
+        flow_y *= 0.985;
         smoke_density *= 0.8;
         
         // We store data in the color
@@ -232,14 +226,14 @@ void main(){
 
     } else if(pass == 3){
         if(!is_rocket){
-            color.rgb = vec3(last.x);
-            highp float fire = pow(last.x - 0.5,1.3);
-            highp float fire_red = pow(last.x - 0.5,2.0);
+            highp float fire = pow(smoke_density,1.3);
+            highp float fire_red = pow(smoke_density,2.0);
             highp vec3 yellow = vec3(1.0, 1.0, 0.0);
             highp vec3 red = vec3(1.0, 0.0, 0.0);
+            highp vec3 white = vec3(1.0, 1.0, 1.0);
+            color.rgb = 3.0 * smoke_density * white;
             color.rgb -= fire_red * (1.0 - red);
             color.rgb -= fire * (1.0 - yellow);
-            
             
         } else {
             // Rocket color
