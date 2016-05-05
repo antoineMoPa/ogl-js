@@ -83,8 +83,8 @@ void main(){
     // Extract data
     highp vec4 data = texture(pass_1,UV);
     highp float smoke_density = data.r - 0.5;
-    highp float flow_x = data.g - 0.5;
-    highp float flow_y = data.b - 0.5;
+    highp float flow_velocity_x = data.g - 0.5;
+    highp float flow_velocity_y = data.b - 0.5;
 
     // Take screen ratio into account
     highp vec2 uv_ratio = vec2(1.0,1.0 / ratio);
@@ -160,7 +160,7 @@ void main(){
         // In motor area: oscillate
         if (is_motor && rocket_acc >= 0.1){
             smoke_density = rocket_acc;
-            flow_y = -0.5;
+            flow_velocity_y = -0.5;
         }
     }
     
@@ -178,52 +178,52 @@ void main(){
 
         highp float top_density;
         highp float bottom_density;
-        highp float top_flow;
-        highp float bottom_flow;
+        highp float top_flow_velocity;
+        highp float bottom_flow_velocity;
         
         top_density = 
             texture(pass_1,UV + y_offset).x - 0.5;
         bottom_density = 
             texture(pass_1,UV - y_offset).x - 0.5;
-        top_flow =
+        top_flow_velocity =
             texture(pass_1,UV + y_offset).b - 0.5;
-        bottom_flow =
+        bottom_flow_velocity =
             texture(pass_1,UV - y_offset).b - 0.5;
 
-        highp float flow_fac = 4.0;
+        highp float flow_velocity_fac = 4.0;
 
-        flow_y =
+        flow_velocity_y =
             0.5 * (
-                   p(-flow_fac * top_flow) * top_flow +
-                   (1.0 - p(-flow_fac * top_flow)) * flow_y +
-                   p(flow_fac * bottom_flow) * bottom_flow +
-                   (1.0 - p(flow_fac * bottom_flow)) * flow_y
+                   p(-flow_velocity_fac * top_flow_velocity) * top_flow_velocity +
+                   (1.0 - p(-flow_velocity_fac * top_flow_velocity)) * flow_velocity_y +
+                   p(flow_velocity_fac * bottom_flow_velocity) * bottom_flow_velocity +
+                   (1.0 - p(flow_velocity_fac * bottom_flow_velocity)) * flow_velocity_y
                    );
         
         smoke_density =
-            p(flow_y) * bottom_density +
-            p(-flow_y) * top_density +
-            (1.0 - p(flow_y) - p(-flow_y)) * smoke_density;
+            p(flow_velocity_y) * bottom_density +
+            p(-flow_velocity_y) * top_density +
+            (1.0 - p(flow_velocity_y) - p(-flow_velocity_y)) * smoke_density;
         
         if(UV.y < 0.01){
-            flow_y = 0.0;
+            flow_velocity_y = 0.0;
         }
         
-        // Damp flow_x
+        // Damp flow_velocity_x
         // no damping = weird behaviour
         // to much damping = you don't see anything
-        flow_x *= 0.98;
-        flow_y *= 0.985;
+        flow_velocity_x *= 0.98;
+        flow_velocity_y *= 0.985;
         smoke_density *= 0.8;
         
         // We store data in the color
         color = vec4(
                      smoke_density + 0.5,
-                     flow_x + 0.5,
-                     flow_y + 0.5,
+                     flow_velocity_x + 0.5,
+                     flow_velocity_y + 0.5,
                      1.0
                      );        
-
+        
     } else if(pass == 3){
         if(!is_rocket){
             highp float fire = pow(smoke_density,1.3);
@@ -234,7 +234,7 @@ void main(){
             color.rgb = 3.0 * smoke_density * white;
             color.rgb -= fire_red * (1.0 - red);
             color.rgb -= fire * (1.0 - yellow);
-            
+            color = last;
         } else {
             // Rocket color
             color.rgb = vec3(0.3,0.1,0.0);

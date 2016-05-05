@@ -25,18 +25,25 @@ function render(){
         rocket.y += rocket.dy;
         rocket.angle += rocket.dangle;
 
+        // Damp speeds
         rocket.dy -= 0.00005;
         rocket.dx *= 0.99;
         rocket.dy *= 0.99;
 
         if(rocket.y < floor ){
+            // Don't go further
             rocket.y = floor;
             if(Math.abs(rocket.dy) > 0.004){
+                // Reflect rocket
                 rocket.dy *= -1;
                 if(rocket.angle > 0 && rocket.angle < Math.PI){
                 } else {
                     rocket.angle = 2 * Math.PI - rocket.angle;
                 }
+            } else {
+                // Keep still
+                rocket.dy = 0;
+                rocket.dangle *= 0.4;
             }
         }
         rocket.acc *= 0.95;
