@@ -88,7 +88,7 @@ void main(){
     highp vec4 last = texture(last_pass,UV);
 
     // Extract data
-    highp vec4 data = texture(pass_1,UV);
+    highp vec4 data = texture(pass_2,UV);
     highp float smoke_density = data.r - 0.5;
     highp vec2 u = u_for(data);
     
@@ -107,7 +107,6 @@ void main(){
     highp vec2 u_bottom = u_for(texture(pass_1,UV - y_offset));
     highp vec2 u_right = u_for(texture(pass_1,UV + x_offset));
     highp vec2 u_left = u_for(texture(pass_1,UV - x_offset));
-
 
     
     // Take screen ratio into account
@@ -177,8 +176,8 @@ void main(){
         
         // In motor area: oscillate
         if (is_motor && rocket_acc >= 0.1){
-            smoke_density = rocket_acc;
-            u = -(boat_vec);
+            //smoke_density = rocket_acc;
+            u = (boat_vec) * 0.2;
         }
     }
     
@@ -193,13 +192,13 @@ void main(){
             color = texture(pass_1,UV);
             return;
         }
-
+        
         /* Flow derivative */
         highp vec2 du = vec2(0.0);
-        highp vec2 g = vec2(0.1);
-        highp float nabla_u = 0.0;
-        highp float dudx = 0.0;
-        highp float dudy = 0.0;
+        highp vec2 g = vec2(0.0,-0.1);
+        highp vec2 nabla_u;
+        highp vec2 dudx;
+        highp vec2 dudy;
 
         highp float from_top;
         highp float from_right;
@@ -208,26 +207,26 @@ void main(){
 
         highp float dx = 0.1;
 
-        from_top = dot(u_top,vec2(0.0,-1.0));
-        from_right = dot(u_right,vec2(1.0,0.0));
-        from_bottom = dot(u_bottom,vec2(0.0,1.0));
-        from_left = dot(u_left,vec2(-1.0,0.0));
+        from_top = (u_top * vec2(0.0,-1.0)).y;
+        from_bottom = (u_bottom * vec2(0.0,1.0)).y;
+        from_right = (u_right *vec2(1.0,0.0)).x;
+        from_left = (u_left * vec2(-1.0,0.0)).x;
 
-        nabla_u += (from_right - from_left) / dx;
-        nabla_u += (from_top - from_bottom) / dx;
+        dudx = ((u_right - u_left) / dx);
+        dudy = ((u_top - u_bottom) / dx);
         
-        du -= u * nabla_u;
-        du += g;
+        nabla_u = dudx + dudy;
         
-        u += 0.05 * du;
+        du = g -
+            dot(u,nabla_u);
         
-        // Damp flow_velocity_x
-        // no damping = weird behaviour
-        // to much damping = you don't see anything
-        //flow_velocity_x *= 0.95;
-        //flow_velocity_y *= 0.95;
-        //smoke_density *= 0.8;
+        u += 0.1 * du;
 
+        u *= 0.95;
+        
+        if(UV.y < 0.01){
+            u = vec2(0.0,0.0);
+        }
 
         flow_velocity_x = u.x;
         flow_velocity_y = u.y;
