@@ -27,8 +27,8 @@ function render(){
 
         // Damp speeds
         rocket.dy -= 0.00005;
-        rocket.dx *= 0.99;
-        rocket.dy *= 0.99;
+        rocket.dx *= 0.999;
+        rocket.dy *= 0.999;
 
         if(rocket.y < floor ){
             // Don't go further

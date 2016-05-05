@@ -77,18 +77,42 @@ bool point_in_rect(
     return false;
 }
 
+highp vec2 u_for(highp vec4 data){
+    highp float flow_velocity_x = data.g - 0.5;
+    highp float flow_velocity_y = data.b - 0.5;
+    highp vec2 u = vec2(flow_velocity_x,flow_velocity_y);
+    return u;
+}
+
 void main(){
     highp vec4 last = texture(last_pass,UV);
 
     // Extract data
     highp vec4 data = texture(pass_1,UV);
     highp float smoke_density = data.r - 0.5;
+    highp vec2 u = u_for(data);
+    
     highp float flow_velocity_x = data.g - 0.5;
     highp float flow_velocity_y = data.b - 0.5;
 
+    // Not the real pixel size
+    // (Can be anything)
+    highp float pixel_width = 0.003;
+    
+    // Create these values to find neighboring cells
+    highp vec2 x_offset = vec2(pixel_width,0.00);
+    highp vec2 y_offset = vec2(0.00,pixel_width * ratio);
+    
+    highp vec2 u_top = u_for(texture(pass_1,UV + y_offset));
+    highp vec2 u_bottom = u_for(texture(pass_1,UV - y_offset));
+    highp vec2 u_right = u_for(texture(pass_1,UV + x_offset));
+    highp vec2 u_left = u_for(texture(pass_1,UV - x_offset));
+
+
+    
     // Take screen ratio into account
     highp vec2 uv_ratio = vec2(1.0,1.0 / ratio);
-
+    
     // Find distance between rocket an current UV
     highp float rocket_dist =
         distance(UV * uv_ratio,
@@ -103,27 +127,21 @@ void main(){
     // Is pixel in rocket/motor area?
     bool is_rocket = false;
     bool is_motor = false;
-    
-    // Not the real pixel size
-    // (Can be anything)
-    highp float pixel_width = 0.003;
-    
-    // Create these values to find neighboring cells
-    highp vec2 x_offset = vec2(pixel_width,0.00);
-    highp vec2 y_offset = vec2(0.00,pixel_width * ratio);
 
+    highp vec2 point = UV - vec2(rocket_x,rocket_y);
+    // Screen is not a square so:
+    point.x *= ratio;
+    
+    // Rocket rotation
+    highp float r = length(point);
+    highp float p_angle = atan(-point.y,point.x);
+    p_angle += rocket_angle;
+
+    highp vec2 boat_vec = vec2(cos(p_angle),sin(p_angle));
+    
     // Enter rocket render logic when close enough
     if(rocket_dist < 2.0 * b_length){
-        highp vec2 point = UV - vec2(rocket_x,rocket_y);
-        // Screen is not a square so:
-        point.x *= ratio;
-        
-        // Rocket rotation
-        highp float r = length(point);
-        highp float p_angle = atan(-point.y,point.x);
-        p_angle += rocket_angle;
-        
-        point = r * vec2(cos(p_angle),sin(p_angle));
+        point = r * boat_vec;
 
         // This is where I drew the rocket
         // Rectangle part
@@ -160,7 +178,7 @@ void main(){
         // In motor area: oscillate
         if (is_motor && rocket_acc >= 0.1){
             smoke_density = rocket_acc;
-            flow_velocity_y = -0.5;
+            u = -(boat_vec);
         }
     }
     
@@ -176,45 +194,43 @@ void main(){
             return;
         }
 
-        highp float top_density;
-        highp float bottom_density;
-        highp float top_flow_velocity;
-        highp float bottom_flow_velocity;
-        
-        top_density = 
-            texture(pass_1,UV + y_offset).x - 0.5;
-        bottom_density = 
-            texture(pass_1,UV - y_offset).x - 0.5;
-        top_flow_velocity =
-            texture(pass_1,UV + y_offset).b - 0.5;
-        bottom_flow_velocity =
-            texture(pass_1,UV - y_offset).b - 0.5;
+        /* Flow derivative */
+        highp vec2 du = vec2(0.0);
+        highp vec2 g = vec2(0.1);
+        highp float nabla_u = 0.0;
+        highp float dudx = 0.0;
+        highp float dudy = 0.0;
 
-        highp float flow_velocity_fac = 4.0;
+        highp float from_top;
+        highp float from_right;
+        highp float from_bottom;
+        highp float from_left;
 
-        flow_velocity_y =
-            0.5 * (
-                   p(-flow_velocity_fac * top_flow_velocity) * top_flow_velocity +
-                   (1.0 - p(-flow_velocity_fac * top_flow_velocity)) * flow_velocity_y +
-                   p(flow_velocity_fac * bottom_flow_velocity) * bottom_flow_velocity +
-                   (1.0 - p(flow_velocity_fac * bottom_flow_velocity)) * flow_velocity_y
-                   );
+        highp float dx = 0.1;
+
+        from_top = dot(u_top,vec2(0.0,-1.0));
+        from_right = dot(u_right,vec2(1.0,0.0));
+        from_bottom = dot(u_bottom,vec2(0.0,1.0));
+        from_left = dot(u_left,vec2(-1.0,0.0));
+
+        nabla_u += (from_right - from_left) / dx;
+        nabla_u += (from_top - from_bottom) / dx;
         
-        smoke_density =
-            p(flow_velocity_y) * bottom_density +
-            p(-flow_velocity_y) * top_density +
-            (1.0 - p(flow_velocity_y) - p(-flow_velocity_y)) * smoke_density;
+        du -= u * nabla_u;
+        du += g;
         
-        if(UV.y < 0.01){
-            flow_velocity_y = 0.0;
-        }
+        u += 0.05 * du;
         
         // Damp flow_velocity_x
         // no damping = weird behaviour
         // to much damping = you don't see anything
-        flow_velocity_x *= 0.98;
-        flow_velocity_y *= 0.985;
-        smoke_density *= 0.8;
+        //flow_velocity_x *= 0.95;
+        //flow_velocity_y *= 0.95;
+        //smoke_density *= 0.8;
+
+
+        flow_velocity_x = u.x;
+        flow_velocity_y = u.y;
         
         // We store data in the color
         color = vec4(
@@ -234,7 +250,7 @@ void main(){
             color.rgb = 3.0 * smoke_density * white;
             color.rgb -= fire_red * (1.0 - red);
             color.rgb -= fire * (1.0 - yellow);
-            color = last;
+            color.rgb = vec3(last);
         } else {
             // Rocket color
             color.rgb = vec3(0.3,0.1,0.0);
