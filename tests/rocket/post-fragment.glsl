@@ -135,12 +135,12 @@ void main(){
     highp float r = length(point);
     highp float p_angle = atan(-point.y,point.x);
     p_angle += rocket_angle;
-
-    highp vec2 boat_vec = vec2(cos(p_angle),sin(p_angle));
+    
+    highp vec2 rocket_vec = vec2(cos(p_angle),sin(p_angle));
     
     // Enter rocket render logic when close enough
     if(rocket_dist < 2.0 * b_length){
-        point = r * boat_vec;
+        point = r * rocket_vec;
 
         // This is where I drew the rocket
         // Rectangle part
@@ -172,12 +172,12 @@ void main(){
 
         if(is_rocket){
             smoke_density = 0.0;
+            u = vec2(0.0,0.0);
         }
         
         // In motor area: oscillate
-        if (is_motor && rocket_acc >= 0.1){
-            //smoke_density = rocket_acc;
-            u = (boat_vec) * 0.2;
+        if (is_motor){
+            u = vec2(0,-0.5);
         }
     }
     
@@ -195,36 +195,31 @@ void main(){
         
         /* Flow derivative */
         highp vec2 du = vec2(0.0);
-        highp vec2 g = vec2(0.0,-0.1);
-        highp vec2 nabla_u;
-        highp vec2 dudx;
-        highp vec2 dudy;
-
-        highp float from_top;
-        highp float from_right;
-        highp float from_bottom;
-        highp float from_left;
-
-        highp float dx = 0.1;
-
-        from_top = (u_top * vec2(0.0,-1.0)).y;
-        from_bottom = (u_bottom * vec2(0.0,1.0)).y;
-        from_right = (u_right *vec2(1.0,0.0)).x;
-        from_left = (u_left * vec2(-1.0,0.0)).x;
-
-        dudx = ((u_right - u_left) / dx);
-        dudy = ((u_top - u_bottom) / dx);
+        highp vec2 g = vec2(0.0,0.005);
+        highp float nabla_u;
+        highp vec2 dudx, dudy;
         
-        nabla_u = dudx + dudy;
+        highp float dx = 0.4;
         
-        du = g -
-            dot(u,nabla_u);
-        
-        u += 0.1 * du;
+        dudx = (u_right - u_left) / dx;
+        dudy = (u_top - u_bottom) / dx;
 
-        u *= 0.95;
+        highp vec2 u_mid =
+            ( u_top + u_bottom +
+              u_right + u_left ) / 4.0;
         
-        if(UV.y < 0.01){
+        du = - u_mid * vec2( vec2(1.0,0.0) * dudx +
+                               vec2(0.0,1.0) * dudy );
+        
+        u += du * 0.4;
+
+        u *= 0.97;
+        
+        if( UV.y < 0.01 ||
+            UV.y > 0.99 ||
+            UV.x < 0.01 ||
+            UV.x > 0.99
+            ){
             u = vec2(0.0,0.0);
         }
 
@@ -249,7 +244,7 @@ void main(){
             color.rgb = 3.0 * smoke_density * white;
             color.rgb -= fire_red * (1.0 - red);
             color.rgb -= fire * (1.0 - yellow);
-            color.rgb = vec3(last);
+            color.rgb = vec3(length(vec2(last.g,last.b)));
         } else {
             // Rocket color
             color.rgb = vec3(0.3,0.1,0.0);

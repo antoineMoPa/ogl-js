@@ -26,7 +26,7 @@ function render(){
         rocket.angle += rocket.dangle;
 
         // Damp speeds
-        rocket.dy -= 0.00005;
+        rocket.dy -= 0.00002;
         rocket.dx *= 0.999;
         rocket.dy *= 0.999;
 
@@ -68,10 +68,10 @@ function accelerate(force){
 
 function manage_keys(){
     if(keys["w"] == true){
-        accelerate(0.0001);
+        accelerate(0.00004);
     }
     if(keys["s"] == true){
-        accelerate(-0.00006);
+        accelerate(-0.00003);
     }
     if(keys["a"] == true){
         rocket.dangle += 0.003;
