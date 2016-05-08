@@ -187,8 +187,8 @@ void main(){
         
         // In motor area: oscillate
         if (is_motor){
-            u = - 0.5 * rocket_vec;
-            p = 0.5;
+            u = - 0.3 * rocket_vec;
+            p = 0.1;
         }
     }
     
@@ -222,18 +222,13 @@ void main(){
 
         nabla_p = vec2(dudx,dudy) / p0;
         
-        dp.x =  -u.x * (nabla_p.x) - p * (nabla_u.x);
-        dp.y =  -u.y * (nabla_p.y) - p * (nabla_u.y);
+        dp =  -u * (nabla_p) - p * (nabla_u);
         
-        du.x =  -u.x * nabla_u.x - nabla_p.x / p - g.x;
-        du.y =  -u.y * nabla_u.y - nabla_p.y / p - g.y;
-        
-        u += du * 0.3;
+        du =  - u * nabla_u - nabla_p / p + g;
 
-        p += (dp.x + dp.y) * 0.3;
-        
-        u *= 0.9;
-        p *= 0.9;
+        u += du * 0.2;
+
+        p += (dp.x + dp.y) * 0.2;
         
         if( UV.y < 0.01 ||
             UV.y > 0.99 ||
@@ -265,7 +260,7 @@ void main(){
             color.rgb -= fire_red * (1.0 - red);
             color.rgb -= fire * (1.0 - yellow);
             color.rgb = vec3(last.r - 0.5);
-
+            color = last;
             if(frame_count % 1000 < 500){
                 color = last;
             }
