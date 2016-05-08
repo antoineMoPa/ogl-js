@@ -84,13 +84,19 @@ highp vec2 u_for(highp vec4 data){
     return u;
 }
 
+highp float p_for(highp vec4 data){
+    highp float pressure = data.r - 0.5;
+    return pressure;
+}
+
+
 void main(){
     highp vec4 last = texture(last_pass,UV);
 
     // Extract data
     highp vec4 data = texture(pass_2,UV);
-    highp float smoke_density = data.r - 0.5;
     highp vec2 u = u_for(data);
+    highp float p = p_for(data);
     
     highp float flow_velocity_x = data.g - 0.5;
     highp float flow_velocity_y = data.b - 0.5;
@@ -108,7 +114,11 @@ void main(){
     highp vec2 u_right = u_for(texture(pass_1,UV + x_offset));
     highp vec2 u_left = u_for(texture(pass_1,UV - x_offset));
 
-    
+    highp float p_top = p_for(texture(pass_1,UV + y_offset));
+    highp float p_bottom = p_for(texture(pass_1,UV - y_offset));
+    highp float p_right = p_for(texture(pass_1,UV + x_offset));
+    highp float p_left = p_for(texture(pass_1,UV - x_offset));
+
     // Take screen ratio into account
     highp vec2 uv_ratio = vec2(1.0,1.0 / ratio);
     
@@ -171,13 +181,14 @@ void main(){
              vec2(-b_length, b_width/4.5));
 
         if(is_rocket){
-            smoke_density = 0.0;
+            p = 0.0;
             u = vec2(0.0,0.0);
         }
         
         // In motor area: oscillate
         if (is_motor){
-            u = vec2(0,-0.5);
+            u = - 0.5 * rocket_vec;
+            p = 0.5;
         }
     }
     
@@ -194,26 +205,35 @@ void main(){
         }
         
         /* Flow derivative */
-        highp vec2 du = vec2(0.0);
-        highp vec2 g = vec2(0.0,0.005);
-        highp float nabla_u;
-        highp vec2 dudx, dudy;
+        highp vec2 du, dp;
+        highp float p0;
+        highp vec2 g = vec2(0.0,-0.1);
+        highp vec2 nabla_u, nabla_p;
+        highp float dudx, dudy;
         
-        highp float dx = 0.4;
-        
-        dudx = (u_right - u_left) / dx;
-        dudy = (u_top - u_bottom) / dx;
+        dudx = (u_right.x - u_left.x);
+        dudy = (u_top.y - u_bottom.y);
 
-        highp vec2 u_mid =
-            ( u_top + u_bottom +
-              u_right + u_left ) / 4.0;
-        
-        du = - u_mid * vec2( vec2(1.0,0.0) * dudx +
-                               vec2(0.0,1.0) * dudy );
-        
-        u += du * 0.4;
+        nabla_u = vec2(dudx,dudy);
 
-        u *= 0.97;
+        p0 = 1.0;
+        dudx = (p_right - p_left);
+        dudy = (p_top - p_bottom);
+
+        nabla_p = vec2(dudx,dudy) / p0;
+        
+        dp.x =  -u.x * (nabla_p.x) - p * (nabla_u.x);
+        dp.y =  -u.y * (nabla_p.y) - p * (nabla_u.y);
+        
+        du.x =  -u.x * nabla_u.x - nabla_p.x / p - g.x;
+        du.y =  -u.y * nabla_u.y - nabla_p.y / p - g.y;
+        
+        u += du * 0.3;
+
+        p += (dp.x + dp.y) * 0.3;
+        
+        u *= 0.9;
+        p *= 0.9;
         
         if( UV.y < 0.01 ||
             UV.y > 0.99 ||
@@ -228,7 +248,7 @@ void main(){
         
         // We store data in the color
         color = vec4(
-                     smoke_density + 0.5,
+                     p + 0.5,
                      flow_velocity_x + 0.5,
                      flow_velocity_y + 0.5,
                      1.0
@@ -236,15 +256,20 @@ void main(){
         
     } else if(pass == 3){
         if(!is_rocket){
-            highp float fire = pow(smoke_density,1.3);
-            highp float fire_red = pow(smoke_density,2.0);
+            highp float fire = pow(p,1.3);
+            highp float fire_red = pow(p,2.0);
             highp vec3 yellow = vec3(1.0, 1.0, 0.0);
             highp vec3 red = vec3(1.0, 0.0, 0.0);
             highp vec3 white = vec3(1.0, 1.0, 1.0);
-            color.rgb = 3.0 * smoke_density * white;
+            color.rgb = 3.0 * p * white;
             color.rgb -= fire_red * (1.0 - red);
             color.rgb -= fire * (1.0 - yellow);
-            color.rgb = vec3(length(vec2(last.g,last.b)));
+            color.rgb = vec3(last.r - 0.5);
+
+            if(frame_count % 1000 < 500){
+                color = last;
+            }
+            
         } else {
             // Rocket color
             color.rgb = vec3(0.3,0.1,0.0);
