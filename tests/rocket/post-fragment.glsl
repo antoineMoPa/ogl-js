@@ -179,93 +179,72 @@ void main(){
              vec2(-b_length * 1.2, b_width/8.5),
              vec2(-b_length, -b_width/4.5),
              vec2(-b_length, b_width/4.5));
-
+        
         if(is_rocket){
-            // p = 0.0;
-            //u = vec2(0.0,0.0);
+            p = 0.1;
+            u = -0.4 * rocket_vec;
+
         }
         
         // In motor area: oscillate
         if (is_motor){
-            u = -0.4 * rocket_vec;
         }
     }
 
-    highp float div;
     highp vec2 nabla_u, nabla_p;
     
     if(frame_count == 0 || reset == 1){
         // Set initial conditions
         color = vec4(0.5,0.5,0.5,1.0);
+        if(UV.y > 0.5){
+            color.x = 0.0;
+            color.y = 0.0;
+            color.z = 0.0;
+        }
     } else if(pass == 1){
         color = texture(pass_2,UV);
     } else if(pass == 2){
         // In pause, just leave here
         if(pause == 1){
-            color = texture(pass_1,UV);
+            color = texture(pass_2,UV);
             return;
         }
         
         /* Flow derivative */
         highp vec2 du, dp;
         highp float p0;
-        highp vec2 g = vec2(0.0,0.1);
+        highp vec2 g = vec2(0.0,-0.1);
         highp float dudx, dudy;
-        highp vec2 u_temp;
 
-        u_temp = u;
-
-        for(int i = 0; i < 4; i++){
-            dudx = (u_right.x - u_left.x);
-            dudy = (u_top.y - u_bottom.y);
-            nabla_u = vec2(dudx,dudy);
-
-            p0 = 1.0;
-            dudx = (p_right - p_left);
-            dudy = (p_top - p_bottom);
-            
-            nabla_p = vec2(dudx,dudy) / p0;
-
-            du = - u_temp * nabla_u - nabla_p / p + g;
-
-            highp float time_fac = 1.0;
-
-            div = nabla_p.x + nabla_p.y;
-            
-            du.x -= div * time_fac;
-            du.y -= div * time_fac;
-            
-            u_temp -= du * time_fac;
-            
-            dp =  -u * (nabla_p) - p * (nabla_u);
-            p += length(dp);
-        }
-
-        u = u_temp;
+        dudx = ((u - u_left).x + (u_right - u).x)/2.0;
+        dudy = ((u - u_bottom).y + (u_top - u).y)/2.0;
+        nabla_u = vec2(dudx,dudy);
         
-        p *= 0.98;
-        u *= 0.98;
-        
-        u = ( u +
-              u_top +
-              u_bottom +
-              u_left +
-              u_right ) / 5.0;
+        p0 = 1.0;
 
-        p = ( p +
-              p_top +
-              p_bottom +
-              p_left +
-              p_right ) / 5.0;
+        dudx = ((p - p_left) + (p_right - p))/2.0;
+        dudy = ((p - p_bottom) + (p_top - p))/2.0;
+
+        nabla_p = vec2(dudx,dudy) / p0;
+
+        highp float time_fac = 0.1;
+
+        // u = -u . del u + del w - g
+        // del w = 1/p0 . del p
+        du = - u * nabla_u + nabla_p / p + g;
+        u += du * time_fac;
+
+        dp =  -u * (nabla_p) - p * (nabla_u);
+        p += length(dp) * time_fac;
+
         
-        
-        if( UV.y < 0.01 ||
-            UV.y > 0.99 ||
-            UV.x < 0.01 ||
-            UV.x > 0.99
-            ){
+        if( UV.y < 0.02 ||
+            UV.y > 0.98 ||
+            UV.x < 0.02 ||
+            UV.x > 0.98 ){
             u = vec2(0.0,0.0);
-            p = 0.5;
+            //p = 0.0;
+        } else {
         }
 
         flow_velocity_x = u.x;
@@ -289,13 +268,8 @@ void main(){
             color.rgb = 3.0 * p * white;
             color.rgb -= fire_red * (1.0 - red);
             color.rgb -= fire * (1.0 - yellow);
-            color.rgb = vec3(last.r - 0.5);
-            color = last;
-            if(frame_count % 1000 < 500){
-                color.rgb = vec3(pow(last.r,2.0));
-            }
-            
-            color = last;
+            color.rgb = vec3(last.r);
+            //color = last;
         } else {
             // Rocket color
             color.rgb = vec3(0.3,0.1,0.0);
