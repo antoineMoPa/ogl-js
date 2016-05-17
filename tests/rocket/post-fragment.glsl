@@ -15,7 +15,6 @@ uniform highp float ratio;
 uniform highp float rocket_x;
 uniform highp float rocket_y;
 uniform highp float rocket_angle;
-uniform highp float rocket_acc;
 highp vec4 rand_var;
 
 /*
@@ -107,7 +106,7 @@ void main(){
     
     // Create these values to find neighboring cells
     highp vec2 x_offset = vec2(pixel_width,0.00);
-    highp vec2 y_offset = vec2(0.00,pixel_width * ratio);
+    highp vec2 y_offset = vec2(0.00,-pixel_width * ratio);
     
     highp vec2 u_top = u_for(texture(pass_1,UV + y_offset));
     highp vec2 u_bottom = u_for(texture(pass_1,UV - y_offset));
@@ -127,7 +126,6 @@ void main(){
         distance(UV * uv_ratio,
                  vec2(rocket_x,rocket_y) * uv_ratio);
     
-
     // Rocket measurements
     highp float b_length = 0.05;
     highp float b_width = 0.05;
@@ -181,26 +179,29 @@ void main(){
              vec2(-b_length, b_width/4.5));
         
         if(is_rocket){
-            p = 0.1;
-            u = -0.4 * rocket_vec;
-
+            //p = 0.5;
         }
         
         // In motor area: oscillate
         if (is_motor){
+            //p = 0.6;
+            //u = -0.5 * rocket_vec;
         }
     }
 
-    highp vec2 nabla_u, nabla_p;
+    // Source
+    if(distance(UV,vec2(0.25,0.75)) < 0.01){
+        u = vec2(0.0,-0.2);
+        p = 0.5;
+    }
+    if(distance(UV,vec2(0.8,0.25)) < 0.01){
+        u = vec2(0.0,0.2);
+        p = 0.5;
+    }
     
     if(frame_count == 0 || reset == 1){
         // Set initial conditions
         color = vec4(0.5,0.5,0.5,1.0);
-        if(UV.y > 0.5){
-            color.x = 0.0;
-            color.y = 0.0;
-            color.z = 0.0;
-        }
     } else if(pass == 1){
         color = texture(pass_2,UV);
     } else if(pass == 2){
@@ -210,41 +211,45 @@ void main(){
             return;
         }
         
-        /* Flow derivative */
         highp vec2 du, dp;
         highp float p0;
-        highp vec2 g = vec2(0.0,-0.1);
-        highp float dudx, dudy;
-
-        dudx = ((u - u_left).x + (u_right - u).x)/2.0;
-        dudy = ((u - u_bottom).y + (u_top - u).y)/2.0;
-        nabla_u = vec2(dudx,dudy);
+        highp vec2 g = vec2(0.0,0.0);
+        highp vec2 dudx, dudy;
+        highp float dpdx, dpdy;
+        highp vec2 nabla_u, nabla_p;
+  
+        dudx = u_right - u_left;
+        dudy = u_top - u_bottom;
         
         p0 = 1.0;
-
-        dudx = ((p - p_left) + (p_right - p))/2.0;
-        dudy = ((p - p_bottom) + (p_top - p))/2.0;
-
-        nabla_p = vec2(dudx,dudy) / p0;
+        
+        dpdx = p_right - p_left;
+        dpdy = p_top - p_bottom;
 
         highp float time_fac = 0.1;
 
-        // u = -u . del u + del w - g
+        // du = -u . del u + del w - g
         // del w = 1/p0 . del p
-        du = - u * nabla_u + nabla_p / p + g;
+        du = -u * vec2(dudx.x,dudy.y) +
+            1.0/p0 * vec2(dpdx, dpdy) - g;
+
         u += du * time_fac;
 
-        dp =  -u * (nabla_p) - p * (nabla_u);
+        // -u . del p - p del . u
+        dp = -u * vec2(dpdx,dpdy) - p * vec2(dudy.x,dudy.y);
+        
         p += length(dp) * time_fac;
 
+        u = (u + u_top + u_bottom + u_left + u_right) / 5.0;
         
+        // Border
         if( UV.y < 0.02 ||
             UV.y > 0.98 ||
             UV.x < 0.02 ||
             UV.x > 0.98 ){
             u = vec2(0.0,0.0);
-            //p = 0.0;
         } else {
+            
         }
 
         flow_velocity_x = u.x;
@@ -259,7 +264,7 @@ void main(){
                      );        
         
     } else if(pass == 3){
-        if(!is_rocket){
+        if(true){
             highp float fire = pow(p,1.3);
             highp float fire_red = pow(p,2.0);
             highp vec3 yellow = vec3(1.0, 1.0, 0.0);
@@ -272,7 +277,7 @@ void main(){
             //color = last;
         } else {
             // Rocket color
-            color.rgb = vec3(0.3,0.1,0.0);
+            //color.rgb = vec3(0.3,0.1,0.0);
         }
         // Set alpha to 1
         color.a = 1.0;
