@@ -179,24 +179,25 @@ void main(){
              vec2(-b_length, b_width/4.5));
         
         if(is_rocket){
-            //p = 0.5;
+            p = 0.4;
+            u = -0.5 * rocket_vec;
         }
         
         // In motor area: oscillate
         if (is_motor){
-            //p = 0.6;
-            //u = -0.5 * rocket_vec;
+            p = 0.4;
+            u = -0.5 * rocket_vec;
         }
     }
 
     // Source
     if(distance(UV,vec2(0.25,0.75)) < 0.01){
-        u = vec2(0.0,-0.2);
-        p = 0.5;
+        //u = vec2(0.0,-0.2);
+        //p = 0.5;
     }
     if(distance(UV,vec2(0.8,0.25)) < 0.01){
-        u = vec2(0.0,0.2);
-        p = 0.5;
+        //u = vec2(0.0,0.2);
+        //p = 0.5;
     }
     
     if(frame_count == 0 || reset == 1){
@@ -264,7 +265,7 @@ void main(){
                      );        
         
     } else if(pass == 3){
-        if(true){
+        if(!is_rocket){
             highp float fire = pow(p,1.3);
             highp float fire_red = pow(p,2.0);
             highp vec3 yellow = vec3(1.0, 1.0, 0.0);
@@ -274,10 +275,10 @@ void main(){
             color.rgb -= fire_red * (1.0 - red);
             color.rgb -= fire * (1.0 - yellow);
             color.rgb = vec3(last.r);
-            //color = last;
+            color = last;
         } else {
             // Rocket color
-            //color.rgb = vec3(0.3,0.1,0.0);
+            color.rgb = vec3(0.3,0.1,0.0);
         }
         // Set alpha to 1
         color.a = 1.0;
