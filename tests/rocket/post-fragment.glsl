@@ -179,25 +179,25 @@ void main(){
              vec2(-b_length, b_width/4.5));
         
         if(is_rocket){
-            p = 0.4;
-            u = -0.5 * rocket_vec;
+            //p = 0.4;
+            u = vec2(-rocket_vec.y,rocket_vec.x);
         }
         
         // In motor area: oscillate
         if (is_motor){
-            p = 0.4;
-            u = -0.5 * rocket_vec;
+            //p = 0.4;
+            //u = -0.5 * rocket_vec;
         }
     }
 
     // Source
-    if(distance(UV,vec2(0.25,0.75)) < 0.01){
-        //u = vec2(0.0,-0.2);
-        //p = 0.5;
+    if(distance(UV,vec2(0.25,0.5)) < 0.02){
+        //u += vec2(0.0,-0.3);
+        //p += 0.6;
     }
-    if(distance(UV,vec2(0.8,0.25)) < 0.01){
-        //u = vec2(0.0,0.2);
-        //p = 0.5;
+    if(distance(UV,vec2(0.75,0.5)) < 0.02){
+        //u += vec2(0.0,0.3);
+        //p += 0.4;
     }
     
     if(frame_count == 0 || reset == 1){
@@ -240,8 +240,6 @@ void main(){
         dp = -u * vec2(dpdx,dpdy) - p * vec2(dudy.x,dudy.y);
         
         p += length(dp) * time_fac;
-
-        u = (u + u_top + u_bottom + u_left + u_right) / 5.0;
         
         // Border
         if( UV.y < 0.02 ||
@@ -250,7 +248,8 @@ void main(){
             UV.x > 0.98 ){
             u = vec2(0.0,0.0);
         } else {
-            
+            u = (u + u_top + u_bottom + u_left + u_right) / 5.0;
+            p = (10.0*p + p_top + p_bottom + p_left + p_right) / 14.0;
         }
 
         flow_velocity_x = u.x;
@@ -266,16 +265,33 @@ void main(){
         
     } else if(pass == 3){
         if(!is_rocket){
-            highp float fire = pow(p,1.3);
-            highp float fire_red = pow(p,2.0);
-            highp vec3 yellow = vec3(1.0, 1.0, 0.0);
-            highp vec3 red = vec3(1.0, 0.0, 0.0);
-            highp vec3 white = vec3(1.0, 1.0, 1.0);
-            color.rgb = 3.0 * p * white;
-            color.rgb -= fire_red * (1.0 - red);
-            color.rgb -= fire * (1.0 - yellow);
-            color.rgb = vec3(last.r);
-            color = last;
+            highp vec2 flow_vector;
+            highp vec2 uv_offset = UV;
+            highp vec2 point_vector;
+            highp float size = 0.02;
+            
+            uv_offset.x = UV.x - mod(UV.x,size);
+            uv_offset.y = UV.y - mod(UV.y,size);
+
+            point_vector = (UV - uv_offset) / size;
+            point_vector.x -= 0.5;
+            point_vector.y -= 0.5;
+            
+            flow_vector = texture(pass_2,
+                                  uv_offset + vec2(size/2.0)).gb;
+            flow_vector.x -= 0.5;
+            flow_vector.y -= 0.5;
+
+            point_vector = normalize(point_vector);
+            flow_vector = normalize(flow_vector);
+
+            if(length(point_vector + flow_vector) < 0.2){
+                color.rgb = vec3(1.0,1.0,1.0);
+            } else if(length(point_vector - flow_vector) < 0.1){
+                color.rgb = vec3(1.0,1.0,1.0);
+            } else {
+                color = last;
+            }
         } else {
             // Rocket color
             color.rgb = vec3(0.3,0.1,0.0);
