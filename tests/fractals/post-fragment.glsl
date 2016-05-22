@@ -98,11 +98,17 @@ highp vec4 fractals(){
         } else {
             z += c;
         }
+
+        // Note: this is cool
+        //z *= 2.0 * sin(z);
         
         // If z goes out of some value (10.0), we know
         // it is not in the mandelbrot set
         // (So we'll color this place)
-        if(distance(z,vec2(0.0,0.0)) > 10.0){
+        // To get nice weird results:
+        // z.x > 10.0
+        // z.y > 10.0
+        if(length(z) > 10.0){
             break;
         }
         current_step++;
