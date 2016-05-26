@@ -62,24 +62,80 @@ void main(){
             color = vec4(0.0,0.0,0.0,1.0);
         }
     } else if(pass == 1) {
-        if(pause == 1){
+        int active_line = frame_count % screen_h;
+        int this_line = int(
+                            (1.0-UV.y) *
+                            float(screen_h));
+
+        last = texture(pass_2,UV);
+
+        if(last.x > 0.5){
             color = last;
             return;
         }
         
-        last = texture(pass_2,UV);
-        
-        highp vec4 one = texture(pass_2,
-                                 UV + y_offset - x_offset);
-        highp vec4 two = texture(pass_2,
-                                 UV + y_offset + x_offset);
+        if(pause == 1){
+            color = last;
+            return;
+        }
+            
+        if(!(this_line == active_line)){
+            color = last;
+            return;
+        }
 
-        color = last;
+        bool cell_1 = texture(pass_2,
+                              UV + y_offset - x_offset).x > 0.5;
+        bool cell_2 = texture(pass_2,
+                              UV + y_offset).x > 0.5;
+        bool cell_3 = texture(pass_2,
+                              UV + y_offset + x_offset).x > 0.5;
+        int num = 0;
         
-        if(abs(one - two).x > 0.5){
+        if(cell_3){
+            num += 4;
+        }
+        if(cell_2){
+            num += 2;
+        }
+        if(cell_1){
+            num += 1;
+        }
+        
+        bool next = false;
+        int rule = 110;
+        
+        switch(num){
+        case 0:
+            next = (rule & 1) != 0;
+            break;
+        case 1:
+            next = (rule & 2) != 0;
+            break;
+        case 2:
+            next = (rule & 4) != 0;
+            break;
+        case 3:
+            next = (rule & 8) != 0;
+            break;
+        case 4:
+            next = (rule & 16) != 0;
+            break;
+        case 5:
+            next = (rule & 32) != 0;
+            break;
+        case 6:
+            next = (rule & 64) != 0;
+            break;
+        default:
+            next = (rule & 128) != 0;
+            break;
+        }
+        
+        if(next){
             color.rgb = vec3(1.0);
         } else {
-            
+            color = last;
         }
         
         color.a = 1.0;
