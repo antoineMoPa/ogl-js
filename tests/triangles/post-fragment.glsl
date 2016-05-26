@@ -11,13 +11,12 @@ uniform int pass;
 uniform int screen_w;
 uniform int screen_h;
 uniform int frame_count;
-uniform int wall;
+uniform int js_frame_count;
 uniform int reset;
 uniform int pause;
-uniform int shading;
+uniform int rule;
 uniform int source_type;
 uniform highp float ratio;
-uniform highp float damp;
 uniform highp float radius;
 uniform highp float mouse_x;
 uniform highp float mouse_y;
@@ -62,7 +61,7 @@ void main(){
             color = vec4(0.0,0.0,0.0,1.0);
         }
     } else if(pass == 1) {
-        int active_line = frame_count % screen_h;
+        int active_line = js_frame_count % screen_h;
         int this_line = int(
                             (1.0 - UV.y) *
                             float(screen_h));
@@ -103,9 +102,6 @@ void main(){
         }
         
         bool next = false;
-
-        // Rule number
-        int rule = 60;
 
         // `rule`: 8 bits
         // `num`: 3 bits addressing `rule` bits
