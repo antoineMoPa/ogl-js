@@ -240,6 +240,20 @@ namespace OglApp{
         // Bind it
         glUniform1f(loc,(float)w/(float)h);
 
+        // Add screen dimensions
+        // Width
+        loc = post_process_shader
+            .get_uniform_location("screen_w");
+        
+        glUniform1i(loc,w);
+
+        // Height
+        loc = post_process_shader
+            .get_uniform_location("screen_h");
+        
+        glUniform1i(loc,h);
+
+        
         // Add timestamp
         loc = post_process_shader
             .get_uniform_location("time");
