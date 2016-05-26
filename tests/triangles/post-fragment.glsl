@@ -62,19 +62,27 @@ void main(){
             color = vec4(0.0,0.0,0.0,1.0);
         }
     } else if(pass == 1) {
-       highp vec4 one = texture(pass_2,
-            UV + y_offset - x_offset);
-       highp vec4 two = texture(pass_2,
-            UV + y_offset + x_offset);
+        if(pause == 1){
+            color = last;
+            return;
+        }
+        
+        last = texture(pass_2,UV);
+        
+        highp vec4 one = texture(pass_2,
+                                 UV + y_offset - x_offset);
+        highp vec4 two = texture(pass_2,
+                                 UV + y_offset + x_offset);
+
+        color = last;
+        
+        if(abs(one - two).x > 0.5){
+            color.rgb = vec3(1.0);
+        } else {
             
-            if(abs(one - two).x > 0.5){
-        color.rgb = vec3(1.0);
-    } else {
-        color.rgb = vec3(0.0);
-    }
-            
-            color.rgb += last.rgb;
-            color.a = 1.0;
+        }
+        
+        color.a = 1.0;
     } else if(pass == 2){
         // We do nothing here
         color = last;
