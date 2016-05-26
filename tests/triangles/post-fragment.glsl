@@ -26,27 +26,6 @@ void main(){
     // We'll use this later
     highp vec4 last = texture(last_pass,UV);
 
-    // Height, speed and resistance is stored in a texture
-    // red = x = height
-    // green = y = speed
-    // etc.
-    // Since we can't store a negative value,
-    // values are given a 0.5 offset at storage
-    // (Also: we cannot store values > 1.0)
-    highp vec4 data = texture(pass_2,UV);
-    highp float height = data.x - 0.5;
-    highp float speed = data.y - 0.5;
-    highp float resistance = data.z;
-
-    // Ratio used to find distance between mouse and
-    // current position
-    highp vec2 uv_ratio = vec2(1.0,1.0 / ratio);
-
-    // Compute mouse distance
-    highp float mouse_dist =
-        distance(UV * uv_ratio,
-                 vec2(mouse_x,mouse_y) * uv_ratio);
-
     highp float pixel_width = 1.0 / float(screen_w);
     highp float pixel_heigth = 1.0 / float(screen_h);
     
