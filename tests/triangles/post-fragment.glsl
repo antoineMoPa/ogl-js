@@ -64,7 +64,7 @@ void main(){
     } else if(pass == 1) {
         int active_line = frame_count % screen_h;
         int this_line = int(
-                            (1.0-UV.y) *
+                            (1.0 - UV.y) *
                             float(screen_h));
 
         last = texture(pass_2,UV);
@@ -92,50 +92,25 @@ void main(){
                               UV + y_offset + x_offset).x > 0.5;
         int num = 0;
         
-        if(cell_3){
+        if(cell_1){
             num += 4;
         }
         if(cell_2){
             num += 2;
         }
-        if(cell_1){
+        if(cell_3){
             num += 1;
         }
         
         bool next = false;
-        int rule = 110;
+        int rule = 105;
         
-        switch(num){
-        case 0:
-            next = (rule & 1) != 0;
-            break;
-        case 1:
-            next = (rule & 2) != 0;
-            break;
-        case 2:
-            next = (rule & 4) != 0;
-            break;
-        case 3:
-            next = (rule & 8) != 0;
-            break;
-        case 4:
-            next = (rule & 16) != 0;
-            break;
-        case 5:
-            next = (rule & 32) != 0;
-            break;
-        case 6:
-            next = (rule & 64) != 0;
-            break;
-        default:
-            next = (rule & 128) != 0;
-            break;
-        }
+        next = (rule & int(pow(2,num))) != 0;
         
         if(next){
             color.rgb = vec3(1.0);
         } else {
-            color = last;
+            color.rgb = vec3(0.0);
         }
         
         color.a = 1.0;
