@@ -103,8 +103,28 @@ void main(){
         }
         
         bool next = false;
-        int rule = 105;
-        
+
+        // Rule number
+        int rule = 60;
+
+        // `rule`: 8 bits
+        // `num`: 3 bits addressing `rule` bits
+        //
+        // `rule` indicates which cases of `num` will produce
+        // an open pixel
+        //
+        // bitwise or (&) operator example:
+        // 0010 0000 & 0010 0001 == 0010 0000
+        //
+        // Example with rule 3
+        // Rule 3 = 0000 0011
+        // So bits 1 and 2 are activated
+        // Which means 2^0 and 2^1 is activated
+        // 0000 0011 & 0000 0001 != 0 and
+        // 0000 0011 & 0000 0010 != 0
+        //
+        // In these cases, the next state of the pixel is `1`
+        //
         next = (rule & int(pow(2,num))) != 0;
         
         if(next){
