@@ -62,32 +62,57 @@ void main(){
             //return;
         }
 
-        highp float cell_1, cell_2, cell_3,
+        highp vec4 cell_1, cell_2, cell_3,
             cell_4, cell_5, cell_6;
         
         cell_1 = texture(pass_2,
-                              UV + 1.0 * y_offset - x_offset).x;
+                         UV + 6.0 * y_offset - x_offset);
         cell_2 = texture(pass_2,
-                              UV + 1.0 * y_offset).x;
+                         UV + 6.0 * y_offset);
         cell_3 = texture(pass_2,
-                              UV + 1.0 * y_offset + x_offset).x;
-
+                         UV + 6.0 * y_offset + x_offset);
+        
         cell_4 = texture(pass_2,
-                              UV - 1.0 * y_offset - x_offset).x;
+                         UV - 6.0 * y_offset - x_offset);
         cell_5 = texture(pass_2,
-                              UV - 1.0 * y_offset).x;
+                         UV - 6.0 * y_offset);
         cell_6 = texture(pass_2,
-                              UV - 1.0 * y_offset + x_offset).x;
-
+                         UV - 6.0 * y_offset + x_offset);
         
         color = last;
 
-        color.rgb -=
-            sin(UV.y * 20.0) *
-            sin(UV.x * 10.0) *
-            ( cell_1 - cell_4 +
-              cell_2 + cell_5 +
-              cell_3 - cell_6 );
+        highp float factor =
+            (sin(UV.y * 10.0 + color.g)) *
+            (sin(UV.x * 10.0 + color.r));
+
+        if(factor < 0.1 && factor > -0.1){
+            factor += 0.1 + color.g;
+        }
+
+        factor = 1.0 + sin(UV.x * 100.0);
+        
+        color.r -=
+            (factor) *
+            ( cell_1.g - cell_4.b +
+              cell_2.g - cell_5.b +
+              cell_3.g + cell_6.b );
+
+        color.g -=
+            (factor) *
+            ( cell_1.b - cell_4.r +
+              cell_2.b + cell_5.r +
+              cell_3.b - cell_6.r );
+
+        color.b -=
+            (factor) *
+            ( cell_1.r + cell_4.g +
+              cell_2.r - cell_5.g +
+              cell_3.r + cell_6.g );
+
+        
+        if(abs(UV.y - 0.02) < pixel_heigth){
+            color.rgb += vec3(0.1,0.3,0.1);
+        }
         
         color.a = 1.0;
     } else if(pass == 2){
