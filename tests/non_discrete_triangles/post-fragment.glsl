@@ -34,7 +34,7 @@ void main(){
     highp vec2 y_offset = vec2(0.00,pixel_heigth);
     
     if(frame_count == 0 || reset == 1){
-        if(distance(UV,vec2(0.5,0.95)) < float(pixel_width)){
+        if(distance(UV,vec2(0.5,0.05)) < 3.0 * float(pixel_width)){
             color = vec4(1.0,1.0,1.0,1.0);
         } else {
             color = vec4(0.0,0.0,0.0,1.0);
@@ -66,53 +66,28 @@ void main(){
             cell_4, cell_5, cell_6;
         
         cell_1 = texture(pass_2,
-                         UV + 6.0 * y_offset - x_offset);
+                         UV - 2.0 * y_offset - 1.0 * x_offset);
         cell_2 = texture(pass_2,
-                         UV + 6.0 * y_offset);
+                         UV - 2.0 * y_offset);
         cell_3 = texture(pass_2,
-                         UV + 6.0 * y_offset + x_offset);
-        
-        cell_4 = texture(pass_2,
-                         UV - 6.0 * y_offset - x_offset);
-        cell_5 = texture(pass_2,
-                         UV - 6.0 * y_offset);
-        cell_6 = texture(pass_2,
-                         UV - 6.0 * y_offset + x_offset);
-        
+                         UV - 1.0 * y_offset + 1.0 * x_offset);
+
         color = last;
 
-        highp float factor =
-            (sin(UV.y * 10.0 + color.g)) *
-            (sin(UV.x * 10.0 + color.r));
+        int num;
 
-        if(factor < 0.1 && factor > -0.1){
-            factor += 0.1 + color.g;
+        if (this_line % 30 != 0 || this_line % 20 < 4) {
+            color.r += cell_1.r + cell_3.g * 0.1;
+            color.g += cell_2.g;
+            color.b += cell_3.b;
+        } else {
+            color.r += cell_1.g;
+            color.g += cell_2.b;
+            color.b += cell_3.r;
         }
 
-        factor = 1.0 + sin(UV.x * 100.0);
-        
-        color.r -=
-            (factor) *
-            ( cell_1.g - cell_4.b +
-              cell_2.g - cell_5.b +
-              cell_3.g + cell_6.b );
-
-        color.g -=
-            (factor) *
-            ( cell_1.b - cell_4.r +
-              cell_2.b + cell_5.r +
-              cell_3.b - cell_6.r );
-
-        color.b -=
-            (factor) *
-            ( cell_1.r + cell_4.g +
-              cell_2.r - cell_5.g +
-              cell_3.r + cell_6.g );
-
-        
-        if(abs(UV.y - 0.02) < pixel_heigth){
-            color.rgb += vec3(0.1,0.3,0.1);
-        }
+        color *= (sin(UV.y * 30.0 + color.r) + 1.4);
+        color *= (sin(UV.x * 30.0 + color.g) + 1.4);
         
         color.a = 1.0;
     } else if(pass == 2){
