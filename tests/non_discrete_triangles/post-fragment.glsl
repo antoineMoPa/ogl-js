@@ -60,12 +60,15 @@ void main(){
             cell_4, cell_5, cell_6;
 
         // Get other pixel values
-        cell_1 = texture(pass_2,
-                         UV - 2.0 * y_offset + 1.0 * x_offset);
+        cell_1 = texture( pass_2,
+                          UV + 2.0 * y_offset +
+                          (2.0 * sin(UV.x * 20.0) - 2.0) *
+                          x_offset
+                          );
         cell_2 = texture(pass_2,
-                         UV + 2.0 * y_offset);
+                         UV - 1.0 * y_offset);
         cell_3 = texture(pass_2,
-                         UV + 1.0 * y_offset - 1.0 * x_offset);
+                         UV + 2.0 * y_offset - 1.0 * x_offset);
 
         color = last;
 
@@ -77,15 +80,11 @@ void main(){
             color.g += cell_2.g;
             color.b += cell_3.b;
         } else {
-            color.r += cell_1.g;
-            color.g += cell_2.b;
-            color.b += cell_3.r;
+            color.r += cell_2.g;
+            color.g += cell_1.b + cell_1.r;
+            color.b += cell_3.r + cell_1.g;
         }
 
-        // Multiply bin sin
-        color *= (sin(UV.y * 30.0 + color.r) + 1.4);
-        color *= (sin(UV.x * 30.0 + color.g) + 1.4);
-        
         color.a = 1.0;
     } else if(pass == 2){
         // We do nothing here
