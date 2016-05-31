@@ -61,14 +61,13 @@ void main(){
 
         // Get other pixel values
         cell_1 = texture( pass_2,
-                          UV + 2.0 * y_offset +
-                          (2.0 * sin(UV.x * 20.0) - 2.0) *
-                          x_offset
-                          );
-        cell_2 = texture(pass_2,
-                         UV - 1.0 * y_offset);
-        cell_3 = texture(pass_2,
-                         UV + 2.0 * y_offset - 1.0 * x_offset);
+                          UV + 1.0 * y_offset +
+                          1.0 * x_offset );
+        cell_2 = texture( pass_2,
+                          UV + 1.0 * y_offset );
+        cell_3 = texture( pass_2,
+                          UV + 1.0 * y_offset -
+                          1.0 * x_offset );
 
         color = last;
 
@@ -76,15 +75,15 @@ void main(){
 
         // Do weird stuff
         if (this_line % 30 != 0 || this_line % 20 < 4) {
-            color.r += cell_1.r + cell_3.g * 0.1;
-            color.g += cell_2.g;
+            color.r += cell_2.r + cell_3.g * 0.1;
+            color.g += cell_1.g;
             color.b += cell_3.b;
         } else {
-            color.r += cell_2.g;
-            color.g += cell_1.b + cell_1.r;
-            color.b += cell_3.r + cell_1.g;
+            color.r += cell_2.g + cell_1.g;
+            color.g += cell_1.b + cell_3.r;
+            color.b += cell_3.r + cell_2.b;
         }
-
+        color.rgb -= vec3(0.3);
         color.a = 1.0;
     } else if(pass == 2){
         // We do nothing here
