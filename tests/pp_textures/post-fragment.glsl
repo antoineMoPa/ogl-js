@@ -20,31 +20,34 @@ void main(){
     
     if(pass == 1){
         highp vec2 mod_UV;
-        highp float time_fac = float(time % 10000) / 300.0;
+        highp float time_fac = float(time % 20000) / 300.0;
         
-        highp float modulation = 0.1 *
+        highp float modulation = 0.02 *
             sin(1.0 * UV.x + time_fac + 2.0 * UV.y);
         
         mod_UV.x = UV.x +
             modulation;
         mod_UV.y = UV.y;
-        
-        mod_UV *= 1.5;
-        mod_UV -= vec2(0.25,0.25);
-        
+
         color = texture(bg, mod_UV);
         
         if( mod_UV.x < 0.0 || mod_UV.x > 1.0 ||
             mod_UV.y < 0.0 || mod_UV.y > 1.0 ){
-            color.rgb = vec3(0.0,0.0,0.0);
+            color = vec4(0.0,0.0,0.0,1.0);
         }
+        
     } else {
-        color =
-            abs(texture(pass_1,UV) -
-                texture(pass_1,UV - vec2(pixel_width,0.0))) +
-            abs(texture(pass_1,UV) -
-                texture(pass_1,UV - vec2(0.0,pixel_height)));
+        highp vec4 edge =
+            abs(texture(bg,UV) -
+                texture(bg,UV - vec2(pixel_width,0.0))) +
+            abs(texture(bg,UV) -
+                texture(bg,UV - vec2(0.0,pixel_height)));
 
+        highp float f_edge = edge.r + edge.g + edge.b;
+        f_edge /= 4.0;
+        
+        color = texture(pass_1, UV) - vec4(f_edge);
     }
+    
     color.a = 1.0;
 }
