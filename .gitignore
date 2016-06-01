@@ -44,3 +44,5 @@ tramp
 
 # flymake-mode
 *_flymake.*
+
+*.bmp

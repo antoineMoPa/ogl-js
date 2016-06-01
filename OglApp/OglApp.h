@@ -386,14 +386,18 @@ namespace OglApp{
         argv[1] = js_x;
         argv[2] = js_y;
 
+        const char * fct_name = is_down?
+            "on_key_down": "on_key_up";
+        
         JSBool ok = JS_CallFunctionName(
             cx,
             *gl,
-            is_down? "on_key_down": "on_key_up",
+            fct_name,
             3,
             argv.begin(),
             rval.address()
             );
+
     }
 
     /**
@@ -430,13 +434,15 @@ namespace OglApp{
         
         argv[0] = js_x;
         argv[1] = js_y;
+
+        const char * fct_name = "on_mouse_move";
         
         // Call javascript "render" function
         // defined in the app's main.js
         JSBool ok = JS_CallFunctionName(
             cx,
             *gl,
-            "on_mouse_move",
+            fct_name,
             2,
             argv.begin(),
             rval.address()
@@ -645,7 +651,7 @@ namespace OglApp{
                     JS_FN("log", jsfn::log, 1, 0),
                     JS_FN("push_matrix", jsfn::push_matrix, 0, 0),
                     JS_FN("pop_matrix", jsfn::pop_matrix, 0, 0),
-                    JS_FN("create_texture",jsfn::create_texture,3,0),
+                    JS_FN("load_texture",jsfn::load_texture,2,0),
                     JS_FN("window_width",jsfn::window_width,3,0),
                     JS_FN("window_height",jsfn::window_height,3,0),
                     JS_FN("enable_2_pass_pp",jsfn::enable_2_pass_pp,0,0),

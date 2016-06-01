@@ -111,32 +111,42 @@ namespace jsfn{
     }
 
     /**
-       Creates a texture for use in GLSL shaders
+       Loads a texture for use in GLSL shaders
        
        Args: 
        
-       name
-       width
-       height
-     */
+       name (Identifier for use in GLSL)
+       filename
+    */
     static JSBool
-        create_texture(JSContext *cx, unsigned argc, jsval *vp)
+        load_texture(JSContext *cx, unsigned argc, jsval *vp)
     {
         JS::CallArgs args = CallArgsFromVp(argc, vp);
-
+        
         if(!args[0].isString()){
             return false;
         }
-
-        int w = args[1].toInt32();
-        int h = args[2].toInt32();
         
-        const char * str =
+        if(!args[1].isString()){
+            return false;
+        }
+        
+        const char * name_cstr =
             JS_EncodeString(cx,args[0].toString());
+
+        const char * filename_cstr =
+            JS_EncodeString(cx,args[1].toString());
         
-        string index(str);
+        string index(name_cstr);
+        string filename(filename_cstr);
+
+        OglApp::js_textures[index].load(filename_cstr);
+
+        GLuint pps = OglApp::post_process_shader.get_id();
         
-        OglApp::js_textures[index].init(w,h);
+        // bind last texture
+        OglApp::js_textures[index].bind(pps,1,name_cstr);
+        
         
         return true;
     }

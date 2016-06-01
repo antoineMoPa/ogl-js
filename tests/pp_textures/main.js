@@ -1,5 +1,5 @@
 // Hey I want this texture to compute stuff internally
-create_texture("value",window_width(),window_height());
+load_texture("bg","samples/tex.bmp");
 enable_2_pass_pp();
 
 function render(){

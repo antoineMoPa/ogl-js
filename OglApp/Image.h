@@ -43,11 +43,14 @@ public:
     GLuint get_id(){
         return textureID;
     }
+
+    /* Loads a bitmap (.bmp) file 
+       Todo: Load other formats (like png)
+     */
     bool load(const char * filename){
         FILE * file = fopen(filename,"rb");
         if(!file){
             cout << "Unable to read file '" << filename << "'."<< endl;
-            fclose(file);
             return false;
         }
         
@@ -78,6 +81,7 @@ public:
         
         data = new unsigned char [imageSize];
         fread(data,1,imageSize,file);
+        
         fclose(file);
 
         generate();
@@ -95,7 +99,7 @@ public:
             width,
             height,
             0, // Doc says:  "This value must be 0." ...
-            GL_BGR, // Format
+            GL_RGB;, // Format
             GL_UNSIGNED_BYTE,
             data);
         
