@@ -1,3 +1,5 @@
+#include <SOIL/SOIL.h>
+
 using namespace std;
 
 /*
@@ -48,43 +50,19 @@ public:
        Todo: Load other formats (like png)
      */
     bool load(const char * filename){
-        FILE * file = fopen(filename,"rb");
-        if(!file){
-            cout << "Unable to read file '" << filename << "'."<< endl;
-            return false;
-        }
         
-        if(fread(header,1,54,file) != 54){
-            cout << "Bad file header." << endl;
-            fclose(file);
-            return false;
-        }
-        
-        if(header[0] != 'B' || header[1] != 'M'){
-            cout << "Bad file header." << endl;
-            fclose(file);
-            return false;
-        }
-        
-        dataPos = *(int*)&(header[0x0A]);
-        imageSize = *(int*)&(header[0x22]);
-        width = *(int*)&(header[0x12]);
-        height = *(int*)&(header[0x16]);
-        
-        if(imageSize == 0){
-            imageSize = width*height*3;
-        }
-        
-        if(dataPos == 0){
-            dataPos = 54;
-        }
-        
-        data = new unsigned char [imageSize];
-        fread(data,1,imageSize,file);
-        
-        fclose(file);
+        textureID = SOIL_load_OGL_texture(
+                              filename,
+                              SOIL_LOAD_AUTO,
+                              SOIL_CREATE_NEW_ID,
+                              SOIL_FLAG_INVERT_Y
+                              );
 
-        generate();
+        if(textureID == 0){
+            cout << "SOIL image loading error: "
+                 << SOIL_last_result()
+                 << endl;
+        }
         
         return true;
     }
@@ -99,7 +77,7 @@ public:
             width,
             height,
             0, // Doc says:  "This value must be 0." ...
-            GL_RGB;, // Format
+            GL_RGB, // Format
             GL_UNSIGNED_BYTE,
             data);
         

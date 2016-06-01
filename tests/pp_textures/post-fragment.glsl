@@ -13,6 +13,6 @@ uniform int frame_count;
 highp vec4 rand_var;
 
 void main(){
-    color = texture(bg,vec2(UV.x,UV.y));
+    color = texture(bg,UV);
     color.a = 1.0;
 }
