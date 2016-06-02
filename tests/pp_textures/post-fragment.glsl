@@ -30,24 +30,24 @@ void main(){
 
         mod_UV = UV;
 
+        highp float fac = 0.0;
+        
         if(length(mouse_diff) < 0.2){
-            highp float fac = length(mouse_diff) / 0.2;
+            fac = 1.0 - pow(length(mouse_diff) / 0.2, 2.0);
+
             // The magnifying math
             // Some vector thinking here.
-            mod_UV =  mouse - fac * 0.3 * mouse_diff;
-        } else if (length(mouse_diff) < 0.23){
-            // Loop border
-            color = vec4(0.0,0.0,0.0,1.0);
-            return;
+            mod_UV =  mouse - 0.01 * mouse_diff;
+            mod_UV = (1.0-fac) * UV + fac * mod_UV;
         }
 
         color = texture(bg, mod_UV);
-
+        
         if( mod_UV.x < 0.0 || mod_UV.x > 1.0 ||
             mod_UV.y < 0.0 || mod_UV.y > 1.0 ){
             color = vec4(0.0,0.0,0.0,1.0);
         }
-        
+
     } else {
         color = texture(pass_1, UV);
     }
