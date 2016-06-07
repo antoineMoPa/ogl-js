@@ -1,6 +1,6 @@
 # OGL-JS
 
-This project embeds Spidemonkey 24 into a c++ application.
+This project embeds Spidemonkey 24 into a C++ application with JS scripting. The JS code has access a coder-friendly set of 3d functions. You can use GLSL to create everything you can think of. 
 
 ## Currently available functions
 
@@ -23,49 +23,24 @@ This project embeds Spidemonkey 24 into a c++ application.
 
 GLSL is an awesome language that allows you to do all sorts of magic things with the vertex and pixels of the screen.
 
-"handle" is an identifier created by you.
-
-* `load_shaders("handle","vertex.glsl","fragment.glsl")` - Load Shaders in current folder. Use "handle" as the name.
-* `bind_shaders("handle")` - Bind the shader with name "handle" for the next calls
+* `load_shaders("some-shaders","vertex.glsl","fragment.glsl")` - Load Shaders in current folder. Use "handle" as the name.
+* `bind_shaders("some-shaders")` - Bind the shader with name "handle" for the next calls
 * `bind_shaders("default")` - Back to the default shader
  
 **BONUS**
 
 * `render_model("test.obj");` - Render a 3d model made with blender's obj export. (In export settings: Triangulate faces!)
 
-**OpenGL todo**
+# Todo
 
-* make render to texture work
-* default shader that loads textures, uvs, uses Kd, Ks, Ka from MaterialLib
-* conquer the world
-* Load PNGs in Model, not just bmp - http://lodev.org/lodepng/? other lib with more filetypes?
-
-**General todo**
-
-* Ability to download "cubes" from the internet in .zip format (but renamed .cube)
-* user input (started, but not put in javascript)
-* links
-* move through the world / follow links
-
-## Cubes
-
-Cubes are subdivisions of the world. They will be coded in Javascript and packed into an archive along with images and 3d models they might need.
-The archive size will be limited to < 1 MB. The goal is to keep this file small so it can be loaded in a snap.
-Cubes will take advantage of the space they have, maximize originality and use procedural stuff.
-
-The initial motivation is to create a big world where people can create links to other cubes (with urls like http://site.com/unicorn.cube). 
-
-## Why Spidemonkey 24 ?
-I did not want to compile chrome or a new Spidemonkey release on my chromebook. Spidermonkey 24 is available in debian packages.
-
-## Make your cubes Free Software
-(open source, if you prefer)
-
-I encourage you to follow the hacker mindset and share your cubes under an open source licence such as the GPLV3.
+* More scripting languages with swig
+* Remove Spidermonkey dependency (Use other JS engines)
+* Build on Windows
+* Web library with the same API ?
 
 ## Contributing
 
-fork on github
+Fork on github
 commit your changes
 create a pull request
 
@@ -93,12 +68,17 @@ In Debian (and maybe Ubuntu):
 
     ./app.o
 
-### Create your own world!
+### Run something else than world/
+
+    ./app.o some_folder/
+
+    ./app.o tests/
+
+### Create your own project!
+
+You can start by playing with the code in the `/world` folder.
 
     cp -r world some_folder
 
 Just have fun with main.js and the GLSL files!
 
-### Run something else than world/
-
-    ./app.o some_folder/
