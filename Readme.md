@@ -56,7 +56,7 @@ Rules:
 
 In Debian (and maybe Ubuntu):
 
-    sudo apt-get install libmozjs-24-dev freeglut3-dev
+    sudo apt-get install libmozjs-24-dev freeglut3-dev libglm-dev libglew-dev libsoil-dev zlib1g-dev
 
 ## Building
 
