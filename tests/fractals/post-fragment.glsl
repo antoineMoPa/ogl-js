@@ -59,18 +59,22 @@ highp vec4 fractals(){
         z = vec2(0,0);
         
         z.x = time_fac * sqrt(zoom);
-    } else if (fractal == 1 || fractal == 2 || fractal == 3){
+    } else if (fractal == 1 || fractal == 2 || fractal == 3 || fractal == 4){
         // Julia
         z = screen();
         
         z.x += x_offset - 0.5;
         z.y += y_offset;
         
-        c = vec2(0.345,0.003);
+        if(fractal != 4){
+            c = vec2(0.345,0.003);
+        } else {
+            c = vec2(-0.8,0.156);
+        }
         
         c.y = 0.5 * time_fac * sqrt(zoom);
     }
-    
+
     int current_step = 0;
     highp vec2 old_z;
     
